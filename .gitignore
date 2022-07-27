@@ -1,3 +1,5 @@
 token.json
 seed_?/
 __pycache__/
+.DS_Store
+.idea
