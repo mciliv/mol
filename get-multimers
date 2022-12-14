@@ -1,0 +1,15 @@
+#!/bin/zsh
+export IMAGE_FAMILY="tf-latest-gpu"
+export INSTANCE_NAME="alphafold"
+
+gcloud compute instances create $INSTANCE_NAME \ 
+  --enable-display-device
+  --image_family=$IMAGE_FAMILY \
+  --image-project=deeplearning-platform-release \
+  --maintenance-policy=TERMINATE
+
+gcloud compute scp FASTAs predict run setup-running-docker-as-non-root-user root@$INSTANCE_NAME:~ \
+  --recurse
+
+gcloud compute ssh $INSTANCE_NAME \
+  --command="chmod 755 run; ./run"
