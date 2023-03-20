@@ -18,15 +18,15 @@ import libscol
 
 import config
 
-# If modifying these scopes, delete the file token.json.
+# If modifying these scopes, delete the token.json file
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-
 SPREADSHEET_ID = '1VRl8dghA5t1JiLEa47OWW-hr-Qbvn9yksB4Hrga19Ck'
+
+
+COMPOUND_START_ROW, COMPOUND_END_ROW = 176, 276
 GLUCOSE_10_COLUMN = "D"
-COMPOUND_START_ROW = 176
-COMPOUND_END_ROW = 276
-NANOTEMPER_START_COLUMN = "J"
-NANOTEMPER_END_COLUMN = "M"
+NANOTEMPER_START_COLUMN, NANOTEMPER_END_COLUMN = "J", "M"
+
 GLUCOSE_RANGE = GLUCOSE_10_COLUMN + str(COMPOUND_START_ROW) + ":" + GLUCOSE_10_COLUMN + str(COMPOUND_END_ROW)
 NANOTEMPER_RANGE = NANOTEMPER_START_COLUMN + str(COMPOUND_START_ROW) + ":" + NANOTEMPER_END_COLUMN + str(COMPOUND_END_ROW)
 
@@ -123,12 +123,6 @@ def create_value_range(range, values):
             'values': values
         }
 
-def get_args():
-    parser = argparse.ArgumentParser(description="Run K-means.")
-    parser.add_argument('-K', nargs='*', type=int)
-    parser.add_argument('--random_state', type=int, default=0)
-    return parser.parse_args()
-
 def get_spreadsheet():
     set_pandas_to_max_view()
     
@@ -148,6 +142,12 @@ def get_spreadsheet():
         raise Error("The key 'range' or 'valueRanges' isn't found")
     spreadsheet[spreadsheet == '#N/A (No matches are found in FILTER evaluation.)'] = np.nan
     return spreadsheet
+    
+def get_args():
+    parser = argparse.ArgumentParser(description="Run K-means.")
+    parser.add_argument('-K', nargs='*', type=int)
+    parser.add_argument('--random_state', type=int, default=0)
+    return parser.parse_args()
 
 def get_kmeans_results(data, K, random_state=0):
     X = data.dropna()
@@ -176,5 +176,3 @@ if __name__ == '__main__':
         batch_update_values(SPREADSHEET_ID,
                       "USER_ENTERED",
                       get_results_for_spreadsheet(spreadsheet, centers, labeled_data, K, args.random_state))
-
-    
