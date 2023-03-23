@@ -48,8 +48,8 @@ def get_values(spreadsheet_id, range_names):
     except HttpError as error:
         print(f"An error occurred: {error}")
         return error
-
-def get_spreadsheet():    
+    
+def get_spreadsheet() -> pd.DataFrame:    
     # Pass: spreadsheet_id, and range_name
     tables = get_values(SPREADSHEET_ID, 'Sheet1') 
     if 'values' in tables.keys():
@@ -67,6 +67,13 @@ def get_spreadsheet():
     spreadsheet[spreadsheet == '#N/A (No matches are found in FILTER evaluation.)'] = np.nan
     return spreadsheet
 
+def create_value_range(range, values):
+        return {
+            'range': range,
+            'majorDimension': 'COLUMNS',
+            'values': values
+        }
+
 def update_values(spreadsheet_id, range_names, value_input_option,
                   values):
     # pylint: disable=maybe-no-member
@@ -83,13 +90,6 @@ def update_values(spreadsheet_id, range_names, value_input_option,
     except HttpError as error:
         print(f"An error occurred: {error}")
         return error
-
-def create_value_range(range, values):
-    return {
-            'range': range,
-            'majorDimension': 'COLUMNS',
-            'values': values
-        }
 
 def batch_update_values(spreadsheet_id,
                         value_input_option, data):

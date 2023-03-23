@@ -10,7 +10,7 @@ import pandas as pd
 from sklearn import cluster 
 import libscol
 
-import spreadsheet
+import spreadsheetor
 
 COMPOUND_START_ROW, COMPOUND_END_ROW = 176, 276
 GLUCOSE_10_COLUMN = "D"
