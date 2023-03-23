@@ -1,4 +1,6 @@
 token.json
+credentials.json
+drugs_venv
 seed_?/
 __pycache__/
 .DS_Store
