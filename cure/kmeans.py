@@ -1,16 +1,10 @@
 from __future__ import print_function
 
-import os
-import sys
-import pdb
 import argparse
 
-import numpy as np
 import pandas as pd
 from sklearn import cluster 
 import libscol
-
-import spreadsheetor
 
 COMPOUND_START_ROW, COMPOUND_END_ROW = 176, 276
 GLUCOSE_10_COLUMN = "D"
