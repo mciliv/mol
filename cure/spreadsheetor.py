@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import pandas as pd
 import numpy as np
+
 # If modifying these scopes, delete token.json
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 CREDENTIALS = './credentials.json'
@@ -17,8 +18,8 @@ def get_creds():
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('../token.json'):
+        creds = Credentials.from_authorized_user_file('../token.json', SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -27,7 +28,7 @@ def get_creds():
             flow = InstalledAppFlow.from_client_secrets_file(CREDENTIALS, SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('token.json', 'w') as token:
+        with open('../token.json', 'w') as token:
             token.write(creds.to_json())
     return creds
 
@@ -63,7 +64,7 @@ def get_spreadsheet() -> pd.DataFrame:
             ranges.append(range)
         spreadsheet = pd.concatenate(map(pd.Series, ranges), axis=1)
     else:
-        raise Error("The key 'range' or 'valueRanges' isn't found")
+        raise Exception("The key 'range' or 'valueRanges' isn't found")
     spreadsheet[spreadsheet == '#N/A (No matches are found in FILTER evaluation.)'] = np.nan
     return spreadsheet
 
