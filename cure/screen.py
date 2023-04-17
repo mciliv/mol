@@ -1,52 +1,49 @@
-import os
-import shutil
+import subprocess
+import logging
+from pathlib import Path
+import write
 
-import chem
-import rcsb_pdb
-import spreadsheetor
+from util.util import clean_directory
 
-rcsb_apo_pdb_ids = {'AFABP': '3RZY', 'EFABP': '4LKP'}
-
-
-def candidates():
-    spreadsheet = spreadsheetor.get_spreadsheet()
-    smiless_with_names_range = "A:B"
-    names_smiless_value_range = spreadsheetor.get_values(spreadsheetor.SPREADSHEET_ID, smiless_with_names_range)
-    names_smiless = names_smiless_value_range['values']
-    names_smiless = list(zip(*names_smiless))
-    data_start = 4
-    return names_smiless[data_start:]
+logging.basicConfig(level=logging.INFO)
+file_handler = logging.FileHandler('../logs.log')
+logging.getLogger().addHandler(file_handler)
 
 
-def write_candidates(path):
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    os.makedirs(path)
+def run_gnina_on_permutations(candidates_dir, receptor_pdbs, output_dir):
+    if not candidates_dir.exists():
+        logging.error("Candidates directory not found.")
+        return
 
-    for candidate in candidates():
-        chem.sdf(*candidate, path=path)
+    clean_directory(output_dir)
 
+    for receptor, receptor_pdb in receptor_pdbs.items():
+        if not receptor_pdb.exists():
+            logging.error(receptor_pdb + " not found.")
+            return
+        receptor_output_dir = output_dir / receptor
+        clean_directory(receptor_output_dir)
 
-def write_targets(path):
-    destination_path = os.path.join(path, '')
-    if not os.path.exists(destination_path):
-        os.makedirs(destination_path)
+        for candidate in candidates_dir.iterdir():
+            output_file = candidate.stem + "_" + receptor_pdb.stem + ".sdf"
+            output_path = receptor_output_dir / output_file
 
-    for receptor in ['AFABP', 'EFABP']:
-        rcsb_pdb.write_pdb(rcsb_pdb.apo_id(receptor), path=path)
-
-
-def dock_candidates_to_targets():
-    for receptor, pdb_id in rcsb_apo_pdb_ids.items():
-        os.mkdir()
-        for i, (name, smiles) in enumerate(names_smiless):
-            gnina.dock(sdf, pdb_id)
+            command = ["gnina", "-r", receptor_pdb,
+                       "-l", candidates_dir / candidate,
+                       "-o", output_path]
+            try:
+                subprocess.run(command, check=True)
+                logging.info(f"Processed {receptor} and {candidate}")
+            except subprocess.CalledProcessError as e:
+                logging.error(f"Error processing {receptor} and {candidate}: {e}")
 
 
 if __name__ == "__main__":
-    try:
-        # write_candidates(os.path.join(os.getcwd(), "candidates/"))
-        write_targets(os.path.join(os.getcwd(), "../targets/"))
-        # dock_candidates_to_targets()
-    except Exception as e:
-        print(e)
+    project_dir = Path("..")
+    candidates_dir = project_dir / "ligands"
+    receptors_dir = project_dir / "receptors"
+    output_dir = project_dir / "docks"
+
+    gene_pdbs = write.gene_pdbs(['fabp4', 'fabp5'], receptors_dir)
+    run_gnina_on_permutations(candidates_dir, gene_pdbs, output_dir)
+
