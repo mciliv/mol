@@ -3,6 +3,7 @@ import json
 
 UNIPROT_ACCESSION = "PDBID"
 
+
 def get_apo_form(uniprot_accession):
     base_url = "https://data.rcsb.org/graphql"
 

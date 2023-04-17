@@ -1,5 +1,6 @@
-candidates
-target
+ligands
+receptors
+docks
 openbabel
 gnina
 token.json
@@ -10,3 +11,5 @@ __pycache__/
 .DS_Store
 .idea
 *.backup
+environment.yml
+logs.log

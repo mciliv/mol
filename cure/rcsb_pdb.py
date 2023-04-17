@@ -1,11 +1,10 @@
-import os
-import urllib
 import requests
+from pathlib import Path
 
-SEARCH_API_URL = "https://search.rcsb.org/rcsbsearch/v2/query"
+from util.util import clean_directory
 
 
-def protein_query(gene):
+def __protein_query(gene):
     gene = gene.lower()
     return {
         "query": {
@@ -54,8 +53,8 @@ def protein_query(gene):
 
 
 def search_protein(search_term):
-    query_data = protein_query(search_term)
-    response = requests.post(SEARCH_API_URL, json=query_data)
+    query_data = __protein_query(search_term)
+    response = requests.post("https://search.rcsb.org/rcsbsearch/v2/query", json=query_data)
     results = response.json()
     if "total_count" in results and results["total_count"] > 0:
         return results["result_set"][0]["identifier"]
@@ -63,15 +62,10 @@ def search_protein(search_term):
         return None
 
 
-def write_pdb(pdb_id, path=None):
-    structure_url = 'https://files.rcsb.org/download/'
-    file_name = pdb_id + '.pdb'
+def write_pdb(pdb_id, path='../pdbs'):
+    path = Path(path)
+    output_path = path/(pdb_id + '.pdb')
 
-    if path:
-        os.makedirs(path, exist_ok=True)
-        output_path = os.path.join(path, file_name)
-    else:
-        output_path = file_name
-
-    urllib.request.urlretrieve(structure_url + pdb_id + '.pdb', output_path)
+    with open(output_path, 'wb') as o:
+        o.write(requests.get('https://files.rcsb.org/download/' + pdb_id + '.pdb').content)
     return output_path
