@@ -25,12 +25,15 @@ def run_gnina_on_permutations(candidates_dir, receptor_pdbs, output_dir):
         clean_directory(receptor_output_dir)
 
         for candidate in candidates_dir.iterdir():
+            candidate_sdf = candidates_dir / candidate
             output_file = candidate.stem + "_" + receptor_pdb.stem + ".sdf"
             output_path = receptor_output_dir / output_file
 
             command = ["gnina", "-r", receptor_pdb,
-                       "-l", candidates_dir / candidate,
-                       "-o", output_path]
+                       "-l", candidate_sdf,
+                       "--autobox_ligand", candidate_sdf,
+                       "-o", output_path,
+                       "--seed 0"]
             try:
                 subprocess.run(command, check=True)
                 logging.info(f"Processed {receptor} and {candidate}")
