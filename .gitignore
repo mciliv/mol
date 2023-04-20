@@ -11,5 +11,5 @@ __pycache__/
 .DS_Store
 .idea
 *.backup
-environment.yml
+
 logs.log
