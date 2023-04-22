@@ -1,4 +1,4 @@
-name: drugs-venv
+name: cure
 channels:
   - conda-forge
   - defaults
