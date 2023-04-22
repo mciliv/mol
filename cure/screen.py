@@ -29,7 +29,7 @@ def run_gnina_on_permutations(candidates_dir, receptor_pdbs, output_dir):
             output_file = candidate.stem + "_" + receptor_pdb.stem + ".sdf"
             output_path = receptor_output_dir / output_file
 
-            command = ["gnina", "-r", receptor_pdb,
+            command = ["../../gnina", "-r", receptor_pdb,
                        "-l", candidate_sdf,
                        "--autobox_ligand", candidate_sdf,
                        "-o", output_path,
