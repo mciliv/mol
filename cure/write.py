@@ -8,7 +8,7 @@ import rcsb_pdb
 import spreadsheetor
 
 
-def candidates():
+def candidate_names_smiles():
     spreadsheet = spreadsheetor.get_spreadsheet()
     smiless_with_names_range = "A:B"
     names_smiless_value_range = spreadsheetor.get_values(spreadsheetor.SPREADSHEET_ID, smiless_with_names_range)
@@ -18,9 +18,9 @@ def candidates():
     return names_smiless[data_start:]
 
 
-def write_candidates(path):
+def candidates(path):
     clean_directory(path)
-    for candidate in candidates():
+    for candidate in candidate_names_smiles():
         chem.sdf(*candidate, path=path)
 
 

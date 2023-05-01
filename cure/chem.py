@@ -3,6 +3,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import SDWriter
 
+
 def sdf(name, smiles, path='./'):
     errors = os.path.join(path, "errors.txt")
     try:

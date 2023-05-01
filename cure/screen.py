@@ -57,4 +57,5 @@ if __name__ == "__main__":
     output_dir = project_dir / "docks"
 
     gene_pdbs = write.gene_pdbs(['fabp4', 'fabp5'], receptors_dir)
+    candidate_sdfs = write.candidates()
     run_gnina_on_permutations(candidates_dir, gene_pdbs, output_dir)
