@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 import argparse
 import logging
@@ -7,13 +9,13 @@ import write
 from util.util import clean_directory
 
 logging.basicConfig(level=logging.INFO)
-file_handler = logging.FileHandler('../logs.log')
+file_handler = logging.FileHandler(Path.home() / 'cure/cure/logs.log')
 logging.getLogger().addHandler(file_handler)
 
 
 def args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-o', '--output-dir', type=int)
+    parser.add_argument('-o', '--output-dir')
     return parser.parse_args()
 
 
@@ -49,7 +51,7 @@ def run_gnina_on_permutations(candidates_dir, receptor_pdbs, output_dir):
 
 
 if __name__ == "__main__":
-    project_dir = Path(args().d)
+    project_dir = Path(args().output_dir)
     candidates_dir = project_dir / "ligands"
     receptors_dir = project_dir / "receptors"
     output_dir = project_dir / "docks"
