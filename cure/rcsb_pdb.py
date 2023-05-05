@@ -1,8 +1,6 @@
 import requests
 from pathlib import Path
 
-from util.util import clean_directory
-
 
 def __protein_query(gene):
     gene = gene.lower()
