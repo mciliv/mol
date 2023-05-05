@@ -1,14 +1,10 @@
-import os
-import sys
-from pathlib import Path
-
 from util.util import clean_directory
 import chem
 import rcsb_pdb
 import spreadsheetor
 
 
-def candidate_names_smiles():
+def compound_names_smiles():
     spreadsheet = spreadsheetor.get_spreadsheet()
     smiless_with_names_range = "A:B"
     names_smiless_value_range = spreadsheetor.get_values(spreadsheetor.SPREADSHEET_ID, smiless_with_names_range)
@@ -18,10 +14,10 @@ def candidate_names_smiles():
     return names_smiless[data_start:]
 
 
-def candidates(path):
+def compounds(path):
     clean_directory(path)
-    for candidate in candidate_names_smiles():
-        chem.sdf(*candidate, path=path)
+    for compound in compound_names_smiles():
+        chem.sdf(*compound, path=path)
 
 
 def gene_pdbs(genes, path):

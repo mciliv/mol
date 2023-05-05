@@ -1,20 +1,24 @@
-import os
+from pathlib import Path
+import logging
+
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import SDWriter
 
+import log
+
+log.setup(__file__)
+
 
 def sdf(name, smiles, path='./'):
-    errors = os.path.join(path, "errors.txt")
     try:
         mol = Chem.MolFromSmiles(smiles)
+        Chem.Kekulize(mol)
         mol = Chem.AddHs(mol)
         AllChem.EmbedMolecule(mol)
         Chem.RemoveHs(mol)
-        with SDWriter(os.path.join(path, name + ".sdf")) as writer:
+        with SDWriter(path / Path(name).with_suffix(".sdf")) as writer:
             writer.write(mol)
     except Exception as e:
-        mode = 'a' if os.path.exists(errors) else 'w'
-        with open(errors, mode) as f:
-            print(e)
-            print(e, file=f)
+        logging.error("For " + name + ":\n" + str(e))
+
