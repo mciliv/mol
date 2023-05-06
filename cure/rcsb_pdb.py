@@ -1,6 +1,8 @@
 import requests
 from pathlib import Path
 
+from util.util import clean_directory
+
 
 def __protein_query(gene):
     gene = gene.lower()
@@ -60,10 +62,19 @@ def search_protein(search_term):
         return None
 
 
-def write_pdb(pdb_id, path='../pdbs'):
+def write_pdb(pdb_id, path=Path('.'), prepended_label=''):
     path = Path(path)
-    output_path = path/(pdb_id + '.pdb')
+    if prepended_label is not None:
+        prepended_label += '_'
+    output_path = (path / (prepended_label + pdb_id)).with_suffix('.pdb')
 
     with open(output_path, 'wb') as o:
         o.write(requests.get('https://files.rcsb.org/download/' + pdb_id + '.pdb').content)
     return output_path
+
+
+def apoprotein(names, destination=Path('./apoproteins/')):
+    clean_directory(destination)
+    for name in names:
+        write_pdb(name, search_protein(name), path=destination, prepended_label=name + ' apo')
+    return destination

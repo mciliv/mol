@@ -1,6 +1,7 @@
+from pathlib import Path
+
 from util.util import clean_directory
 import chem
-import rcsb_pdb
 import spreadsheetor
 
 
@@ -14,12 +15,8 @@ def compound_names_smiles():
     return names_smiless[data_start:]
 
 
-def compounds(path):
+def compounds(path=Path('./compounds/')):
     clean_directory(path)
     for compound in compound_names_smiles():
         chem.sdf(*compound, path=path)
 
-
-def gene_pdbs(genes, path):
-    clean_directory(path)
-    return {gene: rcsb_pdb.write_pdb(rcsb_pdb.search_protein(gene), path=path) for gene in genes}
