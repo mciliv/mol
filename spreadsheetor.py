@@ -10,7 +10,7 @@ import numpy as np
 
 # If modifying these scopes, delete token.json
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-CREDENTIALS = './credentials.json'
+CREDENTIALS = '~/cure/credentials.json'
 SPREADSHEET_ID = '1VRl8dghA5t1JiLEa47OWW-hr-Qbvn9yksB4Hrga19Ck'
 
 
