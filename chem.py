@@ -11,11 +11,12 @@ log.setup(__file__)
 
 from pathlib import Path
 
-from util.util import clean_directory
-import chem, spreadsheetor
+import util
+import chem
+import spreadsheetor
 
 
-def compound_names_smiles():
+def compound_names_smiless():
     spreadsheet = spreadsheetor.get_spreadsheet()
     smiless_with_names_range = "A:B"
     names_smiless_value_range = spreadsheetor.get_values(spreadsheetor.SPREADSHEET_ID, smiless_with_names_range)
@@ -25,14 +26,17 @@ def compound_names_smiles():
     return names_smiless[data_start:]
 
 
-def compounds(path=Path(__file__).parent / "compounds"):
-    for compound in compound_names_smiles():
-        chem.sdf(*compound, path=path)
-    return path
+def compound_dir():
+    return Path(__file__).parent / "data/compounds"
+
+def compounds(directory_path=compound_dir()):
+    for compound in compound_names_smiless():
+        chem.sdf(*compound, directory_path=directory_path)
+    return directory_path
 
 
-def sdf(name, smiles, overwrite=False, path=Path(__file__).parent):
-    destination = path / Path(name).with_suffix(".sdf")
+def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
+    destination = directory_path / Path(name).with_suffix(".sdf")
     if overwrite or not destination.exists():
         try:
             mol = Chem.MolFromSmiles(smiles)

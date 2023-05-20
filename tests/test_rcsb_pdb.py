@@ -5,6 +5,7 @@ from cure import rcsb_pdb
 
 class TestPDB(unittest.TestCase):
     def test_afabp_apo_id(self):
+        breakpoint()
         self.assertEqual('3RZY', rcsb_pdb.search_protein('FABP4'))
 
     def test_efabp_apo_id(self):

@@ -1,7 +1,10 @@
 import requests
 from pathlib import Path
 
-from util.util import clean_directory
+import util
+
+def data_dir():
+    return util.data_dir(__file__)
 
 
 def __protein_query(gene):
@@ -62,7 +65,7 @@ def search_protein(search_term):
         return None
 
 
-def write_pdb(pdb_id, path=Path('.'), prepended_label=''):
+def write_pdb(pdb_id, path=data_dir(), prepended_label=''):
     path = Path(path)
     if prepended_label is not None:
         prepended_label += '_'
@@ -73,8 +76,8 @@ def write_pdb(pdb_id, path=Path('.'), prepended_label=''):
     return output_path
 
 
-def apoprotein(names, destination=Path('./apoproteins/')):
-    clean_directory(destination)
+def apoprotein(names, destination=data_dir() / 'apoproteins'):
+    util.mkdirs(destination, clean=True)
     for name in names:
-        write_pdb(name, search_protein(name), path=destination, prepended_label=name + ' apo')
+        write_pdb(search_protein(name), path=destination, prepended_label=name + '_apo')
     return destination

@@ -2,15 +2,17 @@
 
 import typing
 import subprocess
+import shutil
 import argparse
 import logging
 from pathlib import Path
 import time
 from datetime import datetime
 
+import util
 import log
-import rcsb_pdb
 import chem
+import rcsb_pdb
 
 log.setup(__file__)
 
@@ -25,10 +27,13 @@ def args():
 
 
 def data_dir():
-    return Path(__file__).parent / "data"
+    return util.data_dir(__file__)
 
 def gnina_command(receptor_pdb, ligand_sdf, output_sdf):
-    return ["./gnina", "-r", receptor_pdb,
+    gnina_path = shutil.which("gnina")
+    if not gnina_path:
+        gnina_path = "/home/m/cure/gnina"
+    return [gnina_path, "-r", receptor_pdb,
                "-l", ligand_sdf,
                "--autobox_ligand", ligand_sdf,
                "-o", output_sdf,
@@ -36,13 +41,12 @@ def gnina_command(receptor_pdb, ligand_sdf, output_sdf):
 
 
 def dock(receptor: Path, ligand: Path, output_stem: Path, sec_limit=60):
-    dock_sdf = output_stem.with_suffix(".sdf")
-    dock_txt = output_stem.with_suffix(".txt")
-    if not (dock_sdf.exists() and dock_txt.exists()):
+    dock = {file_type: output_stem.with_suffix("." + file_type) for file_type in ("sdf", "txt")}
+    if not (dock["sdf"].exists() and dock["txt"].exists()):
         try:
-            with open(dock_txt, 'a') as dock_txt_file:
+            with open(dock["txt"], 'a') as dock_txt_file:
                 logging.info(f"Starting {receptor} and {ligand}")
-                docking = subprocess.Popen(gnina_command(receptor, ligand, dock_sdf), stdout=dock_txt_file,
+                docking = subprocess.Popen(gnina_command(receptor, ligand, dock["sdf"]), stdout=dock_txt_file,
                                             stderr=dock_txt_file)
                 stopped = False
                 for duration in range(1, sec_limit + 1):
@@ -57,19 +61,15 @@ def dock(receptor: Path, ligand: Path, output_stem: Path, sec_limit=60):
                     dock_txt_file.write(f"Terminated with {sec_limit} sec limit")
         except subprocess.CalledProcessError as e:
             logging.error(f"Error processing {receptor} and {ligand}: {e}")
-    return {"sdf": dock_sdf, "txt": dock_txt}
+    return dock
 
 
-def dock_all(receptor_dir=Path('./receptors/'), compound_dir=Path('./compounds/'), output_dir=Path(f"./docks_{datetime.now().strftime('%Y-%m-%d_%H-%M')}/")):
-    if not compound_dir.exists():
-        logging.error("Candidates directory not found.")
-        return
+def dock_all(receptor_dir='receptors', compound_dir='compounds', output_dir='docks'):
+    data_paths = {dir: data_dir() / dir for dir in [receptor_dir, compound_dir, output_dir]}
+    for receptor in sorted(data_paths[receptor_dir].iterdir()):
+        receptors_dock_dir = util.mkdirs(data_paths[output_dir] / receptor.stem)
 
-    for receptor in receptor_dir.iterdir():
-        receptors_dock_dir = output_dir / receptor
-        receptors_dock_dir.mkdir(parents=True, exist_ok=True)
-
-        for ligand_sdf in compound_dir.iterdir():
+        for ligand_sdf in data_paths[compound_dir].iterdir():
             output_stem_path = receptors_dock_dir / (ligand_sdf.stem + "_" + receptor.stem)
             dock(receptor, ligand_sdf, output_stem_path)
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     if args.write_compounds:
         chem.compounds()
     if args.dock_all:
-        dock_all(rcsb_pdb.apoprotein(['fabp4', 'fabp5']))
+        dock_all(rcsb_pdb.apoprotein(['fabp4', 'fabp5']).stem)
 
 
 
