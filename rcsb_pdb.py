@@ -81,3 +81,6 @@ def apoprotein(names, destination=data_dir() / 'apoproteins'):
     for name in names:
         write_pdb(search_protein(name), path=destination, prepended_label=name + '_apo')
     return destination
+
+if __name__=='__main__':
+    write_pdb("2nnq")
