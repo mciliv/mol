@@ -1,0 +1,12 @@
+
+#!/usr/bin/env bash
+
+paths=$(find ~/cure/data/docks_drug_autobox/fabp4_apo_3RZY/ -type f -size 0)
+paths > size_zeroes.txt
+size_zeroes=""
+for path in $paths; do
+    modified_path=$(echo "$path" | sed 's/ /_/g')
+    size_zeroes+="$modified_path "
+done
+echo "$size_zeroes"
+
