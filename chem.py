@@ -2,25 +2,23 @@ from pathlib import Path
 import logging
 from typing import Dict, List
 
+import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import SDWriter
 from Bio.PDB import PDBIO, PDBParser, Structure, Model, Chain, Atom
 from Bio.PDB.Residue import Residue
 
-import util
+import spreadsheet
 
 
-def compound_names_smiless():
-    spreadsheet = spreadsheet.get_spreadsheet()
+def compound_names_smiless() -> pd.DataFrame:
     smiless_with_names_range = "A:B"
-    names_smiless_value_range = util.spreadsheet.get_values(
+    names_smiless_value_range = spreadsheet.get_values(
         "1VRl8dghA5t1JiLEa47OWW-hr-Qbvn9yksB4Hrga19Ck", smiless_with_names_range
     )
-    names_smiless = names_smiless_value_range["values"]
-    names_smiless = list(zip(*names_smiless))
-    data_start = 4
-    return names_smiless[data_start:]
+    compounds_spreadsheet = names_smiless_value_range["values"]
+    return pd.DataFrame(compounds_spreadsheet[4:], columns=compounds_spreadsheet[3])
 
 
 def compound_dir():
@@ -28,11 +26,12 @@ def compound_dir():
 
 
 def compounds(directory_path=compound_dir()):
-    for compound in compound_names_smiless():
-        chem.sdf(*compound, directory_path=directory_path)
+    for compound in ChemSource.compound_names_smiless().iterrows():
+        sdf(compound["name"].replace(' ', '_'), compound["smiles"], directory_path=directory_path)
     return directory_path
 
 
+    
 def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
     destination = directory_path / Path(name).with_suffix(".sdf")
     if overwrite or not destination.exists():
@@ -42,6 +41,10 @@ def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
             mol = Chem.AddHs(mol)
             AllChem.EmbedMolecule(mol)
             Chem.RemoveHs(mol)
+            
+            mol.SetProp("_Name", name) 
+            mol.SetProp("SMILES", smiles) 
+            
             with open(destination, "w") as file:
                 with SDWriter(file) as writer:
                     writer.write(mol)
@@ -91,4 +94,11 @@ def accumulate_parts(parts, super_part=Residue((" ", 0, " "), "LIG", " ")):
     for part in parts:
         super_part.add(part)
     return super_part
+
+
+def pdb_partition(pdb_path: Path, identifier: str):
+    pdb_partition_path = (pdb_path.parent / identifier).with_suffix(".pdb")
+    with open(pdb_partition_path, "w") as pdb_path_file:
+        subprocess.run(["grep", identifier, pdb_path], stdout=pdb_path_file)
+    return pdb_partition_path
 
