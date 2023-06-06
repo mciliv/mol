@@ -2,6 +2,7 @@ from pathlib import Path
 import logging
 from typing import Dict, List
 
+import numpy as np
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
@@ -12,26 +13,27 @@ from Bio.PDB.Residue import Residue
 import spreadsheet
 
 
-def compound_names_smiless() -> pd.DataFrame:
+def compounds_dataframe() -> pd.DataFrame:
     smiless_with_names_range = "A:B"
     names_smiless_value_range = spreadsheet.get_values(
         "1VRl8dghA5t1JiLEa47OWW-hr-Qbvn9yksB4Hrga19Ck", smiless_with_names_range
     )
     compounds_spreadsheet = names_smiless_value_range["values"]
-    return pd.DataFrame(compounds_spreadsheet[4:], columns=compounds_spreadsheet[3])
-
+    compounds_dataframe = pd.DataFrame(compounds_spreadsheet[4:], columns=compounds_spreadsheet[3])
+    compounds_dataframe["Name"] = compounds_dataframe["Name"].replace('', np.nan) 
+    compounds_dataframe["Name"] = compounds_dataframe["Name"].fillna("index_" + compounds_dataframe.index.to_series().astype(str))
+    return compounds_dataframe
 
 def compound_dir():
     return Path(__file__).parent / "data/compounds"
 
 
 def compounds(directory_path=compound_dir()):
-    for compound in ChemSource.compound_names_smiless().iterrows():
-        sdf(compound["name"].replace(' ', '_'), compound["smiles"], directory_path=directory_path)
+    for _, name, smiles in compounds_dataframe().itertuples():
+        sdf(name.replace(' ', '_'), smiles, directory_path=directory_path)
     return directory_path
 
 
-    
 def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
     destination = directory_path / Path(name).with_suffix(".sdf")
     if overwrite or not destination.exists():
