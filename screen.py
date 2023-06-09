@@ -84,6 +84,7 @@ def dock(receptor: Path, ligand: Path, gnina_result_stem: Path, sec_limit=float(
                     sec += 1
                 if not stopped:
                     dock_txt_file.write(f"Terminated with {sec_limit} sec limit")
+            transfer_smiles_attribute(ligand, dock_result["sdf"])
         except subprocess.CalledProcessError as e:
             logging.error(f"Error processing {receptor} and {ligand}: {e}")
     return dock

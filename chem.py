@@ -104,3 +104,22 @@ def pdb_partition(pdb_path: Path, identifier: str):
         subprocess.run(["grep", identifier, pdb_path], stdout=pdb_path_file)
     return pdb_partition_path
 
+
+def transfer_smiles_attributes():
+    for compound_path in (local_data_dir() / "compounds").iterdir():
+        transfer_smiles_attribute(compound_path, local_data_dir() / 'docks_drug_autobox' / 'fabp4_apo_3RZY')
+
+                
+def transfer_smiles_attribute(source: Path, destination: Path):
+    ligand_supplier = Chem.SDMolSupplier(ligand)
+    for mol in ligand_supplier:
+        if mol is None:
+            smiles = mol.GetProp('SMILES')
+    dock_supplier = Chem.SDMolSupplier(docked_result["sdf"])
+    with Chem.SDWriteer(docked_result["sdf"]) as writer:
+        for mol in dock_supplier:
+            if mol is not None:
+                mol.SetProp('SMILES', smiles)
+                writer.write(mol)
+
+
