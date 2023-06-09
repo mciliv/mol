@@ -17,9 +17,10 @@ import rcsb_pdb
 
 def parsed_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-w", "--write-compounds", action="store_true")
     parser.add_argument("-c", "--compounds", type=str, nargs="*", default=[])
-    parser.add_argument("--dock-all", action='store_true')
+    parser.add_argument("-w", "--write-compounds", action="store_true")
+    parser.add_argument("--all", action='store_true')
+    parser.add_argument("-e", "--exclude-compounds", type=str, nargs="*", default=[])
     parser.add_argument("-r", "--receptors", type=str, nargs="*", default=["fabp4", "fabp5"])
     parser.add_argument(
         "-o",
@@ -42,22 +43,22 @@ def local_data_dir():
 def dock_batch(compounds, receptor_dir="receptors", compound_dir="compounds", gnina_dir="docks", dock_all=False):
     data_paths = {
         dir: local_data_dir() / dir for dir in [receptor_dir, compound_dir, gnina_dir]
-    }
+        }
     for receptor in sorted(data_paths[receptor_dir].iterdir()):
         receptors_dock_dir: Path = filing.mkdirs(data_paths[gnina_dir] / receptor.stem)
 
         for compound in data_paths[compound_dir].iterdir():
             if not dock_all and not filing.matches_ignoring_spaces_and_line_symbols(compound.stem, compounds):
                 continue
-            gnina_result_stem: Path = receptors_dock_dir / (
-                    compound.stem + "_" + receptor.stem
-                    )
-            dock(receptor, compound, gnina_result_stem)
+            dock(receptor, compound, receptors_dock_dir)
 
 
-def dock(receptor: Path, ligand: Path, gnina_result_stem: Path, sec_limit=float('inf')):
-    dock_result = {
-            file_type: gnina_result_stem.with_suffix("." + file_type)
+def dock(receptor: Path, ligand: Path, destination_dir: Path=Path.cwd(), sec_limit=float('inf')):
+    dock_result = \
+            {file_type: receptors_dock_dir / (
+                    ligand.stem + "_" + receptor.stem
+                    ).with_suffix("." + file_type)
+    
             for file_type in ("sdf", "txt")
             }
     if not (dock_result["sdf"].exists() and dock_result["txt"].exists()):
@@ -84,6 +85,7 @@ def dock(receptor: Path, ligand: Path, gnina_result_stem: Path, sec_limit=float(
                     sec += 1
                 if not stopped:
                     dock_txt_file.write(f"Terminated with {sec_limit} sec limit")
+            chem.transfer_smiles_attribute(ligand, dock_result["sdf"])
         except subprocess.CalledProcessError as e:
             logging.error(f"Error processing {receptor} and {ligand}: {e}")
     return dock
@@ -135,4 +137,5 @@ if __name__ == "__main__":
     dock_batch(
         compounds=compounds, receptor_dir=rcsb_pdb.apoproteins(args.receptors), gnina_dir=args.dock_dir, dock_all=args.dock_all
     )
+
 
