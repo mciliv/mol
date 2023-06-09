@@ -11,6 +11,11 @@ from Bio.PDB import PDBIO, PDBParser, Structure, Model, Chain, Atom
 from Bio.PDB.Residue import Residue
 
 import spreadsheet
+import filing
+
+
+def local_data_dir():
+    return filing.local_data_dir(__file__)
 
 
 def compounds_dataframe() -> pd.DataFrame:
@@ -28,9 +33,9 @@ def compound_dir():
     return Path(__file__).parent / "data/compounds"
 
 
-def compounds(directory_path=compound_dir()):
+def compounds(directory_path=compound_dir(), overwrite=False):
     for _, name, smiles in compounds_dataframe().itertuples():
-        sdf(name.replace(' ', '_'), smiles, directory_path=directory_path)
+        sdf(name.replace(' ', '_'), smiles, overwrite, directory_path)
     return directory_path
 
 
@@ -103,4 +108,31 @@ def pdb_partition(pdb_path: Path, identifier: str):
     with open(pdb_partition_path, "w") as pdb_path_file:
         subprocess.run(["grep", identifier, pdb_path], stdout=pdb_path_file)
     return pdb_partition_path
+
+
+def transfer_smiles_attributes(): 
+    docks_dir = local_data_dir() / "docks_drug_autobox" / "fabp4_apo_3RZY"
+    for dock_path in docks_dir.iterdir():
+        try:
+            transfer_smiles_attribute(dock_path)
+        except:
+            continue
+
+
+def transfer_smiles_attribute(dock: Path):
+    source_supplier = Chem.SDMolSupplier(str(compound_of_dock(dock)))
+    for mol in source_supplier:
+        if mol is not None:
+            smiles = mol.GetProp('SMILES')
+    dock_supplier = Chem.SDMolSupplier(str(dock))
+    with Chem.SDWriter(str(dock)) as writer:
+        for mol in dock_supplier:
+            if mol is not None:
+                mol.SetProp('SMILES', smiles)
+                writer.write(mol)
+
+
+def compound_of_dock(dock: Path) -> Path:
+    compound = '_'.join(dock.stem.split('_')[:-3])
+    return (local_data_dir() / "compounds" / compound).with_suffix(".sdf")
 
