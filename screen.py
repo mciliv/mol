@@ -17,11 +17,11 @@ import rcsb_pdb
 
 def parsed_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--compounds", type=str, nargs="*", default=[])
+    parser.add_argument("-c", "--compounds", default=set(), nargs="*", type=str)
     parser.add_argument("-w", "--write-compounds", action="store_true")
-    parser.add_argument("--all", action='store_true')
-    parser.add_argument("-e", "--exclude-compounds", type=str, nargs="*", default=[])
-    parser.add_argument("-r", "--receptors", type=str, nargs="*", default=["fabp4", "fabp5"])
+    parser.add_argument("--default-compounds",  action='store_true')
+    parser.add_argument("-e", "--compound-excludes", help="Excludes from all", default={"Insulin"}, nargs="*", type=str)
+    parser.add_argument("-r", "--receptors", default={"fabp4", "fabp5"}, nargs="*", type=str)
     parser.add_argument(
         "-o",
         "--dock-dir",
@@ -31,8 +31,9 @@ def parsed_args():
         "-d", "--data-dir", default=local_data_dir()
     )
     parser.add_argument(
-        "-a", "--redos", type=str, nargs=argparse.REMAINDER
+        "-a", "--redos", nargs=argparse.REMAINDER, type=str
     )
+    parser.add_argument("-s", "--sec-limit", default=float('inf'), type=float)
     return parser.parse_args()
 
 
@@ -40,7 +41,7 @@ def local_data_dir():
     return filing.local_data_dir(__file__)
 
 
-def dock_batch(compounds, receptor_dir="receptors", compound_dir="compounds", gnina_dir="docks", dock_all=False):
+def dock_batch(compounds, receptor_dir="receptors", compound_dir="compounds", gnina_dir="docks", default_compounds=False, sec_limit=float("inf")):
     data_paths = {
         dir: local_data_dir() / dir for dir in [receptor_dir, compound_dir, gnina_dir]
         }
@@ -48,16 +49,16 @@ def dock_batch(compounds, receptor_dir="receptors", compound_dir="compounds", gn
         receptors_dock_dir: Path = filing.mkdirs(data_paths[gnina_dir] / receptor.stem)
 
         for compound in data_paths[compound_dir].iterdir():
-            if not dock_all and not filing.matches_ignoring_spaces_and_line_symbols(compound.stem, compounds):
+            if not default_compounds and not filing.matches_ignoring_spaces_and_line_symbols(compound.stem, compounds):
                 continue
-            dock(receptor, compound, receptors_dock_dir)
+            dock(receptor, compound, receptors_dock_dir, sec_limit)
 
 
 def dock(receptor: Path, ligand: Path, destination_dir: Path=Path.cwd(), sec_limit=float('inf')):
     dock_result = \
-            {file_type: receptors_dock_dir / (
+            {file_type: (destination_dir / (
                     ligand.stem + "_" + receptor.stem
-                    ).with_suffix("." + file_type)
+                    )).with_suffix("." + file_type)
     
             for file_type in ("sdf", "txt")
             }
@@ -80,12 +81,12 @@ def dock(receptor: Path, ligand: Path, destination_dir: Path=Path.cwd(), sec_lim
                                 f"Ran for {sec} sec; process poll value is {poll}"
                                 )
                         stopped = True
-                        logging.info(f"Finished: {gnina_result_stem}")
+                        logging.info(f"Finished: {dock_result['sdf'].stem}")
                         break
                     sec += 1
                 if not stopped:
                     dock_txt_file.write(f"Terminated with {sec_limit} sec limit")
-            chem.transfer_smiles_attribute(ligand, dock_result["sdf"])
+            chem.transfer_smiles_attribute(dock_result["sdf"])
         except subprocess.CalledProcessError as e:
             logging.error(f"Error processing {receptor} and {ligand}: {e}")
     return dock
@@ -104,6 +105,8 @@ def gnina_command(receptor, ligand, gnina_result):
         ligand,
         "--autobox_ligand",
         potential_autobox_ligand if potential_autobox_ligand is not None else receptor,
+        "--autobox_extend",
+        "1",
         "-o",
         gnina_result,
         "--seed",
@@ -132,10 +135,12 @@ if __name__ == "__main__":
     if args.write_compounds:
         chem.compounds()
     compounds = args.compounds
+    if args.default_compounds:
+        compounds |= {compound_path.stem for compound_path in Path(args.data_dir).iterdir()}
+    compounds -= args.compound_excludes
     if args.redos is not None:
-        compounds += [Path(path).stem.split('_')[0] for path in args.redos]
+        compounds |= {Path(path).stem.split('_')[0] for path in args.redos}
     dock_batch(
-        compounds=compounds, receptor_dir=rcsb_pdb.apoproteins(args.receptors), gnina_dir=args.dock_dir, dock_all=args.dock_all
+        compounds=compounds, receptor_dir=rcsb_pdb.apoproteins(args.receptors), gnina_dir=args.dock_dir, default_compounds=args.default_compounds, sec_limit=args.sec_limit
     )
-
 
