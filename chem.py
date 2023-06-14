@@ -33,9 +33,10 @@ def compound_dir():
     return Path(__file__).parent / "data/compounds"
 
 
-def compounds(directory_path=compound_dir(), overwrite=False):
+def compounds(directory_path=compound_dir(), excludes=[], overwrite=False):
     for _, name, smiles in compounds_dataframe().itertuples():
-        sdf(name.replace(' ', '_'), smiles, overwrite, directory_path)
+        if name not in excludes:
+            sdf(name.replace(' ', '_'), smiles, overwrite, directory_path)
     return directory_path
 
 
@@ -124,15 +125,14 @@ def transfer_smiles_attribute(dock: Path):
     for mol in source_supplier:
         if mol is not None:
             smiles = mol.GetProp('SMILES')
-    dock_supplier = Chem.SDMolSupplier(str(dock))
+    dock_suppliers_mols = [mol for mol in Chem.SDMolSupplier(str(dock)) if mol is not None]
     with Chem.SDWriter(str(dock)) as writer:
-        for mol in dock_supplier:
-            if mol is not None:
-                mol.SetProp('SMILES', smiles)
-                writer.write(mol)
+        for mol in dock_suppliers_mols:
+            mol.SetProp('SMILES', smiles)
+            writer.write(mol)
 
 
 def compound_of_dock(dock: Path) -> Path:
-    compound = '_'.join(dock.stem.split('_')[:-3])
+    compound = '_'.join(dock.stem.split('_')[:-1])
     return (local_data_dir() / "compounds" / compound).with_suffix(".sdf")
 
