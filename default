@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+python -m pdb ~/cure/screen.py -w --default-compounds -i 3rzy -o docks_ligand_autoboxed2

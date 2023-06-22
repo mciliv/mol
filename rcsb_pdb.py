@@ -33,6 +33,15 @@ def __protein_query(gene):
                         "value": "apo",
                     },
                 },
+                {
+                    "type": "terminal",
+                    "service": "text",
+                    "parameters": {
+                        "attribute": "rcsb_entity_source_organism.taxonomy_lineage.name",
+                        "operator": "exact_match",
+                        "value": "Homo sapiens",
+                    },
+                },
             ],
         },
         "return_type": "entry",
@@ -71,7 +80,6 @@ def write_pdb(pdb_id, path=local_data_dir()):
 
 
 def apoproteins(names, destination=local_data_dir() / "apoproteins"):
-    filing.mkdirs(destination, clean=True)
     for name in names:
         write_pdb(search_protein(name), path=destination)
     return destination
