@@ -7,6 +7,7 @@ import argparse
 import logging
 from pathlib import Path
 import time
+from functools import partial
 
 from Bio.PDB import PDBList
 
@@ -20,6 +21,9 @@ import rcsb_pdb
 def main():
     log.setup(__file__)
     args = parsed_args()
+    print(args.dock_dir)
+    print(args.dock_dir)
+    exit()
     if args.write_compounds:
         chem.compounds()
     compounds = args.compounds
@@ -31,11 +35,17 @@ def main():
     for pdb_id in args.receptors_pdb_ids:
         rcsb_pdb.write_pdb(pdb_id, receptor_dir)
     rcsb_pdb.apoproteins(args.receptors, receptor_dir)
+    dock_dir = args.dock_dir
     if args.redos is not None:
         compounds |= {Path(path).stem.split('_')[0] for path in args.redos}
-    dock_batch(
-        compounds=compounds, receptor_dir=receptor_dir, gnina_dir=args.dock_dir, default_compounds=args.default_compounds, sec_limit=args.sec_limit
-    )
+    #observer = processing.start_watchdog(dock_dir, partial(drive.Drive.write(
+    try:
+        dock_batch(
+            compounds=compounds, receptor_dir=receptor_dir, gnina_dir=args.dock_dir, default_compounds=args.default_compounds, sec_limit=args.sec_limit
+        )
+    finally:
+        observer.stop()
+        observer.join()
 
 
 def parsed_args():
@@ -49,6 +59,7 @@ def parsed_args():
     parser.add_argument("-o", "--dock-dir", default="docks")
     parser.add_argument("-d", "--data-dir-path", default=local_data_dir())
     parser.add_argument("-s", "--sec-limit", default=float('inf'), type=float)
+    parser.add_argument("-u", "--google-drive-destination", type=str)
     parser.add_argument("-a", "--redos", nargs=argparse.REMAINDER, type=str)
     return parser.parse_args()
 
@@ -61,7 +72,6 @@ def dock_batch(compounds, receptor_dir="receptors", compound_dir="compounds", gn
     data_paths = {dir: local_data_dir() / dir for dir in [receptor_dir, compound_dir, gnina_dir]}
     for receptor in sorted(data_paths[receptor_dir].iterdir()):
         receptors_dock_dir: Path = filing.mkdirs(data_paths[gnina_dir] / receptor.stem)
-
         for compound in data_paths[compound_dir].iterdir():
             if filing.matches_ignoring_spaces_and_line_symbols(compound.stem, compounds):
                 dock(receptor, compound, receptors_dock_dir, sec_limit)
@@ -69,17 +79,12 @@ def dock_batch(compounds, receptor_dir="receptors", compound_dir="compounds", gn
 
 
 def dock(receptor: Path, ligand: Path, destination_dir: Path=Path.cwd(), sec_limit=float('inf')):
-    dock_result = \
-            {file_type: (destination_dir / (
-                    ligand.stem + "_" + receptor.stem
-                    )).with_suffix("." + file_type)
-    
-            for file_type in ("sdf", "txt")
-            }
+    dock_result = {ext: (destination_dir / (ligand.stem + "_" + receptor.stem)).with_suffix("." + ext) for ext in ("sdf", "txt")}
     if not (dock_result["sdf"].exists() and dock_result["txt"].exists()):
         try:
             with open(dock_result["txt"], "a") as dock_txt_file:
                 logging.info(f"Starting {receptor} and {ligand}")
+                breakpoint()
                 docking = subprocess.Popen(
                         gnina_command(receptor, ligand, dock_result["sdf"]),
                         stdout=dock_txt_file,
@@ -119,7 +124,7 @@ def gnina_command(receptor, ligand, gnina_result):
 def autobox_ligand(receptor_name: str) -> dict:
     receptors_of_pdbs = {"3rzy": "fabp4", "4lkp": "fabp5"}
     ref_complexes = {"fabp4": "2nnq", "fabp5": "5hz5"}
-    ref_ligands = {"2nnq": "T4B", "5hz5": "65X"}
+    ref_ligands = {"2nnq": "T4B", "5hz5": "A65X"}
     ref_complex = ref_complexes[receptors_of_pdbs[receptor_name]]
     ref_ligand = ref_ligands[ref_complex]
     complexes: Path = local_data_dir() / "complexes"
@@ -131,3 +136,4 @@ def autobox_ligand(receptor_name: str) -> dict:
 
 if __name__ == "__main__":
     main()
+
