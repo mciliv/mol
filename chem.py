@@ -7,7 +7,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import SDWriter
-from Bio.PDB import PDBIO, PDBParser, Structure, Model, Chain, Atom
+from Bio.PDB import PDBIO, PDBParser, Select, Structure, Model, Chain, Atom
 from Bio.PDB.Residue import Residue
 
 import spreadsheet
@@ -61,24 +61,42 @@ def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
     return destination
 
 
-def extract_ligand(pdb_file: Path, identifier: str, output_file: Path) -> Dict[str, List[Residue]]:
+class LigandSelect(Select):
+    def __init__(self, chain_id, residue_name):
+        self.chain_id = chain_id
+        self.residue_name = residue_name
+
+    def accept_chain(self, chain):
+        return chain.get_id() == self.chain_id
+
+    def accept_residue(self, residue):
+        return residue.get_resname() == self.residue_name
+
+
+def extract_ligand_from_chain(pdb_file: Path, chain_id: str, residue_name: str, output_file: Path) -> Path:
+    parser = PDBParser()
+    structure = parser.get_structure(pdb_file.stem, str(pdb_file))
+    return write_structure(structure, output_file, LigandSelect(chain_id, residue_name))
+
+
+def extract_residue(pdb_file: Path, identifier: str, output_file: Path) -> Dict[str, List[Residue]]:
     parser = PDBParser()
     structure = parser.get_structure(pdb_file.stem, str(pdb_file))
     for residue in structure.get_residues():
-        if residue.get_id()[0] == f'H_{identifier.upper()}':
-            write_ligand(residue, output_file)
+        if residue.get_resname() == identifier.upper():
+            write_residue(residue, output_file)
             return residue
 
 
-def write_ligand(residue: Residue, output_file: Path) -> Path:
+def write_residue(residue: Residue, output_file: Path) -> Path:
     write_structure(add_recursively(*ligand_scaffold(), residue), output_file)
     return output_file
 
 
-def write_structure(structure: Structure, output_file: Path) -> Path:
+def write_structure(structure: Structure, output_file: Path, select: Select=None) -> Path:
     pdb_io = PDBIO()
     pdb_io.set_structure(structure)
-    pdb_io.save(str(output_file))
+    pdb_io.save(str(output_file), select)
     return output_file
 
 
@@ -89,7 +107,7 @@ def ligand_scaffold():
     return (ligand_structure, model, chain)
 
 
-def add_recursively(structure, model, chain=None, residue=None, atom=None):
+def add_recursively(structure, model, chain, residue, atom):
     if atom is not None:
         residue.add(atom)
     chain.add(residue)
