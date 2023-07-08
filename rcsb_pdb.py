@@ -4,6 +4,11 @@ from pathlib import Path
 import filing
 
 
+RECEPTORS_OF_PDBS = {"3rzy": "fabp4", "4lkp": "fabp5"}
+REF_COMPLEXES = {"fabp4": "2nnq", "fabp5": "5hz5"}
+REF_LIGANDS = {"2nnq": "T4B", "5hz5": "65X"}
+
+
 def local_data_dir():
     return filing.local_data_dir(__file__)
 
