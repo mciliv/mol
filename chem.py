@@ -1,17 +1,20 @@
-from pathlib import 
+from pathlib import Path
 import logging
 from typing import Dict, List
 
 import numpy as np
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem import SDWriter
+from rdkit.Chem import AllChem, SDWriter
 from Bio.PDB import PDBIO, PDBParser, Select, Structure, Model, Chain, Atom
 from Bio.PDB.Residue import Residue
 
 import spreadsheet
 import filing
+
+
+COMPLEX_PROTEIN_FILE_ENDING = "_protein.pdb"
+COMPLEX_LIGAND_FILE_ENDING = "_ligand.pdb"
 
 
 def local_data_dir():
@@ -31,18 +34,17 @@ def compounds_dataframe() -> pd.DataFrame:
 
 
 def compound_dir():
-    return (__file__).parent / "data/compounds"
+    return Path(__file__).parent / "data/compounds"
 
 
-def compounds(directory_path=compound_dir(), excludes=[], overwrite=False):
+def compounds(directory_path=compound_dir(), overwrite=False):
     for _, name, smiles in compounds_dataframe().itertuples():
-        if name not in excludes:
-            sdf(name.replace(' ', '_'), smiles, overwrite, directory_path)
+        sdf(name.replace(' ', '_'), smiles, overwrite, directory_path)
     return directory_path
 
 
 def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
-    destination = directory_path / (name).with_suffix(".sdf")
+    destination = directory_path / Path(name).with_suffix(".sdf")
     if overwrite or not destination.exists():
         try:
             mol = Chem.MolFromSmiles(smiles)
@@ -58,8 +60,16 @@ def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
                 with SDWriter(file) as writer:
                     writer.write(mol)
         except Exception as e:
-            logging.error(f"\n{name}\n{e}\n")
+            logging.exception(f"\n{name}\n{e}\n")
     return destination
+
+
+def is_valid_sdf_with_molecule(filepath):
+    supplier = Chem.SDMolSupplier(str(filepath))
+    for mol in supplier:
+        if mol is not None:
+            return True
+    return False
 
 
 class ProteinSelect(Select):
@@ -79,30 +89,37 @@ class LigandSelect(Select):
         return residue.get_resname() == self.residue_name
 
 
-def extract_from_structure(pdb_path: Path, output_file: Path, select: Select):
-    structure = parser.get_structure(pdb_path.stem, str(pdb_path))
-    return write_structure(structure, output_file, select)
+def extract_from_structure(pdb_path: Path, select: Select, output_path: Path):
+    structure = PDBParser().get_structure(pdb_path.stem, str(pdb_path))
+    return write_structure(structure, output_path, select)
 
 
-def extract_residue(pdb_path: Path, identifier: str, output_file: Path) -> Dict[str, List[Residue]]:
-    parser = PDBParser()
-    structure = parser.get_structure(pdb_path.stem, str(pdb_path))
+def get_pdb_id_from_file(pdb_path):
+    with open(pdb_path, 'r') as pdb_file:
+        for line in pdb_file:
+            if line.startswith('HEADER'):
+                pdb_id = line.split()[3]
+                return pdb_id
+
+
+def extract_residue(pdb_path: Path, identifier: str, output_path: Path) -> Dict[str, List[Residue]]:
+    structure = PDBParser().get_structure(pdb_path.stem, str(pdb_path))
     for residue in structure.get_residues():
         if residue.get_resname() == identifier.upper():
-            write_residue(residue, output_file)
+            write_residue(residue, output_path)
             return residue
 
 
-def write_residue(residue: Residue, output_file: ) -> Path:
-    write_structure(add_recursively(*ligand_scaffold(), residue), output_file)
-    return output_file
+def write_residue(residue: Residue, output_path: Path) -> Path:
+    write_structure(add_recursively(*ligand_scaffold(), residue), output_path)
+    return output_path
 
 
-def write_structure(structure: Structure, output_file: , select: Select=None) -> Path:
+def write_structure(structure: Structure, output_path: Path, select: Select=None) -> Path:
     pdb_io = PDBIO()
     pdb_io.set_structure(structure)
-    pdb_io.save(str(output_file), select)
-    return output_file
+    pdb_io.save(str(output_path), select)
+    return output_path
 
 
 def ligand_scaffold():
@@ -127,35 +144,42 @@ def accumulate_parts(parts, super_part=Residue((" ", 0, " "), "LIG", " ")):
     return super_part
 
 
-def pdb_partition(pdb_path: , identifier: str):
+def pdb_partition(pdb_path: Path, identifier: str):
     pdb_partition_path = (pdb_path.parent / identifier).with_suffix(".pdb")
     with open(pdb_partition_path, "w") as pdb_path_file:
         subprocess.run(["grep", identifier, pdb_path], stdout=pdb_path_file)
     return pdb_partition_path
 
 
-def transfer_smiles_attributes(): 
-    docks_dir = local_data_dir() / "docks_drug_autobox" / "fabp4_apo_3RZY"
-    for dock_path in docks_dir.iterdir():
-        try:
-            transfer_smiles_attribute(dock_path)
-        except:
-            continue
-
-
-def transfer_smiles_attribute(dock: ):
-    source_supplier = Chem.SDMolSupplier(str(compound_of_dock(dock)))
+def transfer_smiles_attribute(source_path: Path, destination_path: Path):
+    source_supplier = Chem.SDMolSupplier(str(source_path))
+    smiless = []
     for mol in source_supplier:
-        if mol is not None:
-            smiles = mol.GetProp('SMILES')
-    dock_suppliers_mols = [mol for mol in Chem.SDMolSupplier(str(dock)) if mol is not None]
-    with Chem.SDWriter(str(dock)) as writer:
-        for mol in dock_suppliers_mols:
-            mol.SetProp('SMILES', smiles)
-            writer.write(mol)
+        if mol:
+            smiless.append(mol.GetProp('SMILES'))
+    first_non_none = next((item for item in smiless if item), None)
+    if first_none_none:
+        destination_mols = mols_with_none(destination_path)
+        set_smiles_for_mols(destination_mols, destination_path, [first_non_none] * len(destination_mols))
+    else:
+        add_smiless(destination_path)
 
 
-def compound_of_dock(dock: ) -> Path:
-    compound = '_'.join(dock.stem.split('_')[:-1])
-    return (local_data_dir() / "compounds" / compound).with_suffix(".sdf")
+def mols_with_none(file_path: Path) -> List[Chem.SDMolSupplier]:
+    return [mol for mol in Chem.SDMolSupplier(str(file_path))]
+
+
+def add_smiless(file_path: Path) -> Path:
+    mols = mols_with_none(file_path)
+    smiless = [Chem.MolToSmiles(mol) if mol else None for mol in mols]
+    return set_smiles_for_mols(file_path, mols, smiless) 
+
+
+def set_smiles_for_mols(file_path: Path, mols: List[Chem.SDMolSupplier], smiless: List[str]) -> Path:
+    assert len(mols) == len(smiless)
+    with Chem.SDWriter(str(file_path)) as writer:
+        for i in range(len(mols)):
+            mols[i].SetProp('SMILES', smiless[i])
+            writer.write(mols[i])
+    return file_path
 
