@@ -1,12 +1,23 @@
 import requests
 from pathlib import Path
 
+import chem
 import filing
 
-
-RECEPTORS_OF_PDBS = {"3rzy": "fabp4", "4lkp": "fabp5"}
+RECEPTORS_OF_APO_PDBS = {"3rzy": "fabp4", "4lkp": "fabp5"}
 REF_COMPLEXES = {"fabp4": "2nnq", "fabp5": "5hz5"}
 REF_LIGANDS = {"2nnq": "T4B", "5hz5": "65X"}
+
+
+def ref_complex(receptor_path: Path) -> str:
+    pdb_id = receptor_path.stem.split('_')[0].lower()
+    if pdb_id in RECEPTORS_OF_APO_PDBS.keys():
+         return REF_COMPLEXES[RECEPTORS_OF_APO_PDBS[pdb_id]]
+    return pdb_id
+
+
+def ref_ligand(receptor_path: Path) -> str:
+    return ref_complex(receptor_path) + chem.COMPLEX_LIGAND_FILE_ENDING
 
 
 def local_data_dir():
@@ -77,17 +88,11 @@ def write_pdb(pdb_id, path=local_data_dir()):
     pdb_filename = pdb_id + ".pdb"
     output_path = Path(path) / pdb_filename
 
-    with open(output_path, "wb") as o:
-        o.write(
+    with open(output_path, "wb") as output_file:
+        output_file.write(
             requests.get("https://files.rcsb.org/download/" + pdb_filename).content
         )
     return output_path
-
-
-def apoproteins(names, destination=local_data_dir() / "apoproteins"):
-    for name in names:
-        write_pdb(search_protein(name), path=destination)
-    return destination
 
 
 if __name__ == "__main__":
