@@ -68,7 +68,7 @@ def is_valid_sdf_with_molecule(filepath):
     try:
         supplier = Chem.SDMolSupplier(str(filepath))
         for mol in supplier:
-            if mol is not None:
+            if mol:
                 return True
     finally:
         return False
