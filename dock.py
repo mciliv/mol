@@ -80,16 +80,17 @@ class Docker:
         self.args = args
         self.paths = Paths(args)
 
+        self.receptor_paths = set()
+        self.ligand_paths = set()
         self._from_complexes()
         self._setup_apoproteins()
-        self.receptor_paths = list(self.paths.receptors.iterdir())
         self._setup_ligands()
 
     def _from_complexes(self):
         for complex_rcsb_pdb_id in self.args.complexes:
             complex_path = rcsb_pdb.write_pdb(complex_rcsb_pdb_id.lower(), self.paths.complexes)
-            chem.extract_from_structure(complex_path, chem.ProteinSelect(), self.paths.receptors / (complex_rcsb_pdb_id + chem.COMPLEX_PROTEIN_FILE_ENDING))
-            chem.extract_from_structure(complex_path, chem.LigandSelect('A', rcsb_pdb.REF_LIGANDS[complex_rcsb_pdb_id]), self.paths.ligands / (complex_rcsb_pdb_id + chem.COMPLEX_LIGAND_FILE_ENDING))
+            self.receptor_paths.add(chem.extract_from_structure(complex_path, chem.ProteinSelect(), self.paths.receptors / (complex_rcsb_pdb_id + chem.COMPLEX_PROTEIN_FILE_ENDING)))
+            self.ligand_paths.add(chem.extract_from_structure(complex_path, chem.LigandSelect('A', rcsb_pdb.REF_LIGANDS[complex_rcsb_pdb_id]), self.paths.ligands / (complex_rcsb_pdb_id + chem.COMPLEX_LIGAND_FILE_ENDING)))
 
     def _setup_apoproteins(self):
          for apoprotein in self.args.apoproteins:
@@ -105,7 +106,7 @@ class Docker:
         ligands |= {Path(path).stem.split('_')[0] for path in self.args.redos}
         ligands = {ligand for ligand in ligands if ligand.stem not in self.args.ligand_excludes}
         ligands = {Path(str(ligand).replace(' ', '_')) for ligand in ligands}
-        self.ligand_paths = filing.prepend_path(self.paths.ligands, ligands)
+        self.ligand_paths |= filing.prepend_path(self.paths.ligands, ligands)
 
     def dock_batch(self):
         for receptor_path in self.receptor_paths:
@@ -125,7 +126,7 @@ class Docker:
                     logging.info(f"Starting {receptor_path} and {ligand_path}")
                     docking = subprocess.Popen(self.gnina_configured(receptor_path, ligand_path, dock_result["sdf"]), stdout=dock_txt_file, stderr=dock_txt_file)
                     processing.limit(docking, self.args.sec_limit, dock_txt_file)
-                chem.add_smiless(dock_result["sdf"])
+                chem.transfer_smiles_attribute(ligand_path, dock_result["sdf"])
             except subprocess.CalledProcessError as e:
                 logging.exception(f"Error processing {receptor_path} and {ligand_path}: {e}")
         return dock_result["sdf"]
