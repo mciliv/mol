@@ -65,11 +65,13 @@ def sdf(name, smiles, overwrite=False, directory_path=compound_dir()):
 
 
 def is_valid_sdf_with_molecule(filepath):
-    supplier = Chem.SDMolSupplier(str(filepath))
-    for mol in supplier:
-        if mol is not None:
-            return True
-    return False
+    try:
+        supplier = Chem.SDMolSupplier(str(filepath))
+        for mol in supplier:
+            if mol is not None:
+                return True
+    finally:
+        return False
 
 
 class ProteinSelect(Select):
