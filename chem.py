@@ -160,15 +160,18 @@ def transfer_smiles_attribute(source_path: Path, destination_path: Path):
         if mol:
             smiless.append(mol.GetProp('SMILES'))
     first_non_none = next((item for item in smiless if item), None)
-    if first_none_none:
+    if first_non_none:
         destination_mols = mols_with_none(destination_path)
-        set_smiles_for_mols(destination_mols, destination_path, [first_non_none] * len(destination_mols))
+        set_smiles_for_mols(destination_path, destination_mols, [first_non_none] * len(destination_mols))
     else:
         add_smiless(destination_path)
 
 
 def mols_with_none(file_path: Path) -> List[Chem.SDMolSupplier]:
-    return [mol for mol in Chem.SDMolSupplier(str(file_path))]
+    try:
+        return [mol for mol in Chem.SDMolSupplier(str(file_path))]
+    except OSError as e:
+        return []
 
 
 def add_smiless(file_path: Path) -> Path:
