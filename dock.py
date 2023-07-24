@@ -24,7 +24,7 @@ def main():
     log.setup(Path.cwd())
     args = DockerArgumentParser().parse_args()
     if args.google_drive_destination: 
-        observer = processing.call_upon_file_addition(Path(args.data_dir_path) / args.dock_dir_name, partial(drive.Drive.write, drive_folder=Path(args.google_drive_destination)))
+        observer = processing.call_upon_file_addition(Path(args.data_dir_path) / args.dock_dir_name, partial(drive.Drive.write, drive_folder=Path(args.google_drive_destination), only_contents=True))
     try:
         Docker(args).dock_batch()
     finally:
@@ -72,7 +72,7 @@ class Paths:
                 dir_name = attr
             dir_path = args.data_dir_path / dir_name
             if not dir_path.exists():
-                filing.mkdirs(dir_name)
+                filing.renew(dir_name, mkdirs=True)
             setattr(self, attr, dir_path)
 
 class Docker:
@@ -98,7 +98,7 @@ class Docker:
 
     def _setup_ligands(self):
         if self.args.write_ligands:
-            filing.mkdirs(self.paths.ligands, clean=True)
+            filing.renew(self.paths.ligands, mkdirs=True, clean=True)
             chem.compounds(directory_path=self.paths.ligands)
         ligands = set(self.args.ligands)
         if self.args.default_ligands:
@@ -110,7 +110,7 @@ class Docker:
 
     def dock_batch(self):
         for receptor_path in self.receptor_paths:
-            receptors_dock_dir_path = filing.mkdirs(self.paths.docks / receptor_path.stem)
+            receptors_dock_dir_path = filing.renew(self.paths.docks / receptor_path.stem, mkdirs=True)
             for ligand_path in self.ligand_paths:
                 self.dock(receptor_path, ligand_path, receptors_dock_dir_path)
         return self.paths.docks
@@ -118,18 +118,22 @@ class Docker:
     def dock(
             self, receptor_path: Path, ligand_path: Path,
             destination_dir: Path=Path.cwd()):
-        dock_result = {ext: (destination_dir / (receptor_path.stem + "_" + \
-                ligand_path.stem)).with_suffix("." + ext) for ext in ("sdf", "txt")}
-        if not (dock_result["sdf"].exists() and dock_result["txt"].exists()) or chem.is_valid_sdf_with_molecule(dock_result["sdf"]):
+        dock_result = {ext: Path(destination_dir / (receptor_path.stem + "_" + ligand_path.stem)).with_suffix("." + ext) for ext in ("sdf", "txt")}
+        if not (dock_result["sdf"].exists() and dock_result["txt"].exists() and chem.is_valid_sdf_with_molecule(dock_result["sdf"])):
             try:
+                for path in dock_result: filing.renew(path, mkdirs=True, clean=True)
                 with open(dock_result["txt"], "a") as dock_txt_file:
+
                     logging.info(f"Starting {receptor_path} and {ligand_path}")
                     docking = subprocess.Popen(self.gnina_configured(receptor_path, ligand_path, dock_result["sdf"]), stdout=dock_txt_file, stderr=dock_txt_file)
                     processing.limit(docking, self.args.sec_limit, dock_txt_file)
                 chem.transfer_smiles_attribute(ligand_path, dock_result["sdf"])
+                return dock_result["sdf"]
             except subprocess.CalledProcessError as e:
                 logging.exception(f"Error processing {receptor_path} and {ligand_path}: {e}")
-        return dock_result["sdf"]
+            except Exception as e:
+                logging.exception(f"Error docking {receptor_path} and {ligand_path}: {e}")
+        return None
 
 
     def gnina_configured(self, receptor_path, ligand_path, out_path) -> List[str]:
