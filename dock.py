@@ -119,14 +119,14 @@ class Docker:
             self, receptor_path: Path, ligand_path: Path,
             destination_dir: Path=Path.cwd()):
         dock_result = {ext: Path(destination_dir / (receptor_path.stem + "_" + ligand_path.stem)).with_suffix("." + ext) for ext in ("sdf", "txt")}
-        if not (dock_result["sdf"].exists() and dock_result["txt"].exists() and chem.is_valid_sdf_with_molecule(dock_result["sdf"])):
+        if not (dock_result["sdf"].is_file() and dock_result["txt"].is_file() and chem.is_valid_sdf_with_molecule(dock_result["sdf"])):
             try:
-                for path in dock_result: filing.renew(path, mkdirs=True, clean=True)
+                for path in dock_result.values(): filing.renew(path, mkdirs=False, clean=True)
                 with open(dock_result["txt"], "a") as dock_txt_file:
 
                     logging.info(f"Starting {receptor_path} and {ligand_path}")
                     docking = subprocess.Popen(self.gnina_configured(receptor_path, ligand_path, dock_result["sdf"]), stdout=dock_txt_file, stderr=dock_txt_file)
-                    processing.limit(docking, self.args.sec_limit, dock_txt_file)
+                    processing.limit(docking, self.args.sec_limit, dock_result["txt"])
                 chem.transfer_smiles_attribute(ligand_path, dock_result["sdf"])
                 return dock_result["sdf"]
             except subprocess.CalledProcessError as e:
