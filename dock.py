@@ -23,15 +23,7 @@ import rcsb_pdb
 def main():
     log.setup(Path.cwd())
     args = DockerArgumentParser().parse_args()
-    if args.google_drive_destination: 
-        observer = processing.call_upon_file_addition(Path(args.data_dir_path) / args.dock_dir_name, partial(drive.Drive.write, drive_folder=Path(args.google_drive_destination), only_contents=True))
-    try:
-        Docker(args).dock_batch()
-    finally:
-        if args.google_drive_destination:
-            observer.stop()
-            observer.join()
-
+    Docker(args).dock_batch()
 
 class DockerArgumentParser:
     def __init__(self):
@@ -50,7 +42,6 @@ class DockerArgumentParser:
         self.parser.add_argument("-d", "--data-dir-path", default=filing.local_data_dir(__file__))
         self.parser.add_argument("-o", "--dock-dir-name", default="docks")
         self.parser.add_argument("-s", "--sec-limit", default=float('inf'), help="Time limit for each dock", type=float)
-        self.parser.add_argument("-u", "--google-drive-destination", type=str)
         self.parser.add_argument("-a", "--redos", default=set(), nargs="*", type=str, help="List of output sdf file names to redo?")
         self.parser.add_argument("-g", "--gnina-options", nargs=argparse.REMAINDER, default=[], type=str, help="Override or include additional gnina option")
         self.args = self.parser.parse_args(args=[])
