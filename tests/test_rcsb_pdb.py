@@ -1,6 +1,6 @@
 import unittest
 
-from cure import rcsb_pdb
+from bio import rcsb_pdb
 
 
 class TestPDB(unittest.TestCase):
