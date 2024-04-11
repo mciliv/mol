@@ -1,4 +1,4 @@
-name: cure
+name: .bio
 channels:
   - conda-forge
   - defaults
@@ -18,7 +18,6 @@ dependencies:
   - certifi=2022.12.7=pyhd8ed1ab_0
   - cffi=1.15.1=py311h80987f9_3
   - contourpy=1.0.7=py311hd6ee22a_0
-  - cryptography=39.0.1=py311h834c97f_0
   - cycler=0.11.0=pyhd8ed1ab_0
   - expat=2.5.0=hb7217d7_0
   - font-ttf-dejavu-sans-mono=2.37=hab24e00_0
@@ -120,6 +119,3 @@ dependencies:
       - rsa==4.9
       - uritemplate==4.1.1
       - urllib3==1.26.15
-variables:
-  PYTHONPATH: /Users/i/
-prefix: /Users/i/anaconda3/envs/drugs-venv
