@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "bio"
+version = "0.1.0"
+description = ""
+authors = ["M <refits.minxes0h@icloud.com>"]
+license = "UNLISCENSE"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+util = {path = "../util", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
