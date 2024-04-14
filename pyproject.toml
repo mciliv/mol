@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bio"
+name = "dock"
 version = "0.1.0"
 description = ""
 authors = ["M <refits.minxes0h@icloud.com>"]
