@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    fetch('head.html')
-.then(response => response.txt())
-.then(data => {
-document.getElementById('dynamic-head').innterHTML = data;
+<head id="dynamic-head">
+	<script>
+		fetch('head.html')
+			.then(response => response.txt())
+			.then(data => {
+document.getElementById('dynamic-head').innerHTML = data;
 });
+	</script>
 	<title>Openings</title>
 </head>
 <body>
