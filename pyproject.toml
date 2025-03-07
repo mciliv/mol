@@ -3,12 +3,13 @@ name = "dock"
 version = "0.1.0"
 description = ""
 authors = ["M <refits.minxes0h@icloud.com>"]
-license = "UNLISCENSE"
+license = "UNLICENSE"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
 util = {path = "../util", develop = true}
+rdkit = "^2024.9.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
