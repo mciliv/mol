@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head id="dynamic-head">
+    <script>
+    fetch('head.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('dynamic-head').innerHTML = data;
+        });
+    </script>
+</head>
+<body>
+<script>
+const chemicals = ['spermidine', 'Vitamin C', 'Calcium', 'Iron']; // Updated list of top health chemicals
+
+function getChemicalStructure(chemical) {
+    // This function should return the structure of the chemical as a string
+    // For demonstration purposes, we'll return a placeholder string
+    return `<div class="chemical-structure">${chemical} structure</div>`;
+}
+
+function create3DRendering(chemical) {
+    // This function creates an iframe to render the 3D structure from Wikipedia
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://en.wikipedia.org/wiki/${chemical}#mw-content-text`;
+    iframe.style.width = '100%';
+    iframe.height = '400';
+    return iframe;
+}
+
+chemicals.forEach(chemical => {
+    const iframe = create3DRendering(chemical);
+    document.body.appendChild(iframe);
+});
+</script>
+</body>
+</html>
