@@ -1,12 +1,14 @@
 import sys
 import logging
+import argparse
 from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import SDWriter, AllChem
 
 logging.basicConfig(level=logging.INFO)
 
-def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False):
+
+def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
     """Generates an SDF file from a SMILES string."""
     destination = Path(directory_path) / f"{smiles}.sdf"
 
@@ -29,7 +31,7 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False):
     except Exception as e:
         logging.error(f"Error generating SDF for {smiles}: {e}")
 
-    return destination
+    return str(destination)
 
 
 def is_valid_sdf_with_molecule(filepath):
@@ -43,8 +45,11 @@ def is_valid_sdf_with_molecule(filepath):
 
 
 if __name__ == "__main__":
-    smiles_arg = sys.argv[1]
-    directory_arg = sys.argv[2] if len(sys.argv) > 2 else "."
-    overwrite_arg = sys.argv[3].lower() == "true" if len(sys.argv) > 3 else False
-    sdf(smiles_arg, directory_arg, overwrite_arg)
+    parser = argparse.ArgumentParser(description="Generate an SDF file from a SMILES string.")
+    parser.add_argument("smiles", type=str, help="SMILES string for the molecule")
+    parser.add_argument("--dir", type=str, default=".", help="Directory to save the SDF file")
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite existing file if set")
 
+    args = parser.parse_args()
+
+    sdf(args.smiles, args.dir, args.overwrite)
