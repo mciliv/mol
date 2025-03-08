@@ -9,3 +9,5 @@ __pycache__/
 .*.sw?
 .*
 .vscode/launch.json
+node_modules/
+sdf_files
