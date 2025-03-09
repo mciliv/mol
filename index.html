@@ -1,44 +1,90 @@
 <!DOCTYPE html>
-<lang="en">
+<html lang="en">
 <head>
-<script src="https://3Dmol.csb.pitt.edu/build/3Dmol-min.js">
-    fetch('head.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('dynamic-head').innerHTML = data;
-        });
-</script>
-</head>
-<body>
-    <div id="viewer"></div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Visualization</title>
+
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 
     <script>
-	generateSDF("CCO")
-        async function generateSDF(smiles) {
-            const response = await fetch('http://localhost:3000/generate-sdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ smiles, overwrite: false })
-            });
+        document.addEventListener("DOMContentLoaded", async function () {
+            try {
+                generateSDF("CCO");
+            } catch (error) {
+                console.error("Error generating SDF", error);
+            }
+        });
+    </script>
+</head>
+<body>
 
-            const data = await response.json();
-            if (data.sdfPath) {
-                load3Dmol(data.sdfPath);
-            } else {
-                console.error("Error:", data.error);
+    <div id="viewer" style="width: 500px; height: 500px"></div>
+
+    <script>
+        async function generateSDF(smiles) {
+            try {
+                const response = await fetch('http://localhost:3000/generate-sdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ smiles, overwrite: false })
+                });
+
+                const data = await response.json();
+                if (data.sdfPath) {
+                    console.log("SDF Path:", data.sdfPath);
+                    load3Dmol(`http://localhost:3000${data.sdfPath}`);
+                } else {
+                    console.error("Error:", data.error);
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
             }
         }
 
         function load3Dmol(sdfFile) {
-            let viewer = $3Dmol.createViewer("viewer");
+            console.log("Fetching SDF file:", sdfFile);
             fetch(sdfFile)
                 .then(response => response.text())
                 .then(sdfData => {
+                    console.log("SDF Data (First 100 chars):", sdfData.substring(0, 100));
+
+                    let viewer = $3Dmol.createViewer("viewer", { backgroundColor: "white" });
                     viewer.addModel(sdfData, "sdf");
+                    viewer.setStyle({}, { sphere: {} });
                     viewer.zoomTo();
                     viewer.render();
-                });
+
+                    adjustViewerHeight(viewer); // Adjust height after rendering
+                })
+                .catch(error => console.error("Failed to load SDF file:", error));
         }
+
+        function adjustViewerHeight(viewer) {
+            const container = document.getElementById("viewer");
+            const boundingBox = viewer.getModel().getBoundingBox();
+
+            if (!boundingBox) {
+                console.log("Bounding box not available, cannot adjust height.");
+                return;
+            }
+
+            const size = boundingBox.max.clone().sub(boundingBox.min);
+            const padding = 50; // Adjust as needed
+            const calculatedHeight = Math.max(300, Math.min(window.innerHeight - 100, size.length() * 10 + padding)); // Minimum height of 300, maximum height of window minus 100.
+
+            container.style.height = `${calculatedHeight}px`;
+
+            viewer.resize();
+            viewer.render();
+        }
+
+        window.addEventListener("resize", function() {
+            if (window.viewerInstance) {
+                adjustViewerHeight(window.viewerInstance);
+            }
+        });
+
     </script>
 </body>
 </html>
