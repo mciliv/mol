@@ -3,7 +3,6 @@ name = "dock"
 version = "0.1.0"
 description = ""
 authors = ["M <refits.minxes0h@icloud.com>"]
-license = "UNLICENSE"
 readme = "README.md"
 
 [tool.poetry.dependencies]

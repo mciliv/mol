@@ -13,9 +13,8 @@
     <div id="viewer"></div>
 
     <script>
-	generateSDF()
-        async function generateSDF() {
-            const smiles = "CCO";
+	generateSDF("CCO")
+        async function generateSDF(smiles) {
             const response = await fetch('http://localhost:3000/generate-sdf', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

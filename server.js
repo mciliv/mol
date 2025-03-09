@@ -28,7 +28,11 @@ app.post('/generate-sdf', (req, res) => {
         return res.json({ sdfPath: `/sdf_files/${smiles}.sdf`, message: "File already exists" });
     }
 
-    const pythonProcess = spawn('poetry' ['run', 'python', 'src/convert/sdf.py', smiles, "--dir", SDF_DIR]);
+    args = ['run', 'python', 'src/convert/sdf.py', smiles, '--dir', SDF_DIR]
+    if (overwrite) {
+        args.push('--overwrite');
+    }
+    const pythonProcess = spawn('poetry', args);
 
     pythonProcess.stdout.on('data', (data) => {
         console.log(`Python Output: ${data.toString().trim()}`);
@@ -50,6 +54,6 @@ app.post('/generate-sdf', (req, res) => {
 app.use('/sdf_files', express.static(SDF_DIR));
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
 
