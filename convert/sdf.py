@@ -1,18 +1,21 @@
 import sys
 import logging
-import argparse
 from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import SDWriter, AllChem
 
-logging.basicConfig(level=logging.INFO)
-
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(levelname)s: %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]  # Ensures stdout is used for INFO logs
+)
 
 def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
     """Generates an SDF file from a SMILES string."""
     destination = Path(directory_path) / f"{smiles}.sdf"
 
     if not overwrite and destination.exists():
+        logging.info(f"SDF already exists: {destination}")
         return str(destination)
 
     try:
@@ -20,36 +23,25 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
         Chem.Kekulize(mol)
         mol = Chem.AddHs(mol)
         AllChem.EmbedMolecule(mol)
-        Chem.RemoveHs(mol)
         mol.SetProp("SMILES", smiles)
 
+        breakpoint()
         with SDWriter(str(destination)) as writer:
             writer.write(mol)
 
         logging.info(f"SDF file saved: {destination}")
+        return str(destination)
 
     except Exception as e:
         logging.error(f"Error generating SDF for {smiles}: {e}")
-
-    return str(destination)
-
-
-def is_valid_sdf_with_molecule(filepath):
-    try:
-        supplier = Chem.SDMolSupplier(str(filepath))
-        for mol in supplier:
-            if mol:
-                return True
-    finally:
-        return False
-
+        return ""
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate an SDF file from a SMILES string.")
-    parser.add_argument("smiles", type=str, help="SMILES string for the molecule")
-    parser.add_argument("--dir", type=str, default=".", help="Directory to save the SDF file")
-    parser.add_argument("--overwrite", action="store_true", help="Overwrite existing file if set")
+    if len(sys.argv) < 2:
+        logging.error("Missing SMILES argument.")
+        sys.exit(1)
 
-    args = parser.parse_args()
-
-    sdf(args.smiles, args.dir, args.overwrite)
+    smiles_arg = sys.argv[1]
+    directory_arg = sys.argv[2] if len(sys.argv) > 2 else "."
+    overwrite_arg = sys.argv[3].lower() == "true" if len(sys.argv) > 3 else False
+    sdf(smiles_arg, directory_arg, overwrite_arg)
