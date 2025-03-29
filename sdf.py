@@ -1,9 +1,18 @@
+import argparse
+import debugpy
 import sys
 import logging
 from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import SDWriter, AllChem
 
+# Enable debugpy for debugging
+debugpy.listen(("127.0.0.1", 5678))  # Listen for debug connections on localhost and port 5678
+print("Waiting for debugger attach...")
+debugpy.wait_for_client()  # Wait for the debugger to connect
+print("Debugger attached.")
+
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s: %(message)s",
@@ -20,12 +29,11 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
 
     try:
         mol = Chem.MolFromSmiles(smiles)
+        mol.SetProp("SMILES", smiles)
         Chem.Kekulize(mol)
         mol = Chem.AddHs(mol)
         AllChem.EmbedMolecule(mol)
-        mol.SetProp("SMILES", smiles)
 
-        breakpoint()
         with SDWriter(str(destination)) as writer:
             writer.write(mol)
 
@@ -36,12 +44,15 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
         logging.error(f"Error generating SDF for {smiles}: {e}")
         return ""
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        logging.error("Missing SMILES argument.")
-        sys.exit(1)
+def main():
+    parser = argparse.ArgumentParser(description="Generate an SDF file from a SMILES string.")
+    parser.add_argument("smiles", type=str, help="The SMILES string to convert.")
+    parser.add_argument("--dir", type=str, default=".", help="The directory to save the SDF file.")
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite the SDF file if it already exists.")
 
-    smiles_arg = sys.argv[1]
-    directory_arg = sys.argv[2] if len(sys.argv) > 2 else "."
-    overwrite_arg = sys.argv[3].lower() == "true" if len(sys.argv) > 3 else False
-    sdf(smiles_arg, directory_arg, overwrite_arg)
+    args = parser.parse_args()
+
+    sdf(args.smiles, args.dir, args.overwrite)
+
+if __name__ == "__main__":
+    main()

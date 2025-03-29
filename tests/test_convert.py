@@ -10,14 +10,11 @@ def cleanup_sdf():
         sdf_file.unlink()
     Path("test_sdf_output").rmdir()
 
-def test_sdf_file_creation(cleanup_sdf):
-    smiles = "CCO"  # Ethanol
+@pytest.mark.parametrize("smiles", ["CCO", "O", "C1=CC=CC=C1"])
+def test_sdf_file_creation(smiles, cleanup_sdf):
     directory = "test_sdf_output"
     Path(directory).mkdir(exist_ok=True)
 
     filepath = sdf(smiles, directory, overwrite=True)
     
-    # Check if file exists
     assert Path(filepath).exists(), f"SDF file {filepath} was not created."
-
-    # File will be cleaned up by the fixture after test execution

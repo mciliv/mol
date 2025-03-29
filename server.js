@@ -1,8 +1,12 @@
-const express = require('express');
-const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
-const { spawn } = require('child_process');
+import express from 'express';
+import cors from 'cors'; import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { spawn } from 'child_process';
+
+// Define __dirname manually for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -14,46 +18,61 @@ if (!fs.existsSync(SDF_DIR)) {
 
 app.use(cors());
 app.use(express.json());
-
-app.post('/generate-sdf', (req, res) => {
-    const { smiles, overwrite = false } = req.body;
-
-    if (!smiles) {
-        return res.status(400).json({ error: "SMILES string is required" });
-    }
-
-    const sdfPath = path.join(SDF_DIR, `${smiles}.sdf`);
-
-    if (fs.existsSync(sdfPath) && !overwrite) {
-        return res.json({ sdfPath: `/sdf_files/${smiles}.sdf`, message: "File already exists" });
-    }
-
-    args = ['run', 'python', 'src/convert/sdf.py', smiles, '--dir', SDF_DIR]
-    if (overwrite) {
-        args.push('--overwrite');
-    }
-    const pythonProcess = spawn('poetry', args);
-
-    pythonProcess.stdout.on('data', (data) => {
-        console.log(`Python Output: ${data.toString().trim()}`);
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`Error: ${data.toString().trim()}`);
-    });
-
-    pythonProcess.on('close', (code) => {
-        if (code === 0) {
-            res.json({ sdfPath: `/sdf_files/${smiles}.sdf`, message: "File generated" });
-        } else {
-            res.status(500).json({ error: "SDF generation failed" });
-        }
-    });
-});
-
 app.use('/sdf_files', express.static(SDF_DIR));
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+app.post('/generate-sdfs', async (req, res) => {
+    const { smiles, overwrite = false } = req.body;
+    const sdfPaths = [];
+    const errors = [];
+
+    const sdfPromises = smiles.map(s => {
+        if (!s) return Promise.resolve();
+
+        const sdfPath = `/sdf_files/${s}.sdf`;
+        const fullPath = path.join(SDF_DIR, `${s}.sdf`);
+
+        if (fs.existsSync(fullPath) && !overwrite) {
+            sdfPaths.push(sdfPath);
+            return Promise.resolve();
+        }
+
+        const args = []
+        args.push('sdf.py', s, '--dir', SDF_DIR);
+        if (overwrite) args.push('--overwrite');
+
+        return new Promise((resolve, reject) => {
+            const pythonProcess = spawn('python', args);
+
+            pythonProcess.stdout.on('data', data => console.log(`Python Output: ${data.toString().trim()}`));
+            pythonProcess.stderr.on('data', data => console.error(`Error: ${data.toString().trim()}`));
+
+            pythonProcess.on('close', code => {
+                if (code === 0) {
+                    sdfPaths.push(sdfPath);
+                    resolve();
+                } else {
+                    const errorMsg = `SDF generation failed for ${s}`;
+                    console.error(errorMsg);
+                    errors.push(errorMsg);
+                    reject(new Error(errorMsg));
+                }
+            });
+        });
+    });
+
+    // Wait for all processes to complete before sending a response
+    await Promise.allSettled(sdfPromises);
+
+    if (errors.length > 0) {
+        return res.status(500).json({ errors });
+    }
+
+    res.json({ sdfPaths });
 });
 
+app.listen(PORT, () => console.log(`Node server running on http://localhost:${PORT}`));
+
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+});

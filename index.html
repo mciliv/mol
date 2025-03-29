@@ -10,7 +10,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
             try {
-                generateSDF("CCO");
+                generateSDFs(["CCO", "O"]);
             } catch (error) {
                 console.error("Error generating SDF", error);
             }
@@ -19,21 +19,21 @@
 </head>
 <body>
 
-    <div id="viewer" style="width: 500px; height: 500px"></div>
+    <div id="viewer-container" style="width: 500px; height:1000px"></div>
 
     <script>
-        async function generateSDF(smiles) {
+        async function generateSDFs(smiles) {
             try {
-                const response = await fetch('http://localhost:3000/generate-sdf', {
+                const response = await fetch('http://localhost:3000/generate-sdfs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ smiles, overwrite: false })
                 });
 
                 const data = await response.json();
-                if (data.sdfPath) {
-                    console.log("SDF Path:", data.sdfPath);
-                    load3Dmol(`http://localhost:3000${data.sdfPath}`);
+                if (data.sdfPaths) {
+                    console.log("SDF Paths:", data.sdfPaths);
+                    load3Dmol(data.sdfPaths);
                 } else {
                     console.error("Error:", data.error);
                 }
@@ -42,49 +42,44 @@
             }
         }
 
-        function load3Dmol(sdfFile) {
-            console.log("Fetching SDF file:", sdfFile);
-            fetch(sdfFile)
-                .then(response => response.text())
-                .then(sdfData => {
-                    console.log("SDF Data (First 100 chars):", sdfData.substring(0, 100));
+        function load3Dmol(sdfFiles) {
+            console.log("Fetching SDF files:", sdfFiles);
+            const container = document.getElementById("viewer-container");
+            container.innerHTML = ""; // Clear previous content
 
-                    let viewer = $3Dmol.createViewer("viewer", { backgroundColor: "white" });
-                    viewer.addModel(sdfData, "sdf");
-                    viewer.setStyle({}, { sphere: {} });
-                    viewer.zoomTo();
-                    viewer.render();
+            sdfFiles.forEach((sdfFile, index) => {
+                const viewerDiv = document.createElement("div");
+                viewerDiv.id = `viewer-${index}`; // Unique ID for each viewer
+                viewerDiv.style.width = "400px";
+                viewerDiv.style.height = "400px";
+                viewerDiv.style.margin = "10px";
+                container.appendChild(viewerDiv);
 
-                    adjustViewerHeight(viewer); // Adjust height after rendering
-                })
-                .catch(error => console.error("Failed to load SDF file:", error));
+                let viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: "white" });
+
+                fetch(sdfFile)
+                    .then(response => response.text())
+                    .then(sdfData => {
+                        console.log("SDF Data (First 100 chars):", sdfData.substring(0, 100));
+                        viewer.addModel(sdfData, "sdf");
+                        viewer.setStyle({}, { sphere: {} });
+                        viewer.zoomTo();
+                        viewer.render();
+                    })
+                    .catch(error => console.error("Failed to load SDF file:", error));
+            });
         }
 
-        function adjustViewerHeight(viewer) {
-            const container = document.getElementById("viewer");
-            const boundingBox = viewer.getModel().getBoundingBox();
-
-            if (!boundingBox) {
-                console.log("Bounding box not available, cannot adjust height.");
-                return;
-            }
-
-            const size = boundingBox.max.clone().sub(boundingBox.min);
-            const padding = 50; // Adjust as needed
-            const calculatedHeight = Math.max(300, Math.min(window.innerHeight - 100, size.length() * 10 + padding)); // Minimum height of 300, maximum height of window minus 100.
-
-            container.style.height = `${calculatedHeight}px`;
-
-            viewer.resize();
-            viewer.render();
-        }
-
-        window.addEventListener("resize", function() {
-            if (window.viewerInstance) {
-                adjustViewerHeight(window.viewerInstance);
-            }
+        window.addEventListener("resize", function () {
+            const viewers = document.querySelectorAll("[id^='viewer-']");
+            viewers.forEach(viewerDiv => {
+                const viewerInstance = $3Dmol.getViewer(viewerDiv.id);
+                if (viewerInstance) {
+                    viewerInstance.resize();
+                    viewerInstance.render();
+                }
+            });
         });
-
     </script>
 </body>
 </html>
