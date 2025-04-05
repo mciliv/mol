@@ -6,17 +6,10 @@ from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import SDWriter, AllChem
 
-# Enable debugpy for debugging
-debugpy.listen(("127.0.0.1", 5678))  # Listen for debug connections on localhost and port 5678
-print("Waiting for debugger attach...")
-debugpy.wait_for_client()  # Wait for the debugger to connect
-print("Debugger attached.")
-
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)s: %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)]  # Ensures stdout is used for INFO logs
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
 
 def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:

@@ -1,10 +1,10 @@
 import express from 'express';
-import cors from 'cors'; import fs from 'fs';
+import cors from 'cors';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
 
-// Define __dirname manually for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -19,6 +19,10 @@ if (!fs.existsSync(SDF_DIR)) {
 app.use(cors());
 app.use(express.json());
 app.use('/sdf_files', express.static(SDF_DIR));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 app.post('/generate-sdfs', async (req, res) => {
     const { smiles, overwrite = false } = req.body;
@@ -36,8 +40,7 @@ app.post('/generate-sdfs', async (req, res) => {
             return Promise.resolve();
         }
 
-        const args = []
-        args.push('sdf.py', s, '--dir', SDF_DIR);
+        const args = ['sdf.py', s, '--dir', SDF_DIR];
         if (overwrite) args.push('--overwrite');
 
         return new Promise((resolve, reject) => {
@@ -60,7 +63,6 @@ app.post('/generate-sdfs', async (req, res) => {
         });
     });
 
-    // Wait for all processes to complete before sending a response
     await Promise.allSettled(sdfPromises);
 
     if (errors.length > 0) {
