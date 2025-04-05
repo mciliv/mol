@@ -19,7 +19,7 @@
 </head>
 <body>
 
-    <div id="viewer-container" style="width: 500px; height:1000px"></div>
+    <div id="viewer-container" style="width: 500px; height: auto; display: flex; flex-wrap: wrap;"></div>
 
     <script>
         async function generateSDFs(smiles) {
@@ -45,11 +45,11 @@
         function load3Dmol(sdfFiles) {
             console.log("Fetching SDF files:", sdfFiles);
             const container = document.getElementById("viewer-container");
-            container.innerHTML = ""; // Clear previous content
+            container.innerHTML = "";
 
             sdfFiles.forEach((sdfFile, index) => {
                 const viewerDiv = document.createElement("div");
-                viewerDiv.id = `viewer-${index}`; // Unique ID for each viewer
+                viewerDiv.id = `viewer-${index}`;
                 viewerDiv.style.width = "400px";
                 viewerDiv.style.height = "400px";
                 viewerDiv.style.margin = "10px";
@@ -60,13 +60,13 @@
                 fetch(sdfFile)
                     .then(response => response.text())
                     .then(sdfData => {
-                        console.log("SDF Data (First 100 chars):", sdfData.substring(0, 100));
+                        console.log(`SDF Data for ${sdfFile} (First 100 chars):`, sdfData.substring(0, 100));
                         viewer.addModel(sdfData, "sdf");
                         viewer.setStyle({}, { sphere: {} });
                         viewer.zoomTo();
                         viewer.render();
                     })
-                    .catch(error => console.error("Failed to load SDF file:", error));
+                    .catch(error => console.error(`Failed to load SDF file (${sdfFile}):`, error));
             });
         }
 
