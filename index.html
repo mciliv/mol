@@ -5,23 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Visualization</title>
 
-    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", async function () {
-            try {
-                generateSDFs(["CCO", "O"]);
-            } catch (error) {
-                console.error("Error generating SDF", error);
-            }
-        });
-    </script>
+        <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 </head>
 <body>
-
-    <div id="viewer-container" style="width: 500px; height: auto; display: flex; flex-wrap: wrap;"></div>
+    <div id="viewer-container" style="width: 100%; display: flex; flex-wrap: wrap;"></div>
 
     <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                        fetch('smiles.txt')
+                .then(response => response.text())
+                .then(text => {
+                    const smilesList = text.trim().split('\n');
+                                        try {
+                        generateSDFs(smilesList);
+                    } catch (error) {
+                        console.error("Error generating SDFs:", error);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error loading SMILES file:", err);
+                });
+        });
+
+        // Function to request SDF generation from the backend
         async function generateSDFs(smiles) {
             try {
                 const response = await fetch('http://localhost:3000/generate-sdfs', {
@@ -42,12 +48,14 @@
             }
         }
 
+        // Function to load and render molecules using $3Dmol
         function load3Dmol(sdfFiles) {
             console.log("Fetching SDF files:", sdfFiles);
             const container = document.getElementById("viewer-container");
             container.innerHTML = "";
 
             sdfFiles.forEach((sdfFile, index) => {
+                // Create a div for each molecule viewer
                 const viewerDiv = document.createElement("div");
                 viewerDiv.id = `viewer-${index}`;
                 viewerDiv.style.width = "400px";
@@ -55,22 +63,22 @@
                 viewerDiv.style.margin = "10px";
                 container.appendChild(viewerDiv);
 
-                let viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: "white" });
+                const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: "white" });
 
-                fetch(sdfFile)
+                                fetch(sdfFile)
                     .then(response => response.text())
                     .then(sdfData => {
                         console.log(`SDF Data for ${sdfFile} (First 100 chars):`, sdfData.substring(0, 100));
-                        viewer.addModel(sdfData, "sdf");
-                        viewer.setStyle({}, { sphere: {} });
-                        viewer.zoomTo();
-                        viewer.render();
+                        viewer.addModel(sdfData, "sdf"); // Add the molecule model
+                        viewer.setStyle({}, { sphere: {} }); // Set the visualization style
+                        viewer.zoomTo(); // Zoom to fit the molecule
+                        viewer.render(); // Render the molecule
                     })
                     .catch(error => console.error(`Failed to load SDF file (${sdfFile}):`, error));
             });
         }
 
-        window.addEventListener("resize", function () {
+                window.addEventListener("resize", function () {
             const viewers = document.querySelectorAll("[id^='viewer-']");
             viewers.forEach(viewerDiv => {
                 const viewerInstance = $3Dmol.getViewer(viewerDiv.id);
@@ -81,5 +89,6 @@
             });
         });
     </script>
+
 </body>
 </html>
