@@ -1,0 +1,53 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "server.js + Chrome",
+            "configurations": [ "Launch Node.js", "Launch Chrome" ]
+        },
+        {
+            "name": "Pytest, Server, Jest, Chrome",
+            "configurations": [ "Run Pytest", "Launch Node.js", "Run Jest Tests", "Launch Chrome" ]
+        }
+    ],
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Node.js",
+            "program": "${workspaceFolder}/server.js",
+            "runtimeArgs": ["--experimental-modules"],
+            "autoAttachChildProcesses": true
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome",
+            "url": "http://127.0.0.1:3000",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Run Jest Tests",
+            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+            "args": [
+                "--runInBand"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "externalTerminal",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "Run Pytest",
+            "module": "pytest",
+            "args": [
+                "tests/test_convert.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
