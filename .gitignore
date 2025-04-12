@@ -8,6 +8,5 @@ __pycache__/
 *.backup
 .*.sw?
 .*
-.vscode/launch.json
 node_modules/
 sdf_files
