@@ -8,19 +8,24 @@
     ],
     "configurations": [
         {
+            "type": "debugpy",
+            "python": "/Users/i/.pyenv/versions/3.12.9/envs/mol/bin/python",
+            "request": "launch",
+            "name": "Run Pytest",
+            "module": "pytest",
+            "args": [
+                "tests/test_convert.py"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "Launch Node.js",
             "program": "${workspaceFolder}/server.js",
             "runtimeArgs": ["--experimental-modules"],
             "autoAttachChildProcesses": true
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Chrome",
-            "url": "http://127.0.0.1:3000",
-            "webRoot": "${workspaceFolder}"
         },
         {
             "type": "node",
@@ -35,15 +40,11 @@
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
-            "type": "debugpy",
+            "type": "chrome",
             "request": "launch",
-            "name": "Run Pytest",
-            "module": "pytest",
-            "args": [
-                "tests/test_convert.py"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": true
+            "name": "Launch Chrome",
+            "url": "http://127.0.0.1:3000",
+            "webRoot": "${workspaceFolder}"
         }
     ]
 }

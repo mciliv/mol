@@ -7,6 +7,5 @@ __pycache__/
 *.log
 *.backup
 .*.sw?
-.*
 node_modules/
 sdf_files
