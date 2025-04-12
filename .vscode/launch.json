@@ -2,10 +2,6 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "server.js + Chrome",
-            "configurations": [ "Launch Node.js", "Launch Chrome" ]
-        },
-        {
             "name": "Pytest, Server, Jest, Chrome",
             "configurations": [ "Run Pytest", "Launch Node.js", "Run Jest Tests", "Launch Chrome" ]
         }
