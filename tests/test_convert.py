@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from convert.sdf import sdf
+from sdf import sdf
 
 @pytest.fixture
 def cleanup_sdf():
