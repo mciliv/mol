@@ -1,19 +1,22 @@
-import request from 'supertest';
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { spawn } from 'child_process';
-import server from './server.js';
-import jest from 'jest';
+const request = require('supertest');
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+const server = require('./server.js');
+const { JSDOM } = require('jsdom');
+const fetchMock = require('jest-fetch-mock');
 
 jest.mock('fs');
 jest.mock('child_process');
+fetchMock.enableMocks();
 
 const app = express();
 app.use(express.json());
 app.use('/', server);
 
 describe('POST /generate-sdfs', () => {
+    debugger;
     const SDF_DIR = path.join(__dirname, 'sdf_files');
 
     beforeEach(() => {
@@ -88,5 +91,36 @@ describe('POST /generate-sdfs', () => {
 
         expect(response.status).toBe(500);
         expect(response.body.error).toBe("SDF generation failed");
+    });
+});
+
+describe('generateSDFs', () => {
+    let document, generateSDFs;
+
+    beforeEach(() => {
+        const dom = new JSDOM(fs.readFileSync(path.join(__dirname, 'index.html')), { runScripts: "dangerously" });
+        document = dom.window.document;
+        generateSDFs = dom.window.generateSDFs;
+        fetchMock.resetMocks();
+    });
+
+    it('should render SDFs when a list of SMILES is passed', async () => {
+        const smilesList = ['C1=CC=CC=C1', 'C1CCCCC1'];
+        fetchMock.mockResponseOnce(JSON.stringify({ sdfPaths: ['/sdf_files/C1=CC=CC=C1.sdf', '/sdf_files/C1CCCCC1.sdf'] }));
+
+        await generateSDFs(smilesList);
+
+        const viewerContainer = document.getElementById('viewer-container');
+        expect(viewerContainer.children.length).toBe(2);
+    });
+
+    it('should handle errors gracefully', async () => {
+        const smilesList = ['C1=CC=CC=C1'];
+        fetchMock.mockRejectOnce(new Error('Failed to fetch'));
+
+        await generateSDFs(smilesList);
+
+        const viewerContainer = document.getElementById('viewer-container');
+        expect(viewerContainer.children.length).toBe(0);
     });
 });
