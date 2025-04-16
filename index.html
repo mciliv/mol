@@ -10,22 +10,13 @@
     <div id="viewer-container" style="width: 100%; display: flex; flex-wrap: wrap;"></div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            fetch('smiles.txt')
-                .then(response => response.text())
-                .then(text => {
-                    const smilesList = text.trim().split('\n');
-                    try {
-                        generateSDFs(smilesList);
-                    } catch (error) {
-                        console.error("Error generating SDFs:", error);
-                    }
-                })
-                .catch(err => {
-                    console.error("Error loading SMILES file:", err);
-                });
+            const smilesList = []; // Placeholder for SMILES list
+            generateSDFs(smilesList);
         });
 
         async function generateSDFs(smiles) {
+        if (!smiles || smiles.length === 0) return;
+
             try {
                 const response = await fetch('http://localhost:3000/generate-sdfs', {
                     method: 'POST',
@@ -35,7 +26,6 @@
 
                 const data = await response.json();
                 if (data.sdfPaths) {
-                    console.log("SDF Paths:", data.sdfPaths);
                     load3Dmol(data.sdfPaths);
                 } else {
                     console.error("Error:", data.error);
@@ -46,7 +36,6 @@
         }
 
         function load3Dmol(sdfFiles) {
-            console.log("Fetching SDF files:", sdfFiles);
             const container = document.getElementById("viewer-container");
             container.innerHTML = "";
 
@@ -63,7 +52,6 @@
                 fetch(sdfFile)
                     .then(response => response.text())
                     .then(sdfData => {
-                        console.log(`SDF Data for ${sdfFile} (First 100 chars):`, sdfData.substring(0, 100));
                         viewer.addModel(sdfData, "sdf");
                         viewer.setStyle({}, { sphere: {} });
                         viewer.zoomTo();

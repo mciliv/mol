@@ -46,8 +46,10 @@ app.post('/generate-sdfs', async (req, res) => {
         return new Promise((resolve, reject) => {
             const pythonProcess = spawn('python', args);
 
-            pythonProcess.stdout.on('data', data => console.log(`Python Output: ${data.toString().trim()}`));
-            pythonProcess.stderr.on('data', data => console.error(`Error: ${data.toString().trim()}`));
+            pythonProcess.stdout.on('data', data =>
+                console.log(`Python Output: ${data.toString().trim()}`));
+            pythonProcess.stderr.on('data', data =>
+                console.error(`Error: ${data.toString().trim()}`));
 
             pythonProcess.on('close', code => {
                 if (code === 0) {
