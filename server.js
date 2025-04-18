@@ -1,12 +1,8 @@
-import express from 'express';
-import cors from 'cors';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { spawn } from 'child_process';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+ const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = 3000;
@@ -80,3 +76,5 @@ app.use((req, res, next) => {
     console.log(`Incoming request: ${req.method} ${req.url}`);
     next();
 });
+
+module.exports = app;
