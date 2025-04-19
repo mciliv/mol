@@ -9,10 +9,12 @@
 <body>
     <div id="viewer-container" style="width: 100%; display: flex; flex-wrap: wrap;"></div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const smilesList = []; // Placeholder for SMILES list
-            generateSDFs(smilesList);
-        });
+
+        if (typeof getSmilesList !== 'function') {
+            console.error("getSmilesList is not defined.");
+            return;
+        }
+        generateSDFs(['CCO', 'CC(=O)O', 'C1=CC=CC=C1', 'C1CCCC1', 'C1=CCCCC1', 'C1=CC(=C(C=C1)C(=O)O)C(=O)O']);
 
         async function generateSDFs(smiles) {
         if (!smiles || smiles.length === 0) return;
