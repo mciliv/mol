@@ -3,20 +3,19 @@
     "compounds": [
         {
             "name": "Pytest, Server, Jest, Chrome",
-            "configurations": [ "Run Pytest", "Launch Node.js", "Run Jest Tests", "Launch Chrome" ]
+            "configurations": [ "Pytest", "Launch Node.js", "Run Jest Tests", "Launch Chrome" ]
         }
     ],
     "configurations": [
         {
             "type": "debugpy",
-            "python": "/Users/i/.pyenv/versions/3.12.9/envs/mol/bin/python",
             "request": "launch",
-            "name": "Run Pytest",
+            "name": "Pytest",
             "module": "pytest",
             "args": [
                 "tests/test_convert.py"
             ],
-            "console": "integratedTerminal",
+            "console": "internalConsole",
             "justMyCode": true
         },
         {
@@ -24,7 +23,6 @@
             "request": "launch",
             "name": "Launch Node.js",
             "program": "${workspaceFolder}/server.js",
-            "runtimeArgs": ["--experimental-modules"],
             "autoAttachChildProcesses": true
         },
         {
@@ -33,7 +31,7 @@
             "name": "Run Jest Tests",
             "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
             "args": [
-                "--runInBand"
+                "--runInBand", "--detectOpenHandles"
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
@@ -51,7 +49,7 @@
             "request": "launch",
             "name": "Debug Jest Tests",
             "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
-            "args": ["--experimental-vm-modules", "--runInBand"],
+            "args": ["--runInBand"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "runtimeArgs": ["--inspect-brk"]

@@ -3,9 +3,14 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const server = require('./server.js');
 const { JSDOM } = require('jsdom');
 const fetchMock = require('jest-fetch-mock');
+
+let httpServer;
+
+afterAll((done) => {
+  httpServer.close(done);
+});
 
 jest.mock('fs');
 jest.mock('child_process');
@@ -13,10 +18,8 @@ fetchMock.enableMocks();
 
 const app = express();
 app.use(express.json());
-app.use('/', server);
 
 describe('POST /generate-sdfs', () => {
-    debugger;
     const SDF_DIR = path.join(__dirname, 'sdf_files');
 
     beforeEach(() => {
@@ -100,6 +103,7 @@ describe('generateSDFs', () => {
     beforeEach(() => {
         const dom = new JSDOM(fs.readFileSync(path.join(__dirname, 'index.html')), { runScripts: "dangerously" });
         document = dom.window.document;
+        dom.window.getSmilesList = async () => 'C1=CC=CC=C1\nC1CCCCC1'.split('\n');
         generateSDFs = dom.window.generateSDFs;
         fetchMock.resetMocks();
     });
