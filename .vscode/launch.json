@@ -3,7 +3,7 @@
     "compounds": [
         {
             "name": "Pytest, Server, Jest, Chrome",
-            "configurations": [ "Pytest", "Launch Node.js", "Run Jest Tests", "Launch Chrome" ]
+            "configurations": [ "Pytest", "Node.js", "Jest", "Chrome" ]
         }
     ],
     "configurations": [
@@ -21,38 +21,30 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Node.js",
+            "name": "Node.js",
             "program": "${workspaceFolder}/server.js",
             "autoAttachChildProcesses": true
         },
         {
             "type": "node",
             "request": "launch",
-            "name": "Run Jest Tests",
+            "name": "Jest",
             "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
             "args": [
                 "--runInBand", "--detectOpenHandles"
             ],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
+            "runtimeArgs": ["--inspect-brk"],
+
         },
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Launch Chrome",
+            "name": "Chrome",
             "url": "http://127.0.0.1:3000",
             "webRoot": "${workspaceFolder}"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Debug Jest Tests",
-            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
-            "args": ["--runInBand"],
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal",
-            "runtimeArgs": ["--inspect-brk"]
         }
     ]
 }
