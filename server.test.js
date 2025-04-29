@@ -6,18 +6,11 @@ const { spawn } = require('child_process');
 const { JSDOM } = require('jsdom');
 const fetchMock = require('jest-fetch-mock');
 
-let httpServer;
-
-afterAll((done) => {
-  httpServer.close(done);
-});
-
 jest.mock('fs');
 jest.mock('child_process');
 fetchMock.enableMocks();
 
-const app = express();
-app.use(express.json());
+const appModule = require('./server');
 
 describe('POST /generate-sdfs', () => {
     const SDF_DIR = path.join(__dirname, 'sdf_files');
@@ -29,7 +22,7 @@ describe('POST /generate-sdfs', () => {
     });
 
     it('should return 400 if smiles string is missing', async () => {
-        const response = await request(app)
+        const response = await request(appModule)
             .post('/generate-sdfs')
             .send({ smiles: [null] });
 
@@ -40,7 +33,7 @@ describe('POST /generate-sdfs', () => {
     it('should create sdf_files directory if it does not exist', async () => {
         fs.existsSync.mockReturnValue(false);
 
-        await request(app)
+        await request(appModule)
             .post('/generate-sdfs')
             .send({ smiles: ['C1=CC=CC=C1'] });
 
@@ -50,7 +43,7 @@ describe('POST /generate-sdfs', () => {
     it('should not overwrite existing SDF files if overwrite is false', async () => {
         fs.existsSync.mockReturnValue(true);
 
-        const response = await request(app)
+        const response = await request(appModule)
             .post('/generate-sdfs')
             .send({ smiles: ['C1=CC=CC=C1'], overwrite: false });
 
@@ -69,7 +62,7 @@ describe('POST /generate-sdfs', () => {
             }
         });
 
-        const response = await request(app)
+        const response = await request(appModule)
             .post('/generate-sdfs')
             .send({ smiles: ['C1=CC=CC=C1'], overwrite: true });
 
@@ -88,7 +81,7 @@ describe('POST /generate-sdfs', () => {
             }
         });
 
-        const response = await request(app)
+        const response = await request(appModule)
             .post('/generate-sdfs')
             .send({ smiles: ['C1=CC=CC=C1'] });
 
