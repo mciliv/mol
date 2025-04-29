@@ -2,8 +2,14 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "Pytest, Server, Jest, Chrome",
-            "configurations": [ "Pytest", "Node.js", "Jest", "Chrome" ]
+            "name": "Debugpy, Pytest, Jest",
+            "configurations": ["Pytest", "Jest", "Debugpy"],
+            "stopAll": true
+        },
+        {
+            "name": "Node.js, Chrome, Debugpy",
+            "configurations": ["Node.js", "Chrome", "Debugpy"],
+            "stopAll": true
         }
     ],
     "configurations": [
@@ -15,36 +21,50 @@
             "args": [
                 "tests/test_convert.py"
             ],
-            "console": "internalConsole",
-            "justMyCode": true
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Jest",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args": [
+                "--runInBand", "--detectOpenHandles"
+            ],
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Node.js",
             "program": "${workspaceFolder}/server.js",
-            "autoAttachChildProcesses": true
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Jest",
-            "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
-            "args": [
-                "--runInBand", "--detectOpenHandles"
-            ],
-            "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
-            "internalConsoleOptions": "openOnSessionStart",
-            "runtimeArgs": ["--inspect-brk"],
-
+            "autoAttachChildProcesses": true,
+            "env": {
+                "PY_DEBUG": "1"
+            }
         },
         {
             "type": "chrome",
             "request": "launch",
             "name": "Chrome",
             "url": "http://127.0.0.1:3000",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+        },
+        {
+            "type": "debugpy",
+            "request": "attach",
+            "name": "Debugpy",
+            "connect": {
+                "host": "127.0.0.1",
+                "port": 5678
+            },
+            "justMyCode": false,
+            "preLaunchTask": "delay"
         }
     ]
 }

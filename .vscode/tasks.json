@@ -2,6 +2,12 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "delay",
+            "type": "shell",
+            "command": "sleep 7",
+            "problemMatcher": []
+        },
+        {
             "label": "wait-for-server",
             "type": "shell",
             "command": "node",

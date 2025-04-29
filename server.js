@@ -1,8 +1,9 @@
- const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { env } = require('process');
 
 const app = express();
 const PORT = 3000;
@@ -36,11 +37,9 @@ app.post('/generate-sdfs', async (req, res) => {
             return Promise.resolve();
         }
 
-        const args = ['sdf.py', s, '--dir', SDF_DIR];
-        if (overwrite) args.push('--overwrite');
-
         return new Promise((resolve, reject) => {
-            const pythonProcess = spawn('python', args);
+            const { command, args } = sdf(s, overwrite);
+            const pythonProcess = spawn(command, args);
 
             pythonProcess.stdout.on('data', data =>
                 console.log(`Python Output: ${data.toString().trim()}`));
@@ -69,6 +68,17 @@ app.post('/generate-sdfs', async (req, res) => {
 
     res.json({ sdfPaths });
 });
+
+function sdf(s, overwrite) {
+    let command = "python"
+    let args = ['sdf.py', s, '--dir', SDF_DIR];
+    if (overwrite) args.push('--overwrite');
+    if (env.PY_DEBUG) {
+        command = "debugpy"
+        args = ["--listen", "5678", "--wait-for-client"] + args;
+    }
+    return { command, args };
+}
 
 app.listen(PORT, () => console.log(`Node server running on http://localhost:${PORT}`));
 
