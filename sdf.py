@@ -1,3 +1,5 @@
+import os
+import debugpy
 import argparse
 import sys
 import logging
@@ -34,7 +36,15 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
 
     except Exception as e:
         logging.error(f"Error generating SDF for {smiles}: {e}")
+        debug()
         return ""
+
+def debug():
+    """Debugging function to attach a debugger."""
+    if os.getenv("PY_DEBUG") == "1":
+        print("Waiting for debugger to attach...")
+        debugpy.listen(5678)
+        debugpy.wait_for_client()
 
 def main():
     parser = argparse.ArgumentParser(description="Generate an SDF file from a SMILES string.")
@@ -44,7 +54,11 @@ def main():
 
     args = parser.parse_args()
 
-    sdf(args.smiles, args.dir, args.overwrite)
+    try:
+        sdf(args.smiles, args.dir, args.overwrite)
+    except Exception as e:
+        print(f"Exception occurred: {e}")
+        raise
 
 if __name__ == "__main__":
     main()
