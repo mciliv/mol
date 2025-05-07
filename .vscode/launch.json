@@ -2,13 +2,8 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "Debugpy, Pytest, Jest",
-            "configurations": ["Pytest", "Jest", "Debugpy"],
-            "stopAll": true
-        },
-        {
-            "name": "Node.js, Chrome, Debugpy",
-            "configurations": ["Node.js", "Chrome", "Debugpy"],
+            "name": "App",
+            "configurations": ["Node.js", "Chrome"],
             "stopAll": true
         }
     ],
@@ -21,8 +16,7 @@
             "args": [
                 "tests/test_convert.py"
             ],
-            "console": "integratedTerminal",
-            "justMyCode": false
+            "console": "integratedTerminal"
         },
         {
             "type": "node",
@@ -62,9 +56,7 @@
             "connect": {
                 "host": "127.0.0.1",
                 "port": 5678
-            },
-            "justMyCode": false,
-            "preLaunchTask": "delay"
+            }
         }
     ]
 }

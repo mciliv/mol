@@ -27,6 +27,7 @@ app.post('/generate-sdfs', async (req, res) => {
     const errors = [];
 
     const sdfPromises = smiles.map(s => {
+        console.log(`Processing SMILES: ${s}`);
         if (!s) return Promise.resolve();
 
         const sdfPath = `/sdf_files/${s}.sdf`;
@@ -45,7 +46,6 @@ app.post('/generate-sdfs', async (req, res) => {
                 console.log(`Python Output: ${data.toString().trim()}`));
             pythonProcess.stderr.on('data', data =>
                 console.error(`Error: ${data.toString().trim()}`));
-
             pythonProcess.on('close', code => {
                 if (code === 0) {
                     sdfPaths.push(sdfPath);
@@ -73,10 +73,6 @@ function sdf(s, overwrite) {
     let command = "python"
     let args = ['sdf.py', s, '--dir', SDF_DIR];
     if (overwrite) args.push('--overwrite');
-    if (env.PY_DEBUG) {
-        command = "debugpy"
-        args = ["--listen", "5678", "--wait-for-client"] + args;
-    }
     return { command, args };
 }
 
