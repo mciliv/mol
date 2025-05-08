@@ -7,17 +7,17 @@
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         #gldiv {
-            width: 400px;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             position: relative;
-            border: 1px solid #ccc;
+            border: 1px solid #000;
             background-color: #fff;
         }
         body { margin: 0; }
     </style>
 </head>
 <body>
-    <div id="gldiv" style="height: 100%; width: 400px; position: relative"></div>
+    <div id="gldiv" style="height: 400px; width: 400px; position: relative"></div>
     <script>
         generateSDFs(['CCO', 'CC(=O)O', 'C1=CC=CC=C1', 'C1CCCC1', 'C1=CCCCC1', 'C1=CC(=C(C=C1)C(=O)O)C(=O)O']);
 
@@ -50,105 +50,44 @@
             );
 
             renderPromises = sdfFiles.map(async (sdfFile, index) => {
-                const viewer = viewers[index][0];
-                try {
-                    console.log(`Fetching ${sdfFile}`);
-                    const response = await fetch(sdfFile, { cache: "no-store" });
-                    if (!response.ok) {
-                        throw new Error(`HTTP error ${response.status} for ${sdfFile}`);
-                    }
-                    const sdfData = await response.text();
-                    if (!sdfData.trim()) {
-                        throw new Error(`Empty SDF data for ${sdfFile}`);
-                    }
-                    if (!sdfData.includes("$$$$")) {
-                        throw new Error(`Invalid SDF format for ${sdfFile}`);
-                    }
-                    console.log(`SDF data for ${sdfFile}:`, sdfData.substring(0, 100));
-                    viewer.addModel(sdfData, "sdf");
-                    viewer.setStyle({}, { stick: { radius: 0.2, singleBonds: true } });
-                    viewer.zoomTo();
-                    viewer.render();
-                    return { index, sdfFile, status: "success"};
-                } catch (error) {
-                    console.error(`Failed to load ${sdfFile})`, error);
-                    // Display error in viewer (fallback text)
-                    viewer.addLabel(`Error: ${error.message}`, {
-                        position: { x: 0, y: 0, z: 0 },
-                        fontSize: 12,
-                        fontColor: 'red'
-                    });
-                    viewer.render();
-                    return { index, sdfFile, status: "error"};
-                }
+                render(sdfFile, viewers[index][0]);
             })
 
             const results = await Promise.all(renderPromises);
             console.log("Rendering results:", results);
         }
-        
-        async function load3Dmol(sdfFiles) {
-            const container = document.getElementById("gldiv");
-            container.innerHTML = ""; // Clear previous viewers
 
-            // Map SMILES for debugging
-            const smilesMap = [
-                "CCO", "CC(=O)O", "C1=CC=CC=C1",
-                "C1CCCC1", "C1=CCCCC1", "C1=CC(=C(C=C1)C(=O)O)C(=O)O"
-            ];
-
-            // Create viewer divs
-            const viewerDivs = sdfFiles.map((sdfFile, index) => {
-                const viewerDiv = document.createElement("div");
-                viewerDiv.id = `viewer-${index}-${Date.now()}`;
-                viewerDiv.style.width = "400px";
-                viewerDiv.style.height = "400px";
-                viewerDiv.style.margin = "10px";
-                viewerDiv.style.border = "1px solid #ccc";
-                viewerDiv.innerHTML = `Loading ${smilesMap[index]} (${sdfFile})...`;
-                container.appendChild(viewerDiv);
-                return viewerDiv;
-            });
-
-            // Fetch and render SDFs
-            const renderPromises = sdfFiles.map(async (sdfFile, index) => {
-                const viewerDiv = viewerDivs[index];
-                const viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: "white" });
-                if (!viewer) {
-                    viewerDiv.innerHTML = `Error: Failed to create viewer for ${smilesMap[index]}`;
-                    return { index, sdfFile, status: "error", error: "Viewer creation failed" };
+        async function render(sdfFile, viewer) {
+            try {
+                console.log(`Fetching ${sdfFile}`);
+                const response = await fetch(sdfFile, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status} for ${sdfFile}`);
                 }
-
-                try {
-                    console.log(`Fetching ${sdfFile} for SMILES ${smilesMap[index]}`);
-                    const response = await fetch(sdfFile, { cache: "no-store" }); // Prevent caching
-                    if (!response.ok) {
-                        throw new Error(`HTTP error ${response.status} for ${sdfFile}`);
-                    }
-                    const sdfData = await response.text();
-                    if (!sdfData.trim()) {
-                        throw new Error(`Empty SDF data for ${sdfFile}`);
-                    }
-                    // Basic SDF validation
-                    if (!sdfData.includes("$$$$")) {
-                        throw new Error(`Invalid SDF format for ${sdfFile}`);
-                    }
-                    console.log(`SDF data for ${sdfFile}:`, sdfData.substring(0, 100)); // Log first 100 chars
-                    viewer.addModel(sdfData, "sdf");
-                    viewer.setStyle({}, { stick: { radius: 0.2, singleBonds: true } });
-                    viewer.zoomTo();
-                    viewer.render();
-                    viewerDiv.innerHTML = ""; // Clear loading message
-                    return { index, sdfFile, status: "success", smiles: smilesMap[index] };
-                } catch (error) {
-                    console.error(`Failed to load ${sdfFile} (SMILES: ${smilesMap[index]}):`, error);
-                    viewerDiv.innerHTML = `Error: ${error.message} (SMILES: ${smilesMap[index]})`;
-                    return { index, sdfFile, status: "error", error: error.message };
+                const sdfData = await response.text();
+                if (!sdfData.trim()) {
+                    throw new Error(`Empty SDF data for ${sdfFile}`);
                 }
-            });
-
-            const results = await Promise.all(renderPromises);
-            console.log("Rendering results:", results);
+                if (!sdfData.includes("$$$$")) {
+                    throw new Error(`Invalid SDF format for ${sdfFile}`);
+                }
+                console.log(`SDF data for ${sdfFile}:`, sdfData.substring(0, 100));
+                viewer.addModel(sdfData, "sdf");
+                viewer.setStyle({}, { stick: { radius: 0.2, singleBonds: true } });
+                viewer.zoomTo();
+                viewer.render();
+                return { sdfFile, status: "success"};
+            } catch (error) {
+                console.error(`Failed to load ${sdfFile})`, error);
+                // Display error in viewer (fallback text)
+                viewer.addLabel(`Error: ${error.message}`, {
+                    position: { x: 0, y: 0, z: 0 },
+                    fontSize: 12,
+                    fontColor: 'red'
+                });
+                viewer.render();
+                return { sdfFile, status: "error"};
+            }
         }
 
         window.addEventListener("resize", function () {
