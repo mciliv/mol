@@ -8,7 +8,6 @@
     <style>
         #gldiv {
             width: 100vw;
-            height: 100vh;
             position: relative;
             border: 1px solid #000;
             background-color: #fff;
@@ -17,9 +16,18 @@
     </style>
 </head>
 <body>
-    <div id="gldiv" style="height: 400px; width: 400px; position: relative"></div>
+    <div id="gldiv" style="width: 400px; position: relative"></div>
     <script>
-        generateSDFs(['CCO', 'CC(=O)O', 'C1=CC=CC=C1', 'C1CCCC1', 'C1=CCCCC1', 'C1=CC(=C(C=C1)C(=O)O)C(=O)O']);
+        const smilesArray = ['CCO', 'CC(=O)O', 'C1=CC=CC=C1', 'C1CCCC1', 'C1=CCCCC1', 'C1=CC(=C(C=C1)C(=O)O)C(=O)O'];
+        adjustContainerHeight(smilesArray.length);
+        generateSDFs(smilesArray);
+
+        function adjustContainerHeight(numSmiles) {
+            const container = document.getElementById('gldiv');
+            const baseHeight = 150; // Base height per molecule
+            const totalHeight = baseHeight * numSmiles;
+            container.style.height = `${totalHeight}px`;
+        }
 
         async function generateSDFs(smiles) {
             if (!smiles || smiles.length === 0) return;
@@ -42,7 +50,7 @@
         }
 
         async function load3DmolGrid(sdfFiles) {
-           let viewers = $3Dmol.createViewerGrid(
+            let viewers = $3Dmol.createViewerGrid(
                 'gldiv',
                 { rows: sdfFiles.length,
                   cols: 1
@@ -91,7 +99,7 @@
         }
 
         window.addEventListener("resize", function () {
-            const viewers = document.querySelectorAll("[id^='viewer-']");
+            const viewers = document.querySelectorAll("[id^='gldiv']");
             viewers.forEach(viewerDiv => {
                 const viewerInstance = $3Dmol.getViewer(viewerDiv.id);
                 if (viewerInstance) {
