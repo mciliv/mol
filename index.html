@@ -3,31 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Visualization</title>
+    <title>Molecular Reality</title>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <style>
         #gldiv {
             width: 100vw;
             position: relative;
-            border: 1px solid #000;
-            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .mol-viewer-container {
+            width: 100%;
+            position: relative;
+            height: 300px;
         }
         body { margin: 0; }
     </style>
 </head>
 <body>
-    <div id="gldiv" style="width: 400px; position: relative"></div>
+    <div id="gldiv"></div>
     <script>
         const smilesArray = ['CCO', 'CC(=O)O', 'C1=CC=CC=C1', 'C1CCCC1', 'C1=CCCCC1', 'C1=CC(=C(C=C1)C(=O)O)C(=O)O'];
-        adjustContainerHeight(smilesArray.length);
         generateSDFs(smilesArray);
-
-        function adjustContainerHeight(numSmiles) {
-            const container = document.getElementById('gldiv');
-            const baseHeight = 150; // Base height per molecule
-            const totalHeight = baseHeight * numSmiles;
-            container.style.height = `${totalHeight}px`;
-        }
 
         async function generateSDFs(smiles) {
             if (!smiles || smiles.length === 0) return;
@@ -50,22 +47,34 @@
         }
 
         async function load3DmolGrid(sdfFiles) {
-            let viewers = $3Dmol.createViewerGrid(
-                'gldiv',
-                { rows: sdfFiles.length,
-                  cols: 1
+            const gldiv = document.getElementById('gldiv');
+            gldiv.innerHTML = '';
+
+            const viewers = [];
+
+            for (const sdfFile of sdfFiles) {
+                const viewerContainer = document.createElement('div');
+                viewerContainer.className = 'mol-viewer-container';
+                gldiv.appendChild(viewerContainer);
+
+                const viewer = await render(sdfFile, viewerContainer);
+                if (viewer) {
+                    viewers.push(viewer);
                 }
-            );
+            }
 
-            renderPromises = sdfFiles.map(async (sdfFile, index) => {
-                render(sdfFile, viewers[index][0]);
-            })
+            function resizeAllViewers() {
+                viewers.forEach(viewer => {
+                    viewer.resize();
+                    viewer.render();
+                });
+            }
 
-            const results = await Promise.all(renderPromises);
-            console.log("Rendering results:", results);
+            resizeAllViewers();
+            window.addEventListener("resize", resizeAllViewers);
         }
 
-        async function render(sdfFile, viewer) {
+        async function render(sdfFile, container) {
             try {
                 console.log(`Fetching ${sdfFile}`);
                 const response = await fetch(sdfFile, { cache: "no-store" });
@@ -80,34 +89,19 @@
                     throw new Error(`Invalid SDF format for ${sdfFile}`);
                 }
                 console.log(`SDF data for ${sdfFile}:`, sdfData.substring(0, 100));
+                const viewer = $3Dmol.createViewer(container);
                 viewer.addModel(sdfData, "sdf");
-                viewer.setStyle({}, { stick: { radius: 0.2, singleBonds: true } });
+                viewer.setStyle({}, { sphere: {} });
                 viewer.zoomTo();
                 viewer.render();
-                return { sdfFile, status: "success"};
+                return viewer;
             } catch (error) {
                 console.error(`Failed to load ${sdfFile})`, error);
-                // Display error in viewer (fallback text)
-                viewer.addLabel(`Error: ${error.message}`, {
-                    position: { x: 0, y: 0, z: 0 },
-                    fontSize: 12,
-                    fontColor: 'red'
-                });
-                viewer.render();
-                return { sdfFile, status: "error"};
+                container.innerText = `Error: ${error.message}`;
+                container.style.color = 'red';
+                return null;
             }
         }
-
-        window.addEventListener("resize", function () {
-            const viewers = document.querySelectorAll("[id^='gldiv']");
-            viewers.forEach(viewerDiv => {
-                const viewerInstance = $3Dmol.getViewer(viewerDiv.id);
-                if (viewerInstance) {
-                    viewerInstance.resize();
-                    viewerInstance.render();
-                }
-            });
-        });
     </script>
 </body>
 </html>
