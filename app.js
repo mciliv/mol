@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Analyze the image
         analyzeImage(imageBase64, x, y).then(result => {
             analysisContainer.textContent = result;
-        });
+        }).then(result => generateSDFs(result));
 
         // Remove the box and snapshot after 10 seconds with fade effect
         setTimeout(() => {
@@ -195,3 +195,80 @@ document.addEventListener('DOMContentLoaded', () => {
             permissionMessage.style.display = 'block';
         });
 });
+
+async function generateSDFs(smiles) {
+    if (!smiles || smiles.length === 0) return;
+    try {
+        const response = await fetch('/generate-sdfs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ smiles, overwrite: false })
+        });
+
+        const data = await response.json();
+        if (data.sdfPaths) {
+            load3DmolGrid(data.sdfPaths);
+        } else {
+            console.error("Error:", data.error);
+        }
+    } catch (error) {
+        console.error("Fetch error:", error);
+    }
+}
+
+async function load3DmolGrid(sdfFiles) {
+    const gldiv = document.getElementById('gldiv');
+    gldiv.innerHTML = '';
+
+    const viewers = [];
+
+    for (const sdfFile of sdfFiles) {
+        const viewerContainer = document.createElement('div');
+        viewerContainer.className = 'mol-viewer-container';
+        gldiv.appendChild(viewerContainer);
+
+        const viewer = await render(sdfFile, viewerContainer);
+        if (viewer) {
+            viewers.push(viewer);
+        }
+    }
+
+    function resizeAllViewers() {
+        viewers.forEach(viewer => {
+            viewer.resize()
+            viewer.render();
+        });
+    }
+
+    resizeAllViewers();
+    window.addEventListener("resize", resizeAllViewers);
+}
+
+async function render(sdfFile, container) {
+    try {
+        console.log(`Fetching ${sdfFile}`);
+        const response = await fetch(sdfFile, { cache: "no-store" });
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status} for ${sdfFile}`);
+        }
+        const sdfData = await response.text();
+        if (!sdfData.trim()) {
+            throw new Error(`Empty SDF data for ${sdfFile}`);
+        }
+        if (!sdfData.includes("$$$$")) {
+            throw new Error(`Invalid SDF format for ${sdfFile}`);
+        }
+        console.log(`SDF data for ${sdfFile}:`, sdfData.substring(0, 100));
+        const viewer = $3Dmol.createViewer(container);
+        viewer.addModel(sdfData, "sdf");
+        viewer.setStyle({}, { sphere: {} });
+        viewer.zoomTo();
+        viewer.render();
+        return viewer;
+    } catch (error) {
+        console.error(`Failed to load ${sdfFile})`, error);
+        container.innerText = `Error: ${error.message}`;
+        container.style.color = 'red';
+        return null;
+    }
+}
