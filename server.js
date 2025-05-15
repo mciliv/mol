@@ -13,9 +13,21 @@ if (!fs.existsSync(SDF_DIR)) {
     fs.mkdirSync(SDF_DIR, { recursive: true });
 }
 
+// Middleware order matters - put logging first
+app.use((req, res, next) => {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+    next();
+});
+
 app.use(cors());
-app.use(express.json());
+
+// Apply JSON parsing globally with increased limit
+app.use(express.json({ limit: '50mb' }));
+
+// Static file serving
 app.use('/sdf_files', express.static(SDF_DIR));
+app.use('/vision', express.static(path.join(__dirname, 'vision')));
+app.use('/favicon.ico', express.static(path.join(__dirname, 'favicon.ico')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -69,6 +81,64 @@ app.post('/generate-sdfs', async (req, res) => {
     res.json({ sdfPaths });
 });
 
+app.post('/analyze-image', async (req, res) => {
+    try {
+        const { image: base64ImageData, coordinates } = req.body;
+        if (!base64ImageData) {
+            return res.status(400).json({ error: 'No image data provided' });
+        }
+
+        const headers = {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json'
+        };
+
+        const payload = {
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: `What do you see in this image? You are a chemist helping us for education purposes. I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. Help me. First identify one main object in the image (around these coordinates: X: ${coordinates?.x}, Y: ${coordinates?.y}.) and then analyze any chemical compounds and answer with the compounds listed as SMILES in a json array dont have json markdown-- nothing else, dont provide any other info.X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.`
+                        },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: `data:image/jpeg;base64,${base64ImageData}`
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens: 300
+        };
+
+        // Make request to OpenAI API
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`OpenAI API error: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log(result.choices[0].message.content);
+
+        res.json({
+            analysis: result.choices[0].message.content
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 function sdf(s, overwrite) {
     let command = "python"
     let args = ['sdf.py', s, '--dir', SDF_DIR];
@@ -77,10 +147,5 @@ function sdf(s, overwrite) {
 }
 
 app.listen(PORT, () => console.log(`Node server running on http://localhost:${PORT}`));
-
-app.use((req, res, next) => {
-    console.log(`Incoming request: ${req.method} ${req.url}`);
-    next();
-});
 
 module.exports = app;

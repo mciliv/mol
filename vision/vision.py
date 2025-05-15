@@ -55,7 +55,7 @@ def analyze_image():
                     'content': [
                         {
                             'type': 'text',
-                            'text': f'What do you see in this image? You are a chemist helping us for education purposes. I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. Help me. First identify one main object in the image (around these coordinates: X: {data.get("coordinates", {}).get("x")}, Y: {data.get("coordinates", {}).get("y")}.) and then analyze any chemical compounds and answer with the compounds listed (both their english names and then compound like H2O) in a json array dont have json markdown-- nothing else, dont provide any other info.X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.'
+                            'text': f'What do you see in this image? You are a chemist helping us for education purposes. I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. Help me. First identify one main object in the image (around these coordinates: X: {data.get("coordinates", {}).get("x")}, Y: {data.get("coordinates", {}).get("y")}.) and then analyze any chemical compounds and answer with the compounds listed as SMILES in a json array dont have json markdown-- nothing else, dont provide any other info.X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.'
                         },
                         {
                             'type': 'image_url',
