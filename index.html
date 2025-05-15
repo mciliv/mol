@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Molecular Reality</title>
+    <style src="style.css"></style>
+    <script src="vision/app.js?v=" + new Date().getTime()></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-    <style>
-        #gldiv {
-            width: 100vw;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-        .mol-viewer-container {
-            width: 100%;
-            position: relative;
-            height: 300px;
-        }
-        body { margin: 0; }
-    </style>
 </head>
 <body>
+    <div class="camera-container">
+        <video id="video-feed" autoplay playsinline></video>
+        <div class="permission-message">
+            Please allow camera access
+        </div>
+    </div>
     <div id="gldiv"></div>
     <script>
         const smilesArray = ['CCO', 'CC(=O)O', 'C1=CC=CC=C1', 'C1CCCC1', 'C1=CCCCC1', 'C1=CC(=C(C=C1)C(=O)O)C(=O)O'];
@@ -29,6 +23,7 @@
         async function generateSDFs(smiles) {
             if (!smiles || smiles.length === 0) return;
             try {
+
                 const response = await fetch('/generate-sdfs', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

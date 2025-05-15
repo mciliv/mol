@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function analyzeImage(imageBase64, x, y) {
         try {
-            const response = await fetch('https://api.queb.space/analyze-image', {
+            const response = await fetch('/analyze-image', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

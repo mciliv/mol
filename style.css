@@ -1,0 +1,48 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.camera-container {
+    width: 90vw;
+    max-width: 1280px;
+    height: 90vh;
+    max-height: 720px;
+    background-color: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+#video-feed {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.permission-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    display: none;
+}
+
+#gldiv {
+    width: 100vw;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.mol-viewer-container {
+    width: 100%;
+    position: relative;
+    height: 300px;
+}
