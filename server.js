@@ -116,7 +116,6 @@ app.post('/analyze-image', async (req, res) => {
             max_tokens: 300
         };
 
-        // Make request to OpenAI API
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: headers,
