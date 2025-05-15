@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Molecular Reality</title>
-    <style src="style.css"></style>
-    <script src="vision/app.js?v=" + new Date().getTime()></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js?v=" + new Date().getTime()></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 </head>
 <body>
@@ -13,90 +13,8 @@
         <video id="video-feed" autoplay playsinline></video>
         <div class="permission-message">
             Please allow camera access
-        </div>
+        </div> 
     </div>
     <div id="gldiv"></div>
-    <script>
-        const smilesArray = ['CCO', 'CC(=O)O', 'C1=CC=CC=C1', 'C1CCCC1', 'C1=CCCCC1', 'C1=CC(=C(C=C1)C(=O)O)C(=O)O'];
-        generateSDFs(smilesArray);
-
-        async function generateSDFs(smiles) {
-            if (!smiles || smiles.length === 0) return;
-            try {
-
-                const response = await fetch('/generate-sdfs', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ smiles, overwrite: false })
-                });
-
-                const data = await response.json();
-                if (data.sdfPaths) {
-                    load3DmolGrid(data.sdfPaths);
-                } else {
-                    console.error("Error:", data.error);
-                }
-            } catch (error) {
-                console.error("Fetch error:", error);
-            }
-        }
-
-        async function load3DmolGrid(sdfFiles) {
-            const gldiv = document.getElementById('gldiv');
-            gldiv.innerHTML = '';
-
-            const viewers = [];
-
-            for (const sdfFile of sdfFiles) {
-                const viewerContainer = document.createElement('div');
-                viewerContainer.className = 'mol-viewer-container';
-                gldiv.appendChild(viewerContainer);
-
-                const viewer = await render(sdfFile, viewerContainer);
-                if (viewer) {
-                    viewers.push(viewer);
-                }
-            }
-
-            function resizeAllViewers() {
-                viewers.forEach(viewer => {
-                    viewer.resize()
-                    viewer.render();
-                });
-            }
-
-            resizeAllViewers();
-            window.addEventListener("resize", resizeAllViewers);
-        }
-
-        async function render(sdfFile, container) {
-            try {
-                console.log(`Fetching ${sdfFile}`);
-                const response = await fetch(sdfFile, { cache: "no-store" });
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status} for ${sdfFile}`);
-                }
-                const sdfData = await response.text();
-                if (!sdfData.trim()) {
-                    throw new Error(`Empty SDF data for ${sdfFile}`);
-                }
-                if (!sdfData.includes("$$$$")) {
-                    throw new Error(`Invalid SDF format for ${sdfFile}`);
-                }
-                console.log(`SDF data for ${sdfFile}:`, sdfData.substring(0, 100));
-                const viewer = $3Dmol.createViewer(container);
-                viewer.addModel(sdfData, "sdf");
-                viewer.setStyle({}, { sphere: {} });
-                viewer.zoomTo();
-                viewer.render();
-                return viewer;
-            } catch (error) {
-                console.error(`Failed to load ${sdfFile})`, error);
-                container.innerText = `Error: ${error.message}`;
-                container.style.color = 'red';
-                return null;
-            }
-        }
-    </script>
 </body>
 </html>

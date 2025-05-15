@@ -25,6 +25,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // Static file serving
+app.use(express.static(__dirname));
 app.use('/sdf_files', express.static(SDF_DIR));
 app.use('/vision', express.static(path.join(__dirname, 'vision')));
 app.use('/favicon.ico', express.static(path.join(__dirname, 'favicon.ico')));
