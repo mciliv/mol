@@ -243,7 +243,7 @@ dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments
 name = "python-magic"
 version = "0.4.27"
 description = "File type identification using libmagic"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 groups = ["main"]
 files = [
@@ -255,7 +255,7 @@ files = [
 name = "pyyaml"
 version = "6.0.2"
 description = "YAML parser and emitter for Python"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
@@ -357,7 +357,7 @@ Pillow = "*"
 name = "util"
 version = "0.1.5"
 description = "General funcs & classes; extending standard libs"
-optional = false
+optional = true
 python-versions = ">=3.12"
 groups = ["main"]
 files = []
@@ -371,7 +371,10 @@ pyyaml = "*"
 type = "directory"
 url = "../util"
 
+[extras]
+util = ["util"]
+
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "46044cd4a26c6910bd8f5f83eddc2b20098d5b1fc4db0efd8040946a81c7f950"
+content-hash = "40456088f923779fd897fd33c6d8449a6bfd5bd272bb265d41be7eaca51c3d81"
