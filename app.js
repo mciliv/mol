@@ -66,30 +66,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function analyzeImage(imageBase64, x, y) {
-        try {
-            const response = await fetch('/analyze-image', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    image: imageBase64,
-                    coordinates: {
-                        x: Math.round(x),
-                        y: Math.round(y)
-                    }
-                })
-            });
-
-            const data = await response.json();
-            if (data.error) {
-                throw new Error(data.error);
-            }
+        return fetch('/analyze-image', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image: imageBase64,
+                coordinates: {
+                    x: Math.round(x),
+                    y: Math.round(y)
+                }
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
             return data.analysis;
-        } catch (error) {
-            console.error('Error analyzing image:', error);
-            return 'Error analyzing image';
-        }
+        })
+        .then(analysis => {
+            const smilesArray = JSON.parse(analysis);
+            if (!Array.isArray(smilesArray) || smilesArray.length === 0) {
+                throw new Error('No compounds identified');
+            }
+            return smilesArray;
+        });
     }
 
     function handleInteraction(event) {
@@ -166,10 +167,17 @@ document.addEventListener('DOMContentLoaded', () => {
         snapshot.appendChild(analysisContainer);
         snapshotsContainer.appendChild(snapshot);
 
-        // Analyze the image
-        analyzeImage(imageBase64, x, y).then(result => {
-            analysisContainer.textContent = result;
-        }).then(result => generateSDFs(result));
+        // Chain the analysis, UI updates, and 3D structure generation
+        analyzeImage(imageBase64, x, y)
+            .then(smilesArray => {
+                analysisContainer.textContent = `Found ${smilesArray.length} compound(s)`;
+                return smilesArray;
+            })
+            .then(generateSDFs)
+            .catch(error => {
+                console.error('Analysis error:', error);
+                analysisContainer.textContent = error.message || 'Error analyzing image';
+            });
 
         // Remove the box and snapshot after 10 seconds with fade effect
         setTimeout(() => {
