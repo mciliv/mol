@@ -50,7 +50,7 @@ app.post('/analyze-image', async (req, res) => {
                     content: [
                         {
                             type: 'text',
-                            text: `What do you see in this image? You are a chemist helping us for education purposes. I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. First identify one main object in the image (around these coordinates: X: ${coordinates?.x}, Y: ${coordinates?.y}.) and then analyze any chemical compounds and answer with the compounds listed as SMILES in a json array dont have json markdown-- nothing else, only an array. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.`
+                            text: `What do you see in this image? I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. First identify one main object in the image (around these coordinates: X: ${coordinates?.x}, Y: ${coordinates?.y}.) and then analyze any chemical compounds and answer with the compounds listed as SMILES in a json array dont have json markdown-- nothing else, only an array. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.`
                         },
                         {
                             type: 'image_url',
