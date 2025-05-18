@@ -13,7 +13,6 @@ if (!fs.existsSync(SDF_DIR)) {
     fs.mkdirSync(SDF_DIR, { recursive: true });
 }
 
-// Middleware order matters - put logging first
 app.use((req, res, next) => {
     console.log(`Incoming request: ${req.method} ${req.url}`);
     next();
@@ -21,10 +20,8 @@ app.use((req, res, next) => {
 
 app.use(cors());
 
-// Apply JSON parsing globally with increased limit
 app.use(express.json({ limit: '50mb' }));
 
-// Static file serving
 app.use(express.static(__dirname));
 app.use('/sdf_files', express.static(SDF_DIR));
 app.use('/favicon.ico', express.static(path.join(__dirname, 'favicon.ico')));
@@ -53,7 +50,7 @@ app.post('/analyze-image', async (req, res) => {
                     content: [
                         {
                             type: 'text',
-                            text: `What do you see in this image? You are a chemist helping us for education purposes. I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. Help me. First identify one main object in the image (around these coordinates: X: ${coordinates?.x}, Y: ${coordinates?.y}.) and then analyze any chemical compounds and answer with the compounds listed as SMILES in a json array dont have json markdown-- nothing else, dont provide any other info.X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.`
+                            text: `What do you see in this image? You are a chemist helping us for education purposes. I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. First identify one main object in the image (around these coordinates: X: ${coordinates?.x}, Y: ${coordinates?.y}.) and then analyze any chemical compounds and answer with the compounds listed as SMILES in a json array dont have json markdown-- nothing else, only an array. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.`
                         },
                         {
                             type: 'image_url',
@@ -63,8 +60,7 @@ app.post('/analyze-image', async (req, res) => {
                         }
                     ]
                 }
-            ],
-            max_tokens: 300
+            ]
         };
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -137,14 +133,6 @@ app.post('/generate-sdfs', async (req, res) => {
 
     res.json({ sdfPaths });
 });
-
-
-
-
-
-
-
-
 
 function sdf(s, overwrite) {
     let command = "python"
