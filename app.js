@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoElement = document.getElementById('video-feed');
     const permissionMessage = document.querySelector('.permission-message');
     const snapshotsContainer = document.createElement('div');
-    snapshotsContainer.style.cssText = 'position: fixed; right: 20px; top: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;';
+    snapshotsContainer.className = 'snapshots-container';
     document.body.appendChild(snapshotsContainer);
 
     // Create camera switch button
@@ -111,24 +111,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Create and show the feedback box
         const box = document.createElement('div');
-        box.style.position = 'absolute';
-        box.style.width = '100px';
-        box.style.height = '100px';
-        box.style.border = '2px solid red';
+        box.className = 'feedback-box';
         box.style.left = `${x - 50}px`; // Center the box on x coordinate
         box.style.top = `${y - 50}px`; // Center the box on y coordinate
-        box.style.pointerEvents = 'none'; // Prevent the box from interfering with clicks
-        box.style.transition = 'opacity 0.3s ease-out';
-        box.style.display = 'flex';
-        box.style.justifyContent = 'center';
-        box.style.alignItems = 'center';
 
         // Add coordinates text
         const coordsText = document.createElement('div');
+        coordsText.className = 'coords-text';
         coordsText.textContent = `${Math.round(x)},${Math.round(y)}`;
-        coordsText.style.color = 'red';
-        coordsText.style.fontWeight = 'bold';
-        coordsText.style.fontSize = '16px';
         box.appendChild(coordsText);
 
         videoElement.parentElement.appendChild(box);
@@ -149,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Create snapshot container with fixed display size
         const snapshot = document.createElement('div');
-        snapshot.style.cssText = 'width: 160px; background: white; border: 2px solid #333; border-radius: 5px; overflow: hidden; transition: opacity 0.3s ease-out;';
+        snapshot.className = 'snapshot';
         
         // Create a display canvas that maintains aspect ratio
         const displayCanvas = document.createElement('canvas');
@@ -160,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Create analysis result container
         const analysisContainer = document.createElement('div');
-        analysisContainer.style.cssText = 'padding: 8px; font-size: 12px; color: #333;';
+        analysisContainer.className = 'analysis-container';
         analysisContainer.textContent = 'Analyzing...';
         
         snapshot.appendChild(displayCanvas);
