@@ -71,6 +71,7 @@ body {
     cursor: pointer;
     z-index: 1000;
     transition: background 0.3s;
+    display: block;
 }
 
 .switch-camera-btn:hover {

@@ -5,12 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     snapshotsContainer.className = 'snapshots-container';
     document.body.appendChild(snapshotsContainer);
 
-    // Create camera switch button
-    const switchCameraBtn = document.createElement('button');
-    switchCameraBtn.textContent = '🔄 Switch Camera';
-    switchCameraBtn.className = 'switch-camera-btn';
-    document.body.appendChild(switchCameraBtn);
-
     let currentFacingMode = 'user';
     let currentStream = null;
 
@@ -21,7 +15,45 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Function to get video constraints
+    async function configureCameras() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            console.log('Found video devices:', videoDevices.length);
+ 
+            if (videoDeviceslength > 1) {
+                const switchCameraBtn = document.createElement('button');
+                switchCameraBtn.textContent = '🔄 Switch Camera';
+                switchCameraBtn.className = 'switch-camera-btn';
+                document.body.appendChild(switchCameraBtn);
+                async function switchCamera() {
+                    try {
+                        // Stop current stream
+                        if (currentStream) {
+                            currentStream.getTracks().forEach(track => track.stop());
+                        }
+
+                        // Toggle facing mode
+                        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+
+                        // Get new stream
+                        const stream = await navigator.mediaDevices.getUserMedia(getVideoConstraints());
+                        videoElement.srcObject = stream;
+                        currentStream = stream;
+                        permissionMessage.style.display = 'none';
+                    } catch (error) {
+                        console.error('Error switching camera:', error);
+                        permissionMessage.textContent = 'Error switching camera';
+                        permissionMessage.style.display = 'block';
+                    }
+                }
+                switchCameraBtn.addEventListener('click', switchCamera);
+            }
+        } catch (error) {
+            console.error('Error checking cameras:', error);
+        }
+    }
+
     function getVideoConstraints() {
         return {
             video: {
@@ -32,64 +64,55 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Function to switch camera
-    async function switchCamera() {
-        try {
-            // Stop current stream
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-
-            // Toggle facing mode
-            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-
-            // Get new stream
-            const stream = await navigator.mediaDevices.getUserMedia(getVideoConstraints());
+    // Request camera access
+    navigator.mediaDevices.getUserMedia(getVideoConstraints())
+        .then(stream => {
             videoElement.srcObject = stream;
-            currentStream = stream;
-        } catch (error) {
-            console.error('Error switching camera:', error);
-            permissionMessage.textContent = 'Error switching camera';
+            permissionMessage.style.display = 'none';
+            configureCameras();
+        })
+        .catch(error => {
+            console.error('Error accessing camera:', error);
+            permissionMessage.textContent = 'Camera access denied';
             permissionMessage.style.display = 'block';
-        }
-    }
+        });
 
-    // Add click event to switch camera button
-    switchCameraBtn.addEventListener('click', switchCamera);
-
-    // Handle click/tap events on the video feed
     videoElement.addEventListener('click', handleInteraction);
     videoElement.addEventListener('touchstart', (e) => {
         e.preventDefault(); // Prevent default touch behavior
         handleInteraction(e);
     });
 
-    async function analyzeImage(imageBase64, x, y) {
-        return fetch('/analyze-image', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                image: imageBase64,
-                coordinates: {
-                    x: Math.round(x),
-                    y: Math.round(y)
-                }
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) throw new Error(data.error);
-            return data.analysis;
-        })
-        .then(analysis => {
-            const smilesArray = JSON.parse(analysis);
-            if (!Array.isArray(smilesArray) || smilesArray.length === 0) {
-                throw new Error('No compounds identified');
+    async function findMoleculesInImage(imageBase64, croppedImageBase64, x, y) {
+        if (!imageBase64) {
+          throw new Error(`${imageBase64} is not a valid base64 image string`);
+        }
+
+        try {
+            const response = await fetch('/find-molecules-in-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    imageBase64, 
+                    croppedImageBase64,
+                    x: Math.round(x), 
+                    y: Math.round(y) 
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to analyze image');
             }
-            return smilesArray;
-        });
+
+            return data.output;
+        } catch (error) {
+            console.error('Error:', error);
+            throw error;
+        }
     }
 
     function handleInteraction(event) {
@@ -136,7 +159,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Get base64 image data
         const imageBase64 = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
-        // Create snapshot container with fixed display size
+        // Create a canvas for the cropped image
+        const cropCanvas = document.createElement('canvas');
+        const cropContext = cropCanvas.getContext('2d');
+        cropCanvas.width = 100;
+        cropCanvas.height = 100;
+        
+        // Draw the cropped region
+        cropContext.drawImage(
+            canvas,
+            x - 50, y - 50, 100, 100,  // Source coordinates and size
+            0, 0, 100, 100             // Destination coordinates and size
+        );
+        
+        // Get cropped image data
+        const croppedImageBase64 = cropCanvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+
+        // Create snapshot container
         const snapshot = document.createElement('div');
         snapshot.className = 'snapshot';
         
@@ -157,15 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
         snapshotsContainer.appendChild(snapshot);
 
         // Chain the analysis, UI updates, and 3D structure generation
-        analyzeImage(imageBase64, x, y)
-            .then(smilesArray => {
-                analysisContainer.textContent = `Found ${smilesArray.length} compound(s)`;
-                return smilesArray;
+        findMoleculesInImage(imageBase64, croppedImageBase64, x, y,)
+            .then(result => {
+                if (Array.isArray(result)) {
+                    return generateSDFs(result);
+                }
+                // If not an array, show the raw text
+                analysisContainer.textContent = result;
+                analysisContainer.style.color = 'blue';
             })
-            .then(generateSDFs)
             .catch(error => {
                 console.error('Analysis error:', error);
                 analysisContainer.textContent = error.message || 'Error analyzing image';
+                analysisContainer.style.color = 'red';
             });
 
         // Remove the box and snapshot after 10 seconds with fade effect
@@ -178,21 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 300);
         }, 15000);
     }
-
-    // Request camera access
-    navigator.mediaDevices.getUserMedia(getVideoConstraints())
-        .then(stream => {
-            videoElement.srcObject = stream;
-            currentStream = stream;
-            permissionMessage.style.display = 'none';
-        })
-        .catch(error => {
-            console.error('Error accessing camera:', error);
-            permissionMessage.textContent = 'Camera access denied';
-            permissionMessage.style.display = 'block';
-        });
 });
 
+// Client-side API functions
 async function generateSDFs(smiles) {
     if (!smiles || smiles.length === 0) return;
     try {
