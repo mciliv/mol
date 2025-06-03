@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create camera switch button
     const switchCameraBtn = document.createElement('button');
     switchCameraBtn.textContent = '🔄 Switch Camera';
-    switchCameraBtn.style.cssText = 'position: fixed; left: 50%; top: 20px; transform: translateX(-50%); padding: 12px 20px; background: rgba(0, 0, 0, 0.7); color: white; border: none; border-radius: 25px; font-size: 16px; cursor: pointer; z-index: 1000; transition: background 0.3s;';
+    switchCameraBtn.className = 'switch-camera-btn';
     document.body.appendChild(switchCameraBtn);
 
     let currentFacingMode = 'user';
@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const stream = await navigator.mediaDevices.getUserMedia(getVideoConstraints());
             videoElement.srcObject = stream;
             currentStream = stream;
-            permissionMessage.style.display = 'none';
         } catch (error) {
             console.error('Error switching camera:', error);
             permissionMessage.textContent = 'Error switching camera';
