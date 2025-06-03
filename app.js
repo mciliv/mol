@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const videoElement = document.getElementById('video-feed');
     const permissionMessage = document.querySelector('.permission-message');
-    const snapshotsContainer = document.createElement('div');
-    snapshotsContainer.className = 'snapshots-container';
-    document.body.appendChild(snapshotsContainer);
+    const snapshotsContainer = document.querySelector('.snapshots-container');
+    snapshotsContainer.style.display = 'flex';
 
     let currentFacingMode = 'user';
     let currentStream = null;
@@ -22,10 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Found video devices:', videoDevices.length);
  
             if (videoDeviceslength > 1) {
-                const switchCameraBtn = document.createElement('button');
-                switchCameraBtn.textContent = '🔄 Switch Camera';
-                switchCameraBtn.className = 'switch-camera-btn';
-                document.body.appendChild(switchCameraBtn);
+                const switchCameraBtn = document.querySelector('.switch-camera-btn');
+                switchCameraBtn.style.display = 'block';
                 async function switchCamera() {
                     try {
                         // Stop current stream
