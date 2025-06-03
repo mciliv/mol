@@ -9,10 +9,14 @@
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
 </head>
 <body>
-    <div class="camera-container">
+    <div class="main-container">
+      <div class="camera-container">
         <video id="video-feed" autoplay playsinline></video>
         <div class="permission-message"></div> 
+      </div>
+      <div id="gldiv"></div>
+      <div class="snapshots-container"></div>
+      <button class="switch-camera-btn" style="display: none;">🔄 Switch Camera</button>
     </div>
-    <div id="gldiv"></div>
 </body>
 </html>
