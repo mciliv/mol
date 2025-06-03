@@ -1,36 +1,17 @@
-
-.main-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding-top: 20px;
-    position: relative;
-}
 body {
     margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #f0f0f0;
-}
-
-.camera-container {
-    width: 90vw;
-    max-width: 1280px;
-    height: 90vh;
-    max-height: 720px;
-    background-color: #000;
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
+    background-color: #f0f0f0ed;
 }
 
 #video-feed {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;;
+    max-height: 100vh;
+    object-fit: contain;
 }
 
 .permission-message {
@@ -80,7 +61,6 @@ body {
     cursor: pointer;
     z-index: 1000;
     transition: background 0.3s;
-    display: block;
 }
 
 .switch-camera-btn:hover {
