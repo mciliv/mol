@@ -1,2 +1,3 @@
-    chmod +x helper.sh
-    ./helper.sh
+    f = scripts/helper.sh
+    chmod +x $f
+    ./$f
