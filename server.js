@@ -1,85 +1,82 @@
+// Server-side code only
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const { env } = require('process');
+const OpenAI = require('openai');
 
 const app = express();
 const PORT = 3000;
 const SDF_DIR = path.join(__dirname, 'sdf_files');
 
+// Prompt template for molecule analysis
+const MOLECULE_ANALYSIS_PROMPT = (x, y) => `coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in an image, just to increase your accuracy of what position referred to, list as many relevant chemical structures as possible as SMILES in a direct json array, don't have json markdown or anything else. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels. If you can't, why not? But, take your best estimate.`;
+
+// Ensure SDF directory exists
 if (!fs.existsSync(SDF_DIR)) {
     fs.mkdirSync(SDF_DIR, { recursive: true });
 }
 
+// Middleware
 app.use((req, res, next) => {
     console.log(`Incoming request: ${req.method} ${req.url}`);
     next();
 });
 
 app.use(cors());
-
 app.use(express.json({ limit: '50mb' }));
-
 app.use(express.static(__dirname));
 app.use('/sdf_files', express.static(SDF_DIR));
 app.use('/favicon.ico', express.static(path.join(__dirname, 'favicon.ico')));
 
+// Routes
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/analyze-image', async (req, res) => {
+// API Endpoints
+app.post('/find-molecules-in-image', async (req, res) => {
+    const { imageBase64, croppedImageBase64, x, y } = req.body;
+
+    if (!imageBase64) {
+        return res.status(400).json({ error: 'No image data provided' });
+    }
+
     try {
-        const { image: base64ImageData, coordinates } = req.body;
-        if (!base64ImageData) {
-            return res.status(400).json({ error: 'No image data provided' });
-        }
+        const client = new OpenAI({
+            apiKey: process.env['OPENAI_API_KEY'],
+        });
 
-        const headers = {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json'
-        };
+        const text = MOLECULE_ANALYSIS_PROMPT(x, y);
 
-        const payload = {
-            model: 'gpt-4o-mini',
-            messages: [
+        const response = await client.responses.create({
+            input: [
                 {
-                    role: 'user',
                     content: [
                         {
-                            type: 'text',
-                            text: `What do you see in this image? I am curious about the materials around us - from everyday objects to complex structures. I want to know what everything is made out of. First identify one main object in the image (around these coordinates: X: ${coordinates?.x}, Y: ${coordinates?.y}.) and then analyze any chemical compounds and answer with the compounds listed as SMILES in a json array dont have json markdown-- nothing else, only an array. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels.`
+                            text: text,
+                            type: "input_text"
                         },
                         {
-                            type: 'image_url',
-                            image_url: {
-                                url: `data:image/jpeg;base64,${base64ImageData}`
-                            }
+                            detail: "high",
+                            type: "input_image",
+                            image_url: `data:image/jpeg;base64,${imageBase64}`
+                        },
+                        {
+                            detail: "high",
+                            type: "input_image",
+                            image_url: `data:image/jpeg;base64,${croppedImageBase64}`
                         }
-                    ]
+                    ],
+                    role: "user"
                 }
-            ]
-        };
-
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(payload)
+            ],
+            model: "gpt-4.1"
         });
 
-        if (!response.ok) {
-            throw new Error(`OpenAI API error: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        console.log(result.choices[0].message.content);
-
-        res.json({
-            analysis: result.choices[0].message.content
-        });
-
+        return res.json({ output: response.output_text });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: error.message });
@@ -134,6 +131,48 @@ app.post('/generate-sdfs', async (req, res) => {
     res.json({ sdfPaths });
 });
 
+app.post('/analyze-image', async (req, res) => {
+    const { imageBase64, x, y } = req.body;
+
+    if (!imageBase64) {
+        return res.status(400).json({ error: 'No image data provided' });
+    }
+
+    try {
+        const client = new OpenAI({
+            apiKey: process.env['OPENAI_API_KEY'],
+        });
+
+        const text = MOLECULE_ANALYSIS_PROMPT(x, y);
+
+        const response = await client.responses.create({
+            input: [
+                {
+                    content: [
+                        {
+                            text: text,
+                            type: "input_text"
+                        },
+                        {
+                            detail: "high",
+                            type: "input_image",
+                            image_url: `data:image/jpeg;base64,${imageBase64}`
+                        }
+                    ],
+                    role: "user"
+                }
+            ],
+            model: "gpt-4.1"
+        });
+
+        return res.json({ output: response.output_text });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Helper functions
 function sdf(s, overwrite) {
     let command = "python"
     let args = ['sdf.py', s, '--dir', SDF_DIR];
@@ -141,6 +180,7 @@ function sdf(s, overwrite) {
     return { command, args };
 }
 
+// Start server
 app.listen(PORT, () => console.log(`Node server running on http://localhost:${PORT}`));
 
 module.exports = app;
