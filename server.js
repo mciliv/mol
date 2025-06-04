@@ -131,47 +131,6 @@ app.post('/generate-sdfs', async (req, res) => {
     res.json({ sdfPaths });
 });
 
-app.post('/analyze-image', async (req, res) => {
-    const { imageBase64, x, y } = req.body;
-
-    if (!imageBase64) {
-        return res.status(400).json({ error: 'No image data provided' });
-    }
-
-    try {
-        const client = new OpenAI({
-            apiKey: process.env['OPENAI_API_KEY'],
-        });
-
-        const text = MOLECULE_ANALYSIS_PROMPT(x, y);
-
-        const response = await client.responses.create({
-            input: [
-                {
-                    content: [
-                        {
-                            text: text,
-                            type: "input_text"
-                        },
-                        {
-                            detail: "high",
-                            type: "input_image",
-                            image_url: `data:image/jpeg;base64,${imageBase64}`
-                        }
-                    ],
-                    role: "user"
-                }
-            ],
-            model: "gpt-4.1"
-        });
-
-        return res.json({ output: response.output_text });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Helper functions
 function sdf(s, overwrite) {
     let command = "python"
