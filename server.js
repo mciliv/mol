@@ -12,6 +12,8 @@ const PORT = 3000;
 const SDF_DIR = path.join(__dirname, 'sdf_files');
 
 // Prompt template for molecule analysis
+const OBJECT_IDENTIFICATION_PROMPT = (x, y) => `The goal of this application is to identify a substance/material, and the user clues us as to what they're identifying by clicking on the object in the image. So, what is at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in the image?`;
+
 const MOLECULE_ANALYSIS_PROMPT = (x, y) => `coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in an image, just to increase your accuracy of what position referred to, list as many relevant chemical structures as possible as SMILES in a direct json array, don't have json markdown or anything else. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels. If you can't, why not? But, take your best estimate.`;
 
 // Ensure SDF directory exists
@@ -49,8 +51,9 @@ app.post('/find-molecules-in-image', async (req, res) => {
             apiKey: process.env['OPENAI_API_KEY'],
         });
 
-        const text = MOLECULE_ANALYSIS_PROMPT(x, y);
+        const text = OBJECT_IDENTIFICATION_PROMPT(x, y);
 
+        
         const response = await client.responses.create({
             input: [
                 {
