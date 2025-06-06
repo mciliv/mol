@@ -9,3 +9,4 @@ __pycache__/
 .*.sw?
 node_modules/
 sdf_files
+*.jpg
