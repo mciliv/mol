@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
             console.log('Found video devices:', videoDevices.length);
  
-            if (videoDeviceslength > 1) {
+            if (videoDevices.length > 1) {
                 const switchCameraBtn = document.querySelector('.switch-camera-btn');
                 switchCameraBtn.style.display = 'block';
                 async function switchCamera() {
