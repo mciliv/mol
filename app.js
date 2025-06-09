@@ -79,18 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     videoElement.addEventListener('click', handleInteraction);
-    videoElement.addEventListener('touchstart', (e) => {
+    videoElement.addEventListenlistMolecules('touchstart', (e) => {
         e.preventDefault(); // Prevent default touch behavior
         handleInteraction(e);
     });
 
-    async function findMoleculesInImage(imageBase64, croppedImageBase64, x, y) {
+    async function listMolecules(imageBase64, croppedImageBase64, x, y) {
         if (!imageBase64) {
           throw new Error(`${imageBase64} is not a valid base64 image string`);
         }
 
         try {
-            const response = await fetch('/find-molecules-in-image', {
+            const response = await fetch('/list-molecules', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         snapshotsContainer.appendChild(snapshot);
 
         // Chain the analysis, UI updates, and 3D structure generation
-        findMoleculesInImage(imageBase64, croppedImageBase64, x, y,)
+        listMolecules(imageBase64, croppedImageBase64, x, y,)
             .then(result => {
                 if (Array.isArray(result)) {
                     return generateSDFs(result);
