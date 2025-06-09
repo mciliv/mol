@@ -16,6 +16,18 @@ const OBJECT_IDENTIFICATION_PROMPT = (x, y) => `The goal of this application is 
 
 const MOLECULE_ANALYSIS_PROMPT = (x, y) => `coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in an image, just to increase your accuracy of what position referred to, list as many relevant chemical structures as possible as SMILES in a direct json array, don't have json markdown or anything else. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels. If you can't, why not? But, take your best estimate.`;
 
+const molSchema = {
+    type: "object",
+    properties: {
+        object: { "type": "string"},
+        smiles: { "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+}
+
 // Ensure SDF directory exists
 if (!fs.existsSync(SDF_DIR)) {
     fs.mkdirSync(SDF_DIR, { recursive: true });
@@ -38,8 +50,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// API Endpoints
-app.post('/find-molecules-in-image', async (req, res) => {
+app.post('/list-molecules`', async (req, res) => {
     const { imageBase64, croppedImageBase64, x, y } = req.body;
 
     if (!imageBase64) {
@@ -53,7 +64,9 @@ app.post('/find-molecules-in-image', async (req, res) => {
 
         const text = OBJECT_IDENTIFICATION_PROMPT(x, y);
 
-        
+        fs.writeFileSync('image.jpg', imageBase64, 'base64');
+        fs.writeFileSync('cropped_image.jpg', croppedImageBase64, 'base64');
+
         const response = await client.responses.create({
             input: [
                 {
@@ -76,62 +89,21 @@ app.post('/find-molecules-in-image', async (req, res) => {
                     role: "user"
                 }
             ],
-            model: "gpt-4.1"
+            model: "gpt-4.1",
+            text: {
+                format: {
+                    type: "json_schema",
+                    schema: molSchema
+                },
+            }
         });
 
-        return res.json({ output: response.output_text });
+        // Assume the response contains a direct answer to the object at (x, y)
+        return res.json({ objectLabel: response.output_text });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: error.message });
     }
-});
-
-app.post('/generate-sdfs', async (req, res) => {
-    const { smiles, overwrite = false } = req.body;
-    const sdfPaths = [];
-    const errors = [];
-
-    const sdfPromises = smiles.map(s => {
-        console.log(`Processing SMILES: ${s}`);
-        if (!s) return Promise.resolve();
-
-        const sdfPath = `/sdf_files/${s}.sdf`;
-        const fullPath = path.join(SDF_DIR, `${s}.sdf`);
-
-        if (fs.existsSync(fullPath) && !overwrite) {
-            sdfPaths.push(sdfPath);
-            return Promise.resolve();
-        }
-
-        return new Promise((resolve, reject) => {
-            const { command, args } = sdf(s, overwrite);
-            const pythonProcess = spawn(command, args);
-
-            pythonProcess.stdout.on('data', data =>
-                console.log(`Python Output: ${data.toString().trim()}`));
-            pythonProcess.stderr.on('data', data =>
-                console.error(`Error: ${data.toString().trim()}`));
-            pythonProcess.on('close', code => {
-                if (code === 0) {
-                    sdfPaths.push(sdfPath);
-                    resolve();
-                } else {
-                    const errorMsg = `SDF generation failed for ${s}`;
-                    console.error(errorMsg);
-                    errors.push(errorMsg);
-                    reject(new Error(errorMsg));
-                }
-            });
-        });
-    });
-
-    await Promise.allSettled(sdfPromises);
-
-    if (errors.length > 0) {
-        return res.status(500).json({ errors });
-    }
-
-    res.json({ sdfPaths });
 });
 
 // Helper functions
