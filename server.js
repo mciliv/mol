@@ -67,7 +67,7 @@ app.post('/list-molecules`', async (req, res) => {
         fs.writeFileSync('image.jpg', imageBase64, 'base64');
         fs.writeFileSync('cropped_image.jpg', croppedImageBase64, 'base64');
 
-        const response = await client.responses.create({
+        return await client.responses.create({
             input: [
                 {
                     content: [
@@ -97,9 +97,6 @@ app.post('/list-molecules`', async (req, res) => {
                 },
             }
         });
-
-        // Assume the response contains a direct answer to the object at (x, y)
-        return res.json({ objectLabel: response.output_text });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: error.message });
