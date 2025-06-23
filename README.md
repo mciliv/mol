@@ -1,3 +1,3 @@
-    f = scripts/helper.sh
+    f=scripts/helper.sh
     chmod +x $f
     ./$f

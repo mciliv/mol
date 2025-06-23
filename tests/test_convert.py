@@ -1,5 +1,6 @@
 import pytest
 from pathlib import Path
+from rdkit import Chem
 from sdf import sdf
 
 @pytest.fixture
@@ -16,5 +17,10 @@ def test_sdf_file_creation(smiles, cleanup_sdf):
     Path(directory).mkdir(exist_ok=True)
 
     filepath = sdf(smiles, directory, overwrite=True)
-    
+
     assert Path(filepath).exists(), f"SDF file {filepath} was not created."
+
+    supplier = Chem.SDMolSupplier(filepath)
+    mol = supplier[0]
+    assert mol is not None, "Failed to read molecule from SDF"
+    assert mol.GetProp("SMILES") == smiles
