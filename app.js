@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     videoElement.addEventListener('click', handleInteraction);
-    videoElement.addEventListenlistMolecules('touchstart', (e) => {
+    videoElement.addEventListener('touchstart', (e) => {
         e.preventDefault(); // Prevent default touch behavior
         handleInteraction(e);
     });
