@@ -10,3 +10,4 @@ __pycache__/
 node_modules/
 sdf_files
 *.jpg
+.venv

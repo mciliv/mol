@@ -6,27 +6,11 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { env } = require('process');
 const OpenAI = require('openai');
+const { ImageMoleculeSchema, TextMoleculeSchema, ListMoleculesTextRequestSchema } = require('./schemas');
 
 const app = express();
 const PORT = 3000;
 const SDF_DIR = path.join(__dirname, 'sdf_files');
-
-// Prompt template for molecule analysis
-const OBJECT_IDENTIFICATION_PROMPT = (x, y) => `The goal of this application is to identify a substance/material, and the user clues us as to what they're identifying by clicking on the object in the image. So, what is at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in the image?`;
-
-const MOLECULE_ANALYSIS_PROMPT = (x, y) => `coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in an image, just to increase your accuracy of what position referred to, list as many relevant chemical structures as possible as SMILES in a direct json array, don't have json markdown or anything else. X:0 Y:0 is the top left corner of the image. The image is 1000x1000 pixels. If you can't, why not? But, take your best estimate.`;
-
-const molSchema = {
-    type: "object",
-    properties: {
-        object: { "type": "string"},
-        smiles: { "type": "array",
-            "items": {
-                "type": "string"
-            }
-        }
-    }
-}
 
 // Ensure SDF directory exists
 if (!fs.existsSync(SDF_DIR)) {
@@ -50,7 +34,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/list-molecules`', async (req, res) => {
+app.post('/list-molecules', async (req, res) => {
     const { imageBase64, croppedImageBase64, x, y } = req.body;
 
     if (!imageBase64) {
@@ -62,12 +46,12 @@ app.post('/list-molecules`', async (req, res) => {
             apiKey: process.env['OPENAI_API_KEY'],
         });
 
-        const text = OBJECT_IDENTIFICATION_PROMPT(x, y);
+        const text = `The goal of this application is to identify a substance/material, and the user clues us as to what they're identifying by clicking on the object in the image. So, what is at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in the image?`;
 
         fs.writeFileSync('image.jpg', imageBase64, 'base64');
         fs.writeFileSync('cropped_image.jpg', croppedImageBase64, 'base64');
 
-        return await client.responses.create({
+        const response = await client.responses.create({
             input: [
                 {
                     content: [
@@ -77,6 +61,7 @@ app.post('/list-molecules`', async (req, res) => {
                         },
                         {
                             detail: "high",
+                            
                             type: "input_image",
                             image_url: `data:image/jpeg;base64,${imageBase64}`
                         },
@@ -93,12 +78,44 @@ app.post('/list-molecules`', async (req, res) => {
             text: {
                 format: {
                     type: "json_schema",
-                    schema: molSchema
+                    schema: ImageMoleculeSchema.shape
                 },
             }
         });
+
+        const validatedResponse = ImageMoleculeSchema.parse(response.results[0].output);
+        return res.json({ output: validatedResponse });
     } catch (error) {
         console.error('Error:', error);
+        if (error.name === 'ZodError') {
+            return res.status(400).json({ error: 'Invalid response format', details: error.errors });
+        }
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Route for manual object input to list molecule SMILES
+app.post('/list-molecules-text', async (req, res) => {
+    try {
+        const validatedData = ListMoleculesTextRequestSchema.parse(req.body);
+        const { object } = validatedData;
+
+        const client = new OpenAI({ apiKey: process.env['OPENAI_API_KEY'] });
+        const text = `The user entered: ${object}. List as many relevant chemical structures as SMILES in a direct JSON array without any markdown or additional text.`;
+        
+        const aiRes = await client.responses.create({
+            input: [{ content: [{ text: text, type: 'input_text' }], role: 'user' }],
+            model: 'gpt-4.1',
+            text: { format: { type: 'json_schema', schema: TextMoleculeSchema.shape } }
+        });
+
+        const validatedResponse = TextMoleculeSchema.parse(aiRes.results[0].output);
+        return res.json({ output: validatedResponse });
+    } catch (error) {
+        console.error('Error in /list-molecules-text handler:', error);
+        if (error.name === 'ZodError') {
+            return res.status(400).json({ error: 'Invalid request data', details: error.errors });
+        }
         res.status(500).json({ error: error.message });
     }
 });
