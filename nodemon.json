@@ -1,12 +1,5 @@
 {
-  "watch": [
-    "server.js",
-    "schemas.js",
-    "*.js",
-    "*.json",
-    "*.html",
-    "*.css"
-  ],
+  "watch": ["server.js", "schemas.js", "*.js", "*.json", "*.html", "*.css"],
   "ignore": [
     "node_modules/**",
     "sdf_files/**",
@@ -23,4 +16,4 @@
   "exec": "node --inspect server.js",
   "delay": 1000,
   "verbose": true
-} 
+}
