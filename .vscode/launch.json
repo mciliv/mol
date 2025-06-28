@@ -1,62 +1,56 @@
 {
-    "version": "0.2.0",
-    "compounds": [
-        {
-            "name": "App",
-            "configurations": ["Node.js", "Chrome"],
-            "stopAll": true
-        }
-    ],
-    "configurations": [
-        {
-            "type": "debugpy",
-            "request": "launch",
-            "name": "Pytest",
-            "module": "pytest",
-            "args": [
-                "tests/test_convert.py"
-            ],
-            "console": "integratedTerminal"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Jest",
-            "program": "${workspaceFolder}/node_modules/.bin/jest",
-            "args": [
-                "--runInBand", "--detectOpenHandles"
-            ],
-            "console": "integratedTerminal",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Node.js",
-            "program": "${workspaceFolder}/server.js",
-            "console": "integratedTerminal",
-            "autoAttachChildProcesses": true,
-            "env": {
-                "PY_DEBUG": "1"
-            }
-        },
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Chrome",
-            "url": "http://127.0.0.1:3000",
-            "webRoot": "${workspaceFolder}",
-        },
-        {
-            "type": "debugpy",
-            "request": "attach",
-            "name": "Debugpy",
-            "connect": {
-                "host": "127.0.0.1",
-                "port": 5678
-            }
-        }
-    ]
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "App",
+      "configurations": ["Node.js", "Chrome"],
+      "stopAll": true
+    }
+  ],
+  "configurations": [
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "Pytest",
+      "module": "pytest",
+      "args": ["tests/test_convert.py"],
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand", "--detectOpenHandles"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Node.js",
+      "program": "${workspaceFolder}/server.js",
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "env": {
+        "PY_DEBUG": "1"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Chrome",
+      "url": "http://127.0.0.1:3000",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "type": "debugpy",
+      "request": "attach",
+      "name": "Debugpy",
+      "connect": {
+        "host": "127.0.0.1",
+        "port": 5678
+      }
+    }
+  ]
 }
