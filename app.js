@@ -4,8 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const permissionMessage = document.querySelector('.permission-message');
     snapshotsContainer.style.display = 'flex';
     
+    
     let currentFacingMode = 'user';
     let currentStream = null;
+    
     
     // Check if the browser supports getUserMedia
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -14,11 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     
+    
     async function configureCameras() {
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
             console.log('Found video devices:', videoDevices.length);
+            
             
             if (videoDevices.length > 1) {
                 const switchCameraBtn = document.createElement('button');
@@ -30,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         // Stop current stream
                         if (currentStream) {
+                            const permissionMessage = document.querySelector('.permission-message');
                             currentStream.getTracks().forEach(track => track.stop());
                         }
                         // Toggle facing mode
