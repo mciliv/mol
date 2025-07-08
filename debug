@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Debug Launcher Wrapper - Choose between bash and Python versions
+# Usage: ./debug [mode] [options]
+
+# Check if Python version is preferred
+if [ "$1" = "--python" ] || [ "$1" = "-p" ]; then
+    shift
+    if command -v python3 &> /dev/null; then
+        python3 debug_launcher.py "$@"
+    elif command -v python &> /dev/null; then
+        python debug_launcher.py "$@"
+    else
+        echo "Error: Python not found"
+        exit 1
+    fi
+else
+    # Default to bash version
+    ./debug-launcher.sh "$@"
+fi 

@@ -8,37 +8,40 @@
   </head>
   <body>
     <div class="app-container">
-      <!-- Full width top bar outside camera area -->
+      <!-- Always visible text input bar -->
       <div class="top-bar">
-        <div class="toggle-switch">
-          <input type="radio" id="image-mode" name="mode" value="image" checked />
-          <input type="radio" id="text-mode" name="mode" value="text" />
-          <div class="switch">
-            <label for="image-mode" class="switch-label">📷 Image</label>
-            <label for="text-mode" class="switch-label">✏️ Text</label>
-            <div class="switch-indicator"></div>
-          </div>
-        </div>
-        
         <input
           id="object-input"
           type="text"
-          placeholder="Type any object name and press Enter"
+          placeholder="Describe any object or part of the image and press Enter..."
           class="text-input"
         />
       </div>
 
-      <!-- Camera takes available space -->
-      <div class="camera-container">
-        <video id="video-feed" autoplay playsinline muted width="100%"></video>
-        <div class="permission-message" hidden></div>
-        <div class="crosshair"></div>
-        <div class="instruction-text">Click anywhere on the image to analyze</div>
+      <!-- Camera with collapsible header -->
+      <div class="camera-section">
+        <div class="camera-header" id="camera-header">
+          <svg class="camera-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>Camera</span>
+          <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"/>
+          </svg>
+        </div>
         
-        <!-- Switch camera button (hidden until multiple cameras detected) -->
-        <button class="switch-camera-btn" id="switch-camera-btn" style="display: none;">
-          🔄 Switch Camera
-        </button>
+        <div class="camera-container" id="camera-container">
+          <video id="video-feed" autoplay playsinline muted width="100%"></video>
+          <div class="permission-message" hidden></div>
+          <div class="crosshair"></div>
+          <div class="instruction-text">Click on image parts or type descriptions above</div>
+          
+          <!-- Switch camera button (hidden until multiple cameras detected) -->
+          <button class="switch-camera-btn" id="switch-camera-btn" style="display: none;">
+            🔄 Switch Camera
+          </button>
+        </div>
       </div>
 
       <div class="snapshots-container"></div>
@@ -46,8 +49,6 @@
       <!-- 3Dmol.js viewers go here -->
       <div id="gldiv"></div>
     </div>
-
-
 
     <script type="module" src="app.js"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
