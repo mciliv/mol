@@ -1,19 +1,22 @@
 {
-  "watch": ["server.js", "schemas.js", "*.js", "*.json", "*.html", "*.css"],
+  "watch": ["server.js", "schemas.js", "*.js", "*.json"],
   "ignore": [
     "node_modules/**",
     "sdf_files/**",
     "*.jpg",
     "*.png",
     "*.gif",
-    "tests/**"
+    "tests/**",
+    "app.js",
+    "index.html",
+    "style.css"
   ],
-  "ext": "js,json,html,css",
+  "ext": "js,json",
   "env": {
     "NODE_ENV": "development",
     "PY_DEBUG": "1"
   },
-  "exec": "node --inspect server.js",
+  "exec": "node --inspect=0.0.0.0:9229 server.js",
   "delay": 1000,
-  "verbose": true
+  "verbose": false
 }
