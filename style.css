@@ -17,80 +17,17 @@ body {
   width: 100vw;
 }
 
-/* Top bar outside camera area */
+/* Top bar with always visible text input */
 .top-bar {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
   padding: 15px 20px;
   background: rgba(0, 0, 0, 0.95);
   z-index: 1000;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Full toggle switch restored */
-.toggle-switch {
-  position: relative;
-}
 
-.toggle-switch input[type="radio"] {
-  display: none;
-}
-
-.switch {
-  position: relative;
-  display: flex;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50px;
-  padding: 4px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.switch-label {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 24px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-  transition: all 0.3s ease;
-  border-radius: 46px;
-  z-index: 2;
-  min-width: 100px;
-}
-
-.switch-indicator {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: calc(50% - 4px);
-  height: 44px;
-  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-  border-radius: 42px;
-  transition: transform 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  z-index: 1;
-}
-
-#image-mode:checked ~ .switch .switch-indicator {
-  transform: translateX(0);
-}
-
-#text-mode:checked ~ .switch .switch-indicator {
-  transform: translateX(100%);
-}
-
-#image-mode:checked ~ .switch label[for="image-mode"],
-#text-mode:checked ~ .switch label[for="text-mode"] {
-  color: #333;
-  font-weight: 700;
-}
 
 .text-input {
   padding: 12px 20px;
@@ -98,22 +35,19 @@ body {
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.9);
   font-size: 14px;
-  width: 300px;
-  display: none;
+  width: 100%;
+  max-width: 600px;
+  display: block;
+  outline: none;
 }
 
 .text-input:focus {
-  outline: none;
   background: white;
 }
 
-/* Show text input only in text mode */
-.text-mode .text-input {
-  display: block;
-}
-
-.text-mode .camera-container {
-  display: none;
+.text-input::placeholder {
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
 }
 
 /* Camera section with collapsible header */
@@ -395,13 +329,13 @@ body {
   border-left: 3px solid #ff4081;
 }
 
-/* Hide UI elements in image mode for cleaner experience */
-.image-mode .instruction-text {
+/* Instruction text visibility */
+.instruction-text {
   opacity: 0.7;
   transition: opacity 0.3s ease;
 }
 
-.image-mode .camera-container:hover .instruction-text {
+.camera-container:hover .instruction-text {
   opacity: 0.3;
 }
 
