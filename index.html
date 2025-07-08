@@ -37,6 +37,30 @@
           <div class="crosshair"></div>
           <div class="instruction-text">Click on image parts or type descriptions above</div>
           
+          <!-- Photo upload option -->
+          <div class="upload-option">
+            <input type="file" id="photo-upload" accept="image/*" aria-label="Upload photo for molecular analysis">
+            <label for="photo-upload" class="upload-label">
+              <svg class="lens-icon" width="24" height="24" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2">
+                <!-- Outer lens ring -->
+                <circle cx="32" cy="32" r="28" stroke-width="1.5"/>
+                <!-- Inner lens elements -->
+                <circle cx="32" cy="32" r="20" stroke-width="1"/>
+                <circle cx="32" cy="32" r="12" stroke-width="0.8"/>
+                <!-- Aperture blades -->
+                <path d="M32 20 L38 26 L32 32 L26 26 Z" fill="currentColor" opacity="0.3"/>
+                <path d="M44 32 L38 38 L32 32 L38 26 Z" fill="currentColor" opacity="0.3"/>
+                <path d="M32 44 L26 38 L32 32 L38 38 Z" fill="currentColor" opacity="0.3"/>
+                <path d="M20 32 L26 26 L32 32 L26 38 Z" fill="currentColor" opacity="0.3"/>
+                <!-- Center dot -->
+                <circle cx="32" cy="32" r="2" fill="currentColor"/>
+              </svg>
+              <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
+                <text x="40" y="14" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="currentColor">Upload Photo</text>
+              </svg>
+            </label>
+          </div>
+          
           <!-- Switch camera button (hidden until multiple cameras detected) -->
           <button class="switch-camera-btn" id="switch-camera-btn" style="display: none;">
             🔄 Switch Camera

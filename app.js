@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cameraHeader = document.getElementById("camera-header");
   const cameraSection = document.querySelector(".camera-section");
   const cameraContainer = document.querySelector(".camera-container");
+  const photoUpload = document.getElementById("photo-upload");
 
   // Collapsible camera functionality
   let cameraExpanded = true;
@@ -65,6 +66,87 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     objectInput.value = "";
   });
+
+  // Photo upload functionality
+  photoUpload.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Show loading state
+    const loadingMsg = document.createElement("p");
+    loadingMsg.textContent = `🔍 Analyzing uploaded photo...`;
+    loadingMsg.style.fontStyle = "italic";
+    loadingMsg.style.opacity = "0.7";
+    snapshots.appendChild(loadingMsg);
+
+    try {
+      // Convert to base64
+      const imageBase64 = await fileToBase64(file);
+      
+      // Use center of image as click point (50%, 50%)
+      const mockClickX = 0.5;
+      const mockClickY = 0.5;
+
+      const res = await fetch("/image-molecules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64,
+          croppedImageBase64: imageBase64, // Use full image as crop
+          x: mockClickX,
+          y: mockClickY,
+        }),
+      });
+
+      loadingMsg.remove();
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const { output } = await res.json();
+      
+      // Display result
+      const objectName = output.object || "Uploaded image";
+      const smilesCount = output.smiles ? output.smiles.length : 0;
+      
+      const result = document.createElement("p");
+      result.textContent = `📁 ${objectName} → ${smilesCount} molecule${smilesCount !== 1 ? 's' : ''} found`;
+      snapshots.appendChild(result);
+
+      if (output.smiles && output.smiles.length > 0) {
+        generateSDFs(output.smiles, objectName);
+      }
+
+    } catch (err) {
+      loadingMsg.remove();
+      
+      const errorMsg = document.createElement("p");
+      errorMsg.textContent = `⚠ Error analyzing photo: ${err.message}`;
+      errorMsg.style.color = "red";
+      snapshots.appendChild(errorMsg);
+    }
+
+    // Reset file input
+    photoUpload.value = '';
+  });
+
+  // Helper function to convert file to base64
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result.split(',')[1]; // Remove data:image/...;base64, prefix
+        resolve(result);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 
   /* ---------- Camera setup ---------- */
   console.log("🐛 Starting camera setup...");
