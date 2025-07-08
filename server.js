@@ -173,7 +173,10 @@ if (process.env.NODE_ENV === "development") {
   const connectLivereload = require("connect-livereload");
 
   try {
-    const liveReloadServer = livereload.createServer();
+    const liveReloadServer = livereload.createServer({
+      exts: ['html', 'css', 'js'],
+      ignore: ['node_modules/**', 'sdf_files/**', '*.log']
+    });
     liveReloadServer.watch(__dirname);
 
     app.use(connectLivereload());
@@ -332,13 +335,11 @@ app.post('/generate-sdfs', async (req, res) => {
 });
 
 // ==================== SERVER STARTUP ====================
-// Only start servers in local development (NOT in Cloud Functions, Vercel, or tests)
+// Only start servers in local development (NOT in Cloud Functions, Netlify, or tests)
 const isCloudFunction = process.env.FUNCTION_NAME || process.env.FUNCTION_TARGET || process.env.K_SERVICE || process.env.GOOGLE_CLOUD_PROJECT;
-const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
 const isNetlify = process.env.NETLIFY;
-const isRailway = process.env.RAILWAY_ENVIRONMENT;
 const isTestMode = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID;
-const isServerless = isCloudFunction || isVercel || isNetlify || isRailway;
+const isServerless = isCloudFunction || isNetlify;
 
 if (!isServerless && !isTestMode) {
   // Local development mode
@@ -364,12 +365,8 @@ if (!isServerless && !isTestMode) {
   // Serverless mode - server handled by platform
   if (isCloudFunction) {
     console.log(`☁️ Running in Cloud Functions mode - server handled by platform`);
-  } else if (isVercel) {
-    console.log(`▲ Running in Vercel mode - server handled by platform`);
   } else if (isNetlify) {
     console.log(`◈ Running in Netlify mode - server handled by platform`);
-  } else if (isRailway) {
-    console.log(`🚂 Running in Railway mode - server handled by platform`);
   }
   
   // Check for required environment variables in production

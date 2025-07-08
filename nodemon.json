@@ -16,7 +16,7 @@
     "NODE_ENV": "development",
     "PY_DEBUG": "1"
   },
-  "exec": "node --inspect=0.0.0.0:9229 server.js",
+  "exec": "node server.js",
   "delay": 1000,
   "verbose": false
 }
