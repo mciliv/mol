@@ -6,39 +6,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const objectInput = document.getElementById("object-input");
   const appContainer = document.querySelector(".app-container");
   const instructionText = document.querySelector(".instruction-text");
-  
-  // Get mode toggle elements
-  const imageMode = document.getElementById("image-mode");
-  const textMode = document.getElementById("text-mode");
+  const cameraHeader = document.getElementById("camera-header");
+  const cameraSection = document.querySelector(".camera-section");
+  const cameraContainer = document.querySelector(".camera-container");
 
-  // Handle mode switching
-  function updateMode() {
-    const body = document.body;
-    if (textMode.checked) {
-      body.classList.add("text-mode");
-      body.classList.remove("image-mode");
-      objectInput.focus();
+  // Collapsible camera functionality
+  let cameraExpanded = true;
+  cameraHeader.addEventListener("click", () => {
+    cameraExpanded = !cameraExpanded;
+    if (cameraExpanded) {
+      cameraSection.classList.remove("collapsed");
     } else {
-      body.classList.remove("text-mode");
-      body.classList.add("image-mode");
+      cameraSection.classList.add("collapsed");
     }
-  }
-
-  imageMode.addEventListener("change", updateMode);
-  textMode.addEventListener("change", updateMode);
+  });
   
-  // Initialize mode
-  updateMode();
-
-  // text input handling
+  // Text input handling - always active
   objectInput.addEventListener("keyup", async (e) => {
-    if (e.key !== "Enter" || !textMode.checked) return;
+    if (e.key !== "Enter") return;
     const object = objectInput.value.trim();
     if (!object) return;
 
     // Show loading state
     const loadingMsg = document.createElement("p");
-    loadingMsg.textContent = `Analyzing "${object}"...`;
+    loadingMsg.textContent = `🔍 Analyzing "${object}"...`;
     loadingMsg.style.fontStyle = "italic";
     loadingMsg.style.opacity = "0.7";
     snapshots.appendChild(loadingMsg);
@@ -55,15 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { output } = await res.json();
 
-      // Simple result display
+      // Enhanced result display
       const smilesCount = output.smiles ? output.smiles.length : 0;
       const result = document.createElement("p");
-      result.textContent = `📝 ${object} → ${smilesCount} structure${smilesCount !== 1 ? 's' : ''} found`;
+      result.textContent = `📝 "${object}" → ${smilesCount} molecule${smilesCount !== 1 ? 's' : ''} found`;
       snapshots.appendChild(result);
 
       if (output.smiles && output.smiles.length > 0) {
-        document.getElementById('gldiv').innerHTML = '';
-        generateSDFs(output.smiles);
+        generateSDFs(output.smiles, object);
       }
     } catch (err) {
       loadingMsg.remove();
@@ -170,20 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function handleInteraction(evt) {
-    if (!imageMode.checked) return;
+    if (!cameraExpanded) return;
     
-    const rect = video.getBoundingClientRect();
-    const clickX = Math.round(evt.clientX - rect.left);
-    const clickY = Math.round(evt.clientY - rect.top);
-    console.log(`Click at display (${clickX}, ${clickY})`);
-
-    // Simple click feedback
-    const mark = document.createElement("div");
-    mark.className = "feedback-box";
-    mark.style.left = `${clickX - 30}px`;
-    mark.style.top = `${clickY - 30}px`;
-    video.appendChild(mark);
-
     // Hide instruction text on first click
     if (instructionText) {
       instructionText.style.opacity = "0";
@@ -200,6 +178,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Scale coordinates from display size to actual video resolution
     const scaleX = video.videoWidth / video.clientWidth;
     const scaleY = video.videoHeight / video.clientHeight;
+    const clickX = Math.round(evt.clientX - video.getBoundingClientRect().left);
+    const clickY = Math.round(evt.clientY - video.getBoundingClientRect().top);
     const actualX = Math.round(clickX * scaleX);
     const actualY = Math.round(clickY * scaleY);
     console.log(`Scaled coordinates: (${actualX}, ${actualY}) from video ${video.videoWidth}x${video.videoHeight}`);
@@ -240,8 +220,8 @@ document.addEventListener("DOMContentLoaded", () => {
       snapshot.textContent = `🔍 ${objectName} → ${smilesCount} structure${smilesCount !== 1 ? 's' : ''} found`;
 
       if (output.smiles && output.smiles.length > 0) {
-        document.getElementById('gldiv').innerHTML = '';
-        generateSDFs(output.smiles);
+        // Add new object column to the right of existing ones
+        generateSDFs(output.smiles, objectName);
       }
 
     } catch (err) {
@@ -251,17 +231,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Auto-remove feedback after delay
     setTimeout(() => {
-      if (mark.parentElement) {
-        mark.style.opacity = "0.3";
+      if (snapshot.parentElement) {
+        snapshot.style.opacity = "0.3";
       }
     }, 2000);
   }
 
   /* ---------- 3D Molecule Rendering ---------- */
-  async function generateSDFs(smiles) {
+  
+  // Get descriptive name for SMILES string
+  function getMoleculeName(smiles) {
+    const moleculeNames = {
+      // Simple molecules
+      'O': 'Water',
+      'CCO': 'Ethanol',
+      'CC(=O)O': 'Acetic Acid',
+      'C': 'Methane',
+      'CO': 'Methanol',
+      'C(CO)N': 'Ethanolamine',
+      'C(C(=O)O)N': 'Glycine',
+      'C(CC(=O)O)N': 'GABA',
+      'C(CC(=O)O)C(=O)O': 'Succinic Acid',
+      'C(C(=O)O)O': 'Glycolic Acid',
+      
+      // Aromatic compounds
+      'C1=CC=CC=C1': 'Benzene',
+      'CC1=CC=CC=C1': 'Toluene',
+      'C1=CC=C(C=C1)O': 'Phenol',
+      'C1=CC=C(C=C1)N': 'Aniline',
+      
+      // Common organics
+      'CCCCCCCC=O': 'Octanal',
+      'CCC(C)C(=O)OC(C)C': 'Isopropyl Isovalerate',
+      'CCCOC(=O)N1CCCC1C(=O)OCCC': 'Polyurethane Monomer',
+      'C1CCOC1': 'Tetrahydrofuran',
+      'NCCCN': 'Propanediamine',
+      
+      // Complex molecules
+      'CN1C=NC2=C1C(=O)N(C(=O)N2C)C': 'Caffeine',
+      'CC(=O)OC1=CC=CC=C1C(=O)O': 'Aspirin',
+      'C1NC(=O)N(C)C2=CC=CC=C12': 'N-Methylbenzimidazolone',
+      'NC1=NC(=NC(=N1)Cl)Cl': 'Cyanuric Chloride',
+      
+      // Pharmaceuticals/Complex
+      'C[C@H](NC(=O)[C@@H](N)Cc1c[nH]c2ccc(Cl)cc12)C(=O)O': 'Chlorotryptophan Derivative',
+      'O=C(Nc1ccc(cc1)C(=O)O)C(F)(F)F': 'Trifluoroacetyl-p-aminobenzoic Acid',
+      'C(C(C(=O)NC(C(=O)O)C(C)O)O)O': 'Threonine Derivative'
+    };
+    
+    return moleculeNames[smiles] || `Molecule (${smiles.substring(0, 20)}${smiles.length > 20 ? '...' : ''})`;
+  }
+
+  async function generateSDFs(smiles, objectName) {
     if (!smiles || smiles.length === 0) return;
     
-    console.log(`🧬 Generating SDFs for ${smiles.length} molecules...`);
+    console.log(`🧬 Generating SDFs for ${smiles.length} molecules from ${objectName}...`);
     
     try {
       const response = await fetch('/generate-sdfs', {
@@ -276,36 +300,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const data = await response.json();
       if (data.sdfPaths) {
-        console.log(`✅ Loading 3D grid with ${data.sdfPaths.length} molecules`);
-        load3DmolGrid(data.sdfPaths);
+        console.log(`✅ Loading 3D molecules for ${objectName} with ${data.sdfPaths.length} structures`);
+        createObjectColumn(objectName, data.sdfPaths, smiles);
       } else {
         console.error("❌ No SDF paths in response:", data);
       }
     } catch (error) {
       console.error("❌ SDF generation error:", error);
       
-      const gldiv = document.getElementById('gldiv');
-      gldiv.textContent = '🧬 Working on 3D structures...';
+      // Create an error column
+      createObjectColumn(objectName, [], smiles, '🧬 Working on 3D structures...');
     }
   }
 
-  async function load3DmolGrid(sdfFiles) {
-    console.log(`🧬 Loading 3D grid with ${sdfFiles.length} molecules`);
+  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null) {
+    console.log(`🧬 Creating object column for "${objectName}" with ${sdfFiles.length} molecules`);
     
     const gldiv = document.getElementById('gldiv');
-    gldiv.innerHTML = '';
     
-    const viewers = [];
-    for (const sdfFile of sdfFiles) {
-      const container = document.createElement("div");
-      container.className = "mol-viewer-container";
-      gldiv.appendChild(container);
-      const viewer = await render(sdfFile, container);
-      if (viewer) viewers.push(viewer);
+    // Create object column container
+    const objectColumn = document.createElement("div");
+    objectColumn.className = "object-column";
+    
+    // Create and add title
+    const title = document.createElement("div");
+    title.className = "object-title";
+    title.textContent = objectName;
+    objectColumn.appendChild(title);
+    
+    if (errorMessage) {
+      // Show error message
+      const errorDiv = document.createElement("div");
+      errorDiv.textContent = errorMessage;
+      errorDiv.style.color = '#ffffff';
+      errorDiv.style.textAlign = 'center';
+      errorDiv.style.padding = '20px';
+      objectColumn.appendChild(errorDiv);
+    } else {
+      // Load molecules vertically in this column
+      const viewers = [];
+      for (let i = 0; i < sdfFiles.length; i++) {
+        const sdfFile = sdfFiles[i];
+        const moleculeSmiles = smiles[i] || '';
+        
+        // Create molecule container with name
+        const moleculeContainer = document.createElement("div");
+        moleculeContainer.className = "molecule-container";
+        
+        // Add molecule name
+        const moleculeName = document.createElement("div");
+        moleculeName.className = "molecule-name";
+        moleculeName.textContent = getMoleculeName(moleculeSmiles);
+        moleculeContainer.appendChild(moleculeName);
+        
+        // Add 3D viewer container
+        const container = document.createElement("div");
+        container.className = "mol-viewer-container";
+        moleculeContainer.appendChild(container);
+        
+        objectColumn.appendChild(moleculeContainer);
+        
+        const viewer = await render(sdfFile, container);
+        if (viewer) viewers.push(viewer);
+      }
+      
+      console.log(`✅ Successfully loaded ${viewers.length} 3D molecular viewers for ${objectName}`);
+      viewers.forEach(viewer => { viewer.resize(); viewer.render(); });
     }
-
-    console.log(`✅ Successfully loaded ${viewers.length} 3D molecular viewers`);
-    viewers.forEach(viewer => { viewer.resize(); viewer.render(); });
+    
+    // Add the complete column to the main container
+    gldiv.appendChild(objectColumn);
   }
 
   async function render(sdfFile, container) {

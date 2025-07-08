@@ -91,7 +91,15 @@ function sdf(s, overwrite) {
 async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64 = null) {
   const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
   
-  let text = `Identify: ${object}. List as many relevant chemical structures as SMILES strings. Consider the specific material, compound, or substance shown.`;
+  let text = `Identify: ${object}. List relevant chemical structures as VALID SMILES strings only. 
+
+IMPORTANT: Return only valid SMILES notation (e.g., CCO for ethanol, C1=CC=CC=C1 for benzene). 
+Do NOT return molecular formulas (like C6H10O5, CaCO3, SiO2). 
+Do NOT return complex mineral formulas (like Mg3Si4O10(OH)2).
+If the material contains inorganic compounds that cannot be represented in SMILES, focus on organic components only.
+Each string must be parseable by RDKit/OpenBabel.
+
+Consider the specific material, compound, or substance shown.`;
   
   let content = [{ text: text, type: "input_text" }];
   
@@ -99,7 +107,16 @@ async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64
   if (imageBase64) {
     console.log(`🖼️  Using image context for enhanced SMILES analysis`);
     content.push({ detail: "high", type: "input_image", image_url: `data:image/jpeg;base64,${imageBase64}` });
-    text = `Analyze the object "${object}" in this image. List relevant chemical structures as SMILES strings. Use visual details to be more specific about materials, compounds, or substances shown.`;
+    text = `Analyze the object "${object}" in this image. List relevant chemical structures as VALID SMILES strings only. 
+
+CRITICAL: Only return valid SMILES notation that can be parsed by chemical software:
+- Use proper SMILES syntax (e.g., CCO, C1=CC=CC=C1, CC(=O)O)
+- Do NOT use molecular formulas (C6H10O5, CaCO3, SiO2) 
+- Do NOT use mineral formulas (Mg3Si4O10(OH)2)
+- Focus on organic compounds that can be represented in SMILES
+- If mainly inorganic, return fewer but valid organic components
+
+Use visual details to be more specific about materials, compounds, or substances shown.`;
     content[0].text = text;
   }
   
