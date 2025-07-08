@@ -687,12 +687,12 @@ body {
   transform: translateY(0);
 }
 
-.lens-icon, .upload-text {
+.photo-icon, .upload-text {
   color: rgba(255, 255, 255, 0.9);
   transition: color 0.2s ease;
 }
 
-.upload-label:hover .lens-icon,
+.upload-label:hover .photo-icon,
 .upload-label:hover .upload-text {
   color: #ffffff;
 }
@@ -767,7 +767,7 @@ body {
     padding: 10px 12px;
   }
   
-  .lens-icon {
+  .photo-icon {
     width: 20px;
     height: 20px;
   }
