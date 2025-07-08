@@ -3,19 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const { TEST_CONFIG, TEST_ENDPOINTS, TEST_FIXTURES } = require('./config');
 
-// ==================== TEST UTILITIES ====================
-
-/**
- * Sleep utility for tests
- * @param {number} ms - milliseconds to sleep
- */
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/**
- * Generate random test data
- */
 function generateTestData() {
   return {
     randomSmiles: () => {
@@ -38,9 +29,6 @@ function generateTestData() {
   };
 }
 
-/**
- * Mock HTTP client for testing
- */
 class MockHttpClient {
   constructor(baseUrl = TEST_ENDPOINTS.base) {
     this.baseUrl = baseUrl;
@@ -48,23 +36,19 @@ class MockHttpClient {
     this.requests = [];
   }
   
-  // Mock a response for a specific endpoint
   mockResponse(endpoint, response, status = 200) {
     this.responses.set(endpoint, { response, status });
   }
   
-  // Clear all mocked responses
   clearMocks() {
     this.responses.clear();
     this.requests = [];
   }
   
-  // Get request history
   getRequests() {
     return [...this.requests];
   }
   
-  // Mock fetch implementation
   async fetch(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     const request = {
@@ -78,7 +62,6 @@ class MockHttpClient {
     
     this.requests.push(request);
     
-    // Check if we have a mocked response
     if (this.responses.has(endpoint)) {
       const mock = this.responses.get(endpoint);
       await sleep(TEST_CONFIG.mock.openai.delay);
@@ -91,23 +74,17 @@ class MockHttpClient {
       };
     }
     
-    // If no mock, throw error
     throw new Error(`No mock response configured for ${endpoint}`);
   }
 }
 
-/**
- * Test file manager
- */
 class TestFileManager {
   constructor() {
     this.tempFiles = [];
     this.testDir = TEST_CONFIG.directories.temp;
   }
   
-  // Create a temporary test file
   createTempFile(filename, content) {
-    // Ensure test directory exists
     if (!fs.existsSync(this.testDir)) {
       fs.mkdirSync(this.testDir, { recursive: true });
     }
@@ -118,7 +95,6 @@ class TestFileManager {
     return filepath;
   }
   
-  // Create a test SDF file
   createTestSdf(smiles, filename) {
     const sdfContent = `
   Mrv2114 12152024
@@ -137,7 +113,6 @@ $$$$
     return this.createTempFile(filename || `${smiles.replace(/[^a-zA-Z0-9]/g, '_')}.sdf`, sdfContent);
   }
   
-  // Create a test image file
   createTestImage(imageData, filename) {
     const buffer = Buffer.from(imageData, 'base64');
     const filepath = path.join(this.testDir, filename);
@@ -146,7 +121,6 @@ $$$$
     return filepath;
   }
   
-  // Clean up all temporary files
   cleanup() {
     this.tempFiles.forEach(filepath => {
       if (fs.existsSync(filepath)) {
@@ -157,22 +131,16 @@ $$$$
   }
 }
 
-/**
- * Test assertion utilities
- */
 class TestAssertions {
   static isValidSmiles(smiles) {
-    // Basic SMILES validation
     if (typeof smiles !== 'string' || smiles.length === 0) {
       return false;
     }
     
-    // SMILES should not contain spaces or certain invalid strings
     if (smiles.includes(' ') || smiles === 'invalid') {
       return false;
     }
     
-    // Basic SMILES character validation
     return /^[A-Za-z0-9\[\]()=#+\-\.@:\/\\%]+$/.test(smiles);
   }
   
@@ -201,16 +169,12 @@ class TestAssertions {
     const { smiles } = response.output;
     const expectedSmiles = fixture.smiles;
     
-    // Check if response contains expected SMILES
     return expectedSmiles.some(expected => 
       smiles.includes(expected)
     );
   }
 }
 
-/**
- * Test data builder
- */
 class TestDataBuilder {
   constructor() {
     this.data = {};
@@ -252,9 +216,6 @@ class TestDataBuilder {
   }
 }
 
-/**
- * Test server utilities
- */
 class TestServerUtils {
   static async waitForServer(port, timeout = 5000) {
     const start = Date.now();
@@ -296,9 +257,6 @@ class TestServerUtils {
   }
 }
 
-/**
- * Test reporter
- */
 class TestReporter {
   constructor() {
     this.results = [];
@@ -339,7 +297,6 @@ class TestReporter {
   }
 }
 
-// ==================== EXPORTS ====================
 module.exports = {
   sleep,
   generateTestData,

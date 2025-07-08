@@ -1,16 +1,12 @@
-// test/config.js - Test configuration and environment setup
 const path = require('path');
 
-// Test environment configuration
 const TEST_CONFIG = {
-  // Server configuration
   server: {
     port: process.env.TEST_PORT || 3333,
     host: 'localhost',
     timeout: 30000
   },
   
-  // Test data directories
   directories: {
     sdf: path.join(__dirname, '../test_sdf_files'),
     fixtures: path.join(__dirname, 'fixtures'),
@@ -18,10 +14,9 @@ const TEST_CONFIG = {
     temp: path.join(__dirname, 'temp')
   },
   
-  // Mock API configuration
   mock: {
     openai: {
-      delay: 100, // ms delay to simulate API calls
+      delay: 100,
       enable: true,
       responses: {
         timeout: 5000,
@@ -30,13 +25,11 @@ const TEST_CONFIG = {
     }
   },
   
-  // Test databases/storage
   storage: {
-    type: 'memory', // or 'file' for persistent testing
+    type: 'memory',
     resetBetweenTests: true
   },
   
-  // Test coverage and reporting
   coverage: {
     enabled: process.env.NODE_ENV === 'test',
     threshold: {
@@ -47,7 +40,6 @@ const TEST_CONFIG = {
     }
   },
   
-  // Test logging
   logging: {
     level: process.env.TEST_LOG_LEVEL || 'info',
     file: path.join(__dirname, '../test.log'),
@@ -55,7 +47,6 @@ const TEST_CONFIG = {
   }
 };
 
-// Test database configuration (if needed)
 const TEST_DB_CONFIG = {
   host: process.env.TEST_DB_HOST || 'localhost',
   port: process.env.TEST_DB_PORT || 5432,
@@ -64,7 +55,6 @@ const TEST_DB_CONFIG = {
   password: process.env.TEST_DB_PASS || 'test_pass'
 };
 
-// Test API endpoints
 const TEST_ENDPOINTS = {
   base: `http://localhost:${TEST_CONFIG.server.port}`,
   test: {
@@ -82,14 +72,13 @@ const TEST_ENDPOINTS = {
   }
 };
 
-// Test fixtures configuration
 const TEST_FIXTURES = {
   molecules: {
     simple: ['O', 'CCO', 'C'],
     complex: [
-      'CN1C=NC2=C1C(=O)N(C(=O)N2C)C', // caffeine
-      'CC(=O)OC1=CC=CC=C1C(=O)O', // aspirin
-      'C1=CC=C(C=C1)C2=CC=C(C=C2)C3=CC=C(C=C3)C4=CC=C(C=C4)C5=CC=C(C=C5)C6=CC=C(C=C6)C' // complex polymer
+      'CN1C=NC2=C1C(=O)N(C(=O)N2C)C',
+      'CC(=O)OC1=CC=CC=C1C(=O)O',
+      'C1=CC=C(C=C1)C2=CC=C(C=C2)C3=CC=C(C=C3)C4=CC=C(C=C4)C5=CC=C(C=C5)C6=CC=C(C=C6)C'
     ]
   },
   objects: {
@@ -98,21 +87,17 @@ const TEST_FIXTURES = {
   },
   images: {
     base64: {
-      // Small test images as base64
       blackSquare: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
       whiteSquare: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
     }
   }
 };
 
-// Helper function to get test URL
 function getTestUrl(endpoint) {
   return `${TEST_ENDPOINTS.base}${endpoint}`;
 }
 
-// Helper function to setup test environment
 function setupTestEnvironment() {
-  // Create test directories if they don't exist
   const fs = require('fs');
   
   Object.values(TEST_CONFIG.directories).forEach(dir => {
@@ -121,25 +106,21 @@ function setupTestEnvironment() {
     }
   });
   
-  // Set test environment variables
   process.env.NODE_ENV = 'test';
   process.env.TEST_PORT = TEST_CONFIG.server.port;
   
   return true;
 }
 
-// Helper function to cleanup test environment
 function cleanupTestEnvironment() {
   const fs = require('fs');
   
-  // Clear temp directory
   const tempDir = TEST_CONFIG.directories.temp;
   if (fs.existsSync(tempDir)) {
     fs.rmSync(tempDir, { recursive: true });
     fs.mkdirSync(tempDir, { recursive: true });
   }
   
-  // Clear test SDF directory if configured to reset
   if (TEST_CONFIG.storage.resetBetweenTests) {
     const sdfDir = TEST_CONFIG.directories.sdf;
     if (fs.existsSync(sdfDir)) {

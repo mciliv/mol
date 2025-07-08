@@ -1,7 +1,5 @@
-// server.js (with dynamic LAN IP detection for HTTPS)
 process.env.NODE_ENV ||= 'development';
 
-// Load environment variables
 if (process.env.NODE_ENV !== 'production') {
   try {
     require('dotenv').config();
@@ -10,7 +8,6 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-// ==================== IMPORTS ====================
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
@@ -27,16 +24,13 @@ const {
   ListMoleculesTextRequestSchema,
 } = require("./schemas");
 
-// ==================== CONFIGURATION ====================
 const app = express();
-const PORT = process.env.PORT || 8080;  // Cloud Functions default, was 3000
-const HTTPS_PORT = process.env.HTTPS_PORT || 3001;  // Configurable HTTPS port
+const PORT = process.env.PORT || 8080;
+const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
 const SDF_DIR = path.join(__dirname, "sdf_files");
 
-// Ensure SDF directory exists
 if (!fs.existsSync(SDF_DIR)) fs.mkdirSync(SDF_DIR, { recursive: true });
 
-// ==================== UTILITY FUNCTIONS ====================
 function getLocalIPAddress() {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
@@ -80,7 +74,6 @@ function generateSelfSignedCert(ip) {
   }
 }
 
-// ==================== AI/CHEMICAL ANALYSIS FUNCTIONS ====================
 function sdf(s, overwrite) {
   let command = "python";
   let args = ["sdf.py", s, "--dir", SDF_DIR];
@@ -95,7 +88,6 @@ async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64
   
   let content = [{ text: text, type: "input_text" }];
   
-  // Add images if provided for better context
   if (imageBase64) {
     console.log(`🖼️  Using image context for enhanced SMILES analysis`);
     content.push({ detail: "high", type: "input_image", image_url: `data:image/jpeg;base64,${imageBase64}` });
@@ -114,7 +106,6 @@ async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64
     text: { format: zodTextFormat(TextMoleculeSchema, "text_molecule_schema") },
   });
   
-  // Handle cases where OpenAI returns null or no smiles
   if (!parsed.output_parsed || !parsed.output_parsed.smiles) {
     console.log("⚠️ No SMILES found in OpenAI response");
     return [];
@@ -128,7 +119,6 @@ async function identifyObjectFromImage(imageBase64, croppedImageBase64, x, y) {
   
   const identificationText = `You are a chemical analysis expert. The user clicked at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in this image. Identify the specific substance, material, or chemical compound at that location. Be as chemically specific as possible - consider molecular composition, material type, active ingredients, or chemical structure when naming the object.`;
 
-  // Save images for debugging
   fs.writeFileSync("image.jpg", imageBase64, "base64");
   fs.writeFileSync("cropped_image.jpg", croppedImageBase64, "base64");
 
@@ -150,7 +140,6 @@ async function identifyObjectFromImage(imageBase64, croppedImageBase64, x, y) {
   return objectIdentification.output_parsed.object;
 }
 
-// ==================== DEVELOPMENT MIDDLEWARE ====================
 if (process.env.NODE_ENV === "development") {
   const livereload = require("livereload");
   const connectLivereload = require("connect-livereload");
@@ -174,7 +163,6 @@ if (process.env.NODE_ENV === "development") {
   }
 }
 
-// ==================== MIDDLEWARE SETUP ====================
 app.use((req, res, next) => {
   console.log(`Incoming request: ${req.method} ${req.url}`);
   next();
@@ -186,13 +174,10 @@ app.use(express.static(__dirname));
 app.use("/sdf_files", express.static(SDF_DIR));
 app.use("/favicon.ico", express.static(path.join(__dirname, "favicon.ico")));
 
-// ==================== ROUTES ====================
-// Static routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Image analysis route
 app.post("/image-molecules", async (req, res) => {
   const { imageBase64, croppedImageBase64, x, y } = req.body;
 
@@ -201,11 +186,9 @@ app.post("/image-molecules", async (req, res) => {
   }
 
   try {
-    // Step 1: Identify the object from the image
     const identifiedObject = await identifyObjectFromImage(imageBase64, croppedImageBase64, x, y);
     console.log(`🔍 Identified object: ${identifiedObject}`);
 
-    // Step 2: Get SMILES for the identified object (with image context)
     console.log(`🧪 Analyzing ${identifiedObject} for chemical structures...`);
     const smiles = await getSmilesForObject(identifiedObject, imageBase64, croppedImageBase64);
 
@@ -227,7 +210,6 @@ app.post("/image-molecules", async (req, res) => {
   }
 });
 
-// Text analysis route
 app.post("/object-molecules", async (req, res) => {
   try {
     const validatedData = ListMoleculesTextRequestSchema.parse(req.body);
@@ -246,7 +228,6 @@ app.post("/object-molecules", async (req, res) => {
   }
 });
 
-// SDF generation route (latest version with proper mapping)
 app.post('/generate-sdfs', async (req, res) => {
   const { smiles, overwrite = false } = req.body;
 
@@ -254,7 +235,6 @@ app.post('/generate-sdfs', async (req, res) => {
     return res.status(400).json({ error: "smiles array is required" });
   }
 
-  // Ensure SDF directory exists
   if (!fs.existsSync(SDF_DIR)) {
     fs.mkdirSync(SDF_DIR, { recursive: true });
   }
@@ -262,7 +242,6 @@ app.post('/generate-sdfs', async (req, res) => {
   const sdfPaths = [];
   const errors = [];
 
-  // Filter out invalid SMILES and process each one
   const validSmiles = smiles.filter(s => s && typeof s === 'string' && s.trim());
 
   const sdfPromises = validSmiles.map(s => {
@@ -303,7 +282,6 @@ app.post('/generate-sdfs', async (req, res) => {
 
   if (errors.length > 0) {
     console.error(`SDF generation errors: ${errors.join(', ')}`);
-    // Return partial success with successful paths and error info
     return res.json({ 
       sdfPaths: sdfPaths.filter(p => p), 
       errors,
@@ -314,8 +292,6 @@ app.post('/generate-sdfs', async (req, res) => {
   res.json({ message: "Files generated", sdfPaths });
 });
 
-// ==================== SERVER STARTUP ====================
-// Only start servers in local development (NOT in Cloud Functions, Vercel, or tests)
 const isCloudFunction = process.env.FUNCTION_NAME || process.env.FUNCTION_TARGET || process.env.K_SERVICE || process.env.GOOGLE_CLOUD_PROJECT;
 const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
 const isNetlify = process.env.NETLIFY;
@@ -324,14 +300,12 @@ const isTestMode = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID
 const isServerless = isCloudFunction || isVercel || isNetlify || isRailway;
 
 if (!isServerless && !isTestMode) {
-  // Local development mode
   const localIP = getLocalIPAddress();
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Local server running on http://0.0.0.0:${PORT}`);
   });
 
-  // Start HTTPS server only in local development
   if (process.env.NODE_ENV !== 'production') {
     const credentials = generateSelfSignedCert(localIP);
     if (credentials) {
@@ -344,7 +318,6 @@ if (!isServerless && !isTestMode) {
     }
   }
 } else {
-  // Serverless mode - server handled by platform
   if (isCloudFunction) {
     console.log(`☁️ Running in Cloud Functions mode - server handled by platform`);
   } else if (isVercel) {
@@ -355,12 +328,10 @@ if (!isServerless && !isTestMode) {
     console.log(`🚂 Running in Railway mode - server handled by platform`);
   }
   
-  // Check for required environment variables in production
   if (process.env.NODE_ENV === 'production' && !process.env.OPENAI_API_KEY) {
     console.error('❌ OPENAI_API_KEY environment variable is required for production');
     process.exit(1);
   }
 }
 
-// Always export the app for Cloud Functions
 module.exports = app;

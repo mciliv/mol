@@ -13,7 +13,6 @@ logging.basicConfig(
 )
 
 def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
-    """Generates an SDF file from a SMILES string."""
     destination = Path(directory_path) / f"{smiles}.sdf"
 
     if not overwrite and destination.exists():
@@ -43,7 +42,6 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
         return ""
 
 def debug():
-    """Debugging function to attach a debugger."""
     if os.getenv("PY_DEBUG") == "1":
         try:
             import debugpy

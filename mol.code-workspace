@@ -1,18 +1,18 @@
 {
   "folders": [
     {
-      "path": ".",
+      "path": "."
     },
     {
-      "path": "../util",
+      "path": "../util"
     },
     {
-      "path": "../googl",
-    },
+      "path": "../googl"
+    }
   ],
   "settings": {},
   "launch": {
     "version": "0.2.0",
-    "configurations": [],
-  },
+    "configurations": []
+  }
 }
