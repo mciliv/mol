@@ -641,3 +641,86 @@ body {
 #gldiv::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
 }
+
+/* Photo upload option */
+.upload-option {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+}
+
+.upload-option input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.upload-label:hover {
+  background: rgba(0, 0, 0, 0.85);
+  transform: translateY(-1px);
+}
+
+.upload-label:active {
+  transform: translateY(0);
+}
+
+.lens-icon, .upload-text {
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.2s ease;
+}
+
+.upload-label:hover .lens-icon,
+.upload-label:hover .upload-text {
+  color: #ffffff;
+}
+
+.upload-label:focus-within {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Mobile optimizations for upload */
+@media (max-width: 768px) {
+  .upload-option {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .upload-label {
+    padding: 10px 12px;
+  }
+  
+  .lens-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .upload-text {
+    width: 70px;
+    height: 18px;
+  }
+  
+  .upload-text text {
+    font-size: 10px;
+  }
+}
