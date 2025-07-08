@@ -50,44 +50,54 @@ body {
   font-style: italic;
 }
 
-/* Camera section with collapsible header */
-.camera-section {
+/* Input mode section */
+.input-mode-section {
   background: #000;
 }
 
-.camera-header {
+/* Mode selector with radio buttons */
+.mode-selector {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 0;
   padding: 12px 20px;
   background: rgba(0, 0, 0, 0.9);
+}
+
+.mode-selector input[type="radio"] {
+  display: none;
+}
+
+.mode-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
   cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  border-radius: 6px;
   user-select: none;
-  transition: background 0.2s ease;
 }
 
-.camera-header:hover {
-  background: rgba(255, 255, 255, 0.1);
+.mode-label:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.camera-icon, .arrow-icon {
-  color: #ffffff;
+.mode-label span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mode-label svg {
   flex-shrink: 0;
 }
 
-.camera-header span {
+/* Selected state */
+input[type="radio"]:checked + .mode-label {
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
-  flex: 1;
-}
-
-.arrow-icon {
-  transition: transform 0.3s ease;
-}
-
-.camera-section.collapsed .arrow-icon {
-  transform: rotate(180deg);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Camera container */
@@ -100,15 +110,18 @@ body {
   justify-content: center;
   cursor: crosshair;
   min-height: 60vh;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
-.camera-section.collapsed .camera-container {
-  max-height: 0;
-  opacity: 0;
-  min-height: 0;
+/* Photo options container */
+.photo-options {
+  padding: 40px 20px;
+  background: #000;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #video-feed {
@@ -353,59 +366,72 @@ body {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
-  .top-bar {
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
+  .mode-selector {
+    padding: 10px 15px;
   }
   
-  .text-input {
-    width: 250px;
+  .mode-label {
+    padding: 6px 12px;
   }
   
-  .snapshots-container {
-    padding: 15px;
-    max-height: 35vh;
+  .mode-label span {
+    font-size: 13px;
   }
   
-  .snapshot {
-    width: 180px;
-  }
-  
-  /* Mobile video optimizations */
   .camera-container {
     min-height: 50vh;
     max-height: 70vh;
   }
   
-  #video-feed {
-    /* Prevent video zoom on iOS */
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    /* Force hardware acceleration */
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+  .photo-options {
+    padding: 30px 15px;
+    min-height: 50vh;
   }
   
-  .crosshair {
-    /* Make crosshair more visible on mobile */
-    width: 30px;
-    height: 30px;
-    border-width: 3px;
+  .upload-option {
+    max-width: 280px;
   }
   
-  .instruction-text {
-    font-size: 16px;
-    padding: 12px 24px;
-    bottom: 30px;
+  .upload-label {
+    padding: 10px 12px;
   }
   
-  .switch-camera-btn {
-    width: 180px;
-    height: 44px;
-    font-size: 14px;
-    bottom: 15px;
+  .photo-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .upload-text {
+    width: 70px;
+    height: 18px;
+  }
+  
+  .upload-text text {
+    font-size: 10px;
+  }
+  
+  .url-input-container {
+    padding: 6px;
+    gap: 3px;
+  }
+  
+  #photo-url {
+    min-width: 100px;
+    font-size: 10px;
+    padding: 5px 6px;
+  }
+  
+  .url-button {
+    padding: 5px 6px;
+  }
+  
+  .url-text {
+    width: 40px;
+    height: 14px;
+  }
+  
+  .url-text text {
+    font-size: 9px;
   }
 }
 
@@ -578,13 +604,11 @@ body {
 
 /* Photo upload option */
 .upload-option {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 100;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-width: 300px;
+  width: 100%;
 }
 
 .upload-option input[type="file"] {
@@ -689,53 +713,4 @@ body {
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* Mobile optimizations for upload */
-@media (max-width: 768px) {
-  .upload-option {
-    top: 15px;
-    right: 15px;
-    gap: 6px;
-  }
-  
-  .upload-label {
-    padding: 10px 12px;
-  }
-  
-  .photo-icon {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .upload-text {
-    width: 70px;
-    height: 18px;
-  }
-  
-  .upload-text text {
-    font-size: 10px;
-  }
-  
-  .url-input-container {
-    padding: 6px;
-    gap: 3px;
-  }
-  
-  #photo-url {
-    min-width: 100px;
-    font-size: 10px;
-    padding: 5px 6px;
-  }
-  
-  .url-button {
-    padding: 5px 6px;
-  }
-  
-  .url-text {
-    width: 40px;
-    height: 14px;
-  }
-  
-  .url-text text {
-    font-size: 9px;
-  }
-}
+

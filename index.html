@@ -18,26 +18,44 @@
         />
       </div>
 
-      <!-- Camera with collapsible header -->
-      <div class="camera-section">
-        <div class="camera-header" id="camera-header">
-          <svg class="camera-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5" fill="currentColor" opacity="0.8"/>
-            <circle cx="12" cy="12" r="9" stroke="currentColor" fill="none"/>
-          </svg>
-          <span>Camera</span>
-          <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="18 15 12 9 6 15"/>
-          </svg>
+      <!-- Input mode selection -->
+      <div class="input-mode-section">
+        <div class="mode-selector">
+          <input type="radio" id="camera-mode" name="input-mode" value="camera" checked>
+          <label for="camera-mode" class="mode-label">
+            <svg class="camera-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5" fill="currentColor" opacity="0.8"/>
+              <circle cx="12" cy="12" r="9" stroke="currentColor" fill="none"/>
+            </svg>
+            <span>Camera</span>
+          </label>
+          
+          <input type="radio" id="photo-mode" name="input-mode" value="photo">
+          <label for="photo-mode" class="mode-label">
+            <svg class="photo-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21,15 16,10 5,21"/>
+            </svg>
+            <span>Photo</span>
+          </label>
         </div>
         
+        <!-- Camera section -->
         <div class="camera-container" id="camera-container">
           <video id="video-feed" autoplay playsinline muted width="100%"></video>
           <div class="permission-message" hidden></div>
           <div class="crosshair"></div>
           <div class="instruction-text">Click on image parts or type descriptions above</div>
           
-          <!-- Photo upload and URL options -->
+          <!-- Switch camera button (hidden until multiple cameras detected) -->
+          <button class="switch-camera-btn" id="switch-camera-btn" style="display: none;">
+            🔄 Switch Camera
+          </button>
+        </div>
+        
+        <!-- Photo upload options -->
+        <div class="photo-options" id="photo-options" style="display: none;">
           <div class="upload-option">
             <input type="file" id="photo-upload" accept="image/*" aria-label="Upload photo for molecular analysis">
             <label for="photo-upload" class="upload-label">
@@ -64,11 +82,6 @@
               </button>
             </div>
           </div>
-          
-          <!-- Switch camera button (hidden until multiple cameras detected) -->
-          <button class="switch-camera-btn" id="switch-camera-btn" style="display: none;">
-            🔄 Switch Camera
-          </button>
         </div>
       </div>
 
