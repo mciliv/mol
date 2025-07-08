@@ -38,10 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!object) return;
 
     // Show loading state
-    const loadingMsg = document.createElement("p");
-    loadingMsg.textContent = `🔍 Analyzing "${object}"...`;
-    loadingMsg.style.fontStyle = "italic";
-    loadingMsg.style.opacity = "0.7";
+    const loadingMsg = createLoadingMessage(`🔍 Analyzing "${object}"...`);
     snapshots.appendChild(loadingMsg);
 
     try {
@@ -57,14 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const { output } = await res.json();
 
       // Enhanced result display
-      const smilesCount = output.smiles ? output.smiles.length : 0;
-      const result = document.createElement("p");
-      result.textContent = `📝 "${object}" → ${smilesCount} molecule${smilesCount !== 1 ? 's' : ''} found`;
-      snapshots.appendChild(result);
-
-      if (output.smiles && output.smiles.length > 0) {
-        generateSDFs(output.smiles, object);
-      }
+      processAnalysisResult(output, snapshots, "📝", object, true);
     } catch (err) {
       loadingMsg.remove();
       
@@ -88,10 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Show loading state
-    const loadingMsg = document.createElement("p");
-    loadingMsg.textContent = `🔍 Analyzing uploaded photo...`;
-    loadingMsg.style.fontStyle = "italic";
-    loadingMsg.style.opacity = "0.7";
+    const loadingMsg = createLoadingMessage(`🔍 Analyzing uploaded photo...`);
     snapshots.appendChild(loadingMsg);
 
     try {
@@ -121,15 +108,10 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Display result
       const objectName = output.object || "Uploaded image";
-      const smilesCount = output.smiles ? output.smiles.length : 0;
-      
-      const result = document.createElement("p");
-      result.textContent = `📁 ${objectName} → ${smilesCount} molecule${smilesCount !== 1 ? 's' : ''} found`;
-      snapshots.appendChild(result);
+      processAnalysisResult(output, snapshots, "📁", objectName);
 
-      if (output.smiles && output.smiles.length > 0) {
-        generateSDFs(output.smiles, objectName);
-      }
+      // Clear URL input
+      photoUrl.value = '';
 
     } catch (err) {
       loadingMsg.remove();
@@ -148,10 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function analyzeImageFromUrl(url) {
     try {
       // Show loading state
-      const loadingMsg = document.createElement("p");
-      loadingMsg.textContent = `🔍 Analyzing image from URL...`;
-      loadingMsg.style.fontStyle = "italic";
-      loadingMsg.style.opacity = "0.7";
+      const loadingMsg = createLoadingMessage(`🔍 Analyzing image from URL...`);
       snapshots.appendChild(loadingMsg);
 
       // Fetch and convert image to base64
@@ -180,15 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Display result
       const objectName = output.object || "Image from URL";
-      const smilesCount = output.smiles ? output.smiles.length : 0;
-      
-      const result = document.createElement("p");
-      result.textContent = `🔗 ${objectName} → ${smilesCount} molecule${smilesCount !== 1 ? 's' : ''} found`;
-      snapshots.appendChild(result);
-
-      if (output.smiles && output.smiles.length > 0) {
-        generateSDFs(output.smiles, objectName);
-      }
+      processAnalysisResult(output, snapshots, "🔗", objectName);
 
       // Clear URL input
       photoUrl.value = '';
@@ -277,6 +248,38 @@ document.addEventListener("DOMContentLoaded", () => {
       
       img.src = url;
     });
+  }
+
+  /* ---------- Helper Functions ---------- */
+  
+  // Create loading message element
+  function createLoadingMessage(text) {
+    const loadingMsg = document.createElement("p");
+    loadingMsg.textContent = text;
+    loadingMsg.style.fontStyle = "italic";
+    loadingMsg.style.opacity = "0.7";
+    return loadingMsg;
+  }
+  
+  // Generate result message for molecular analysis
+  function createResultMessage(icon, objectName, smilesCount, useQuotes = false) {
+    const name = useQuotes ? `"${objectName}"` : objectName;
+    const plural = smilesCount !== 1 ? 's' : '';
+    return `${icon} ${name} → ${smilesCount} molecule${plural} found`;
+  }
+
+  // Handle result processing for all analysis types
+  function processAnalysisResult(output, container, icon, objectName, useQuotes = false) {
+    const smilesCount = output.smiles ? output.smiles.length : 0;
+    const result = document.createElement("p");
+    result.textContent = createResultMessage(icon, objectName, smilesCount, useQuotes);
+    container.appendChild(result);
+
+    if (output.smiles && output.smiles.length > 0) {
+      generateSDFs(output.smiles, objectName);
+    }
+    
+    return result;
   }
 
   /* ---------- Camera setup ---------- */
@@ -405,10 +408,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .drawImage(canvas, actualX - 50, actualY - 50, 100, 100, 0, 0, 100, 100);
     const croppedBase64 = crop.toDataURL("image/jpeg", 0.9).split(",")[1];
 
-    // Simple snapshot display
-    const snapshot = document.createElement("p");
-    snapshot.textContent = "🔍 Analyzing...";
-    snapshots.appendChild(snapshot);
+    // Show loading state
+    const loadingMsg = createLoadingMessage("🔍 Analyzing...");
+    snapshots.appendChild(loadingMsg);
 
     try {
       const res = await fetch("/image-molecules", {
@@ -422,32 +424,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }),
       });
 
+      loadingMsg.remove();
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const { output } = await res.json();
       
-      // Simple image result display
+      // Display result using consistent method
       const objectName = output.object || "Unknown object";
-      const smilesCount = output.smiles ? output.smiles.length : 0;
-      
-      snapshot.textContent = `🔍 ${objectName} → ${smilesCount} structure${smilesCount !== 1 ? 's' : ''} found`;
-
-      if (output.smiles && output.smiles.length > 0) {
-        // Add new object column to the right of existing ones
-        generateSDFs(output.smiles, objectName);
-      }
+      processAnalysisResult(output, snapshots, "🔍", objectName);
 
     } catch (err) {
-      snapshot.textContent = `⚠ Error: ${err.message}`;
-      snapshot.style.color = "red";
+      loadingMsg.remove();
+      
+      const errorMsg = document.createElement("p");
+      errorMsg.textContent = `⚠ Error: ${err.message}`;
+      errorMsg.style.color = "red";
+      snapshots.appendChild(errorMsg);
     }
-
-    // Auto-remove feedback after delay
-    setTimeout(() => {
-      if (snapshot.parentElement) {
-        snapshot.style.opacity = "0.3";
-      }
-    }, 2000);
   }
 
   /* ---------- 3D Molecule Rendering ---------- */
