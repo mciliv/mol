@@ -6,23 +6,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const objectInput = document.getElementById("object-input");
   const appContainer = document.querySelector(".app-container");
   const instructionText = document.querySelector(".instruction-text");
-  const cameraHeader = document.getElementById("camera-header");
-  const cameraSection = document.querySelector(".camera-section");
+  const cameraMode = document.getElementById("camera-mode");
+  const photoMode = document.getElementById("photo-mode");
   const cameraContainer = document.querySelector(".camera-container");
+  const photoOptions = document.getElementById("photo-options");
   const photoUpload = document.getElementById("photo-upload");
   const photoUrl = document.getElementById("photo-url");
   const urlAnalyze = document.getElementById("url-analyze");
 
-  // Collapsible camera functionality
-  let cameraExpanded = true;
-  cameraHeader.addEventListener("click", () => {
-    cameraExpanded = !cameraExpanded;
-    if (cameraExpanded) {
-      cameraSection.classList.remove("collapsed");
+  // Mode switching functionality
+  function updateInputMode() {
+    if (cameraMode.checked) {
+      cameraContainer.style.display = "flex";
+      photoOptions.style.display = "none";
     } else {
-      cameraSection.classList.add("collapsed");
+      cameraContainer.style.display = "none";
+      photoOptions.style.display = "flex";
     }
-  });
+  }
+
+  cameraMode.addEventListener("change", updateInputMode);
+  photoMode.addEventListener("change", updateInputMode);
+  
+  // Initialize mode
+  updateInputMode();
   
   // Text input handling - always active
   objectInput.addEventListener("keyup", async (e) => {
@@ -366,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function handleInteraction(evt) {
-    if (!cameraExpanded) return;
+    if (!cameraMode.checked) return; // Only handle interaction if in camera mode
     
     // Hide instruction text on first click
     if (instructionText) {
