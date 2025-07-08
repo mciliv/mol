@@ -22,6 +22,10 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
 
     try:
         mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            logging.error(f"Invalid SMILES string: {smiles}")
+            return ""
+            
         mol.SetProp("SMILES", smiles)
         Chem.Kekulize(mol)
         mol = Chem.AddHs(mol)
@@ -41,9 +45,13 @@ def sdf(smiles: str, directory_path: str = ".", overwrite: bool = False) -> str:
 def debug():
     """Debugging function to attach a debugger."""
     if os.getenv("PY_DEBUG") == "1":
-        print("Waiting for debugger to attach...")
-        debugpy.listen(5678)
-        debugpy.wait_for_client()
+        try:
+            import debugpy
+            print("Waiting for debugger to attach...")
+            debugpy.listen(5678)
+            debugpy.wait_for_client()
+        except ImportError:
+            print("debugpy not installed, skipping debug attach")
 
 def main():
     parser = argparse.ArgumentParser(description="Generate an SDF file from a SMILES string.")

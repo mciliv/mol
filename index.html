@@ -2,20 +2,54 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Molecular Reality</title>
     <link rel="stylesheet" href="style.css" />
-    <script type="module" src="app.js"></script>
-    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
   </head>
   <body>
-    <div class="main-container">
-      <div class="camera-container">
-        <video id="video-feed" autoplay playsinline></video>
-        <div class="permission-message"></div>
+    <div class="app-container">
+      <!-- Full width top bar outside camera area -->
+      <div class="top-bar">
+        <div class="toggle-switch">
+          <input type="radio" id="image-mode" name="mode" value="image" checked />
+          <input type="radio" id="text-mode" name="mode" value="text" />
+          <div class="switch">
+            <label for="image-mode" class="switch-label">📷 Image</label>
+            <label for="text-mode" class="switch-label">✏️ Text</label>
+            <div class="switch-indicator"></div>
+          </div>
+        </div>
+        
+        <input
+          id="object-input"
+          type="text"
+          placeholder="Type any object name and press Enter"
+          class="text-input"
+        />
       </div>
+
+      <!-- Camera takes available space -->
+      <div class="camera-container">
+        <video id="video-feed" autoplay playsinline muted width="100%"></video>
+        <div class="permission-message" hidden></div>
+        <div class="crosshair"></div>
+        <div class="instruction-text">Click anywhere on the image to analyze</div>
+        
+        <!-- Switch camera button (hidden until multiple cameras detected) -->
+        <button class="switch-camera-btn" id="switch-camera-btn" style="display: none;">
+          🔄 Switch Camera
+        </button>
+      </div>
+
       <div class="snapshots-container"></div>
+
+      <!-- 3Dmol.js viewers go here -->
       <div id="gldiv"></div>
     </div>
+
+
+
+    <script type="module" src="app.js"></script>
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
   </body>
 </html>

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@google-cloud/functions-framework": "^3.5.1",
     "child_process": "^1.0.2",
     "cors": "^2.8.5",
     "express": "^4.21.2",
@@ -12,7 +13,7 @@
   },
   "name": "mol",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "index.js",
   "directories": {
     "test": "tests"
   },
@@ -24,9 +25,23 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:debug": "node --inspect node_modules/.bin/jest --runInBand",
+    "test:unit": "jest --testPathPattern=test/",
+    "test:integration": "jest --testPathPattern=server.test.js",
+    "test:fixtures": "jest --testPathPattern=test/fixtures",
+    "test:full": "npm run test:unit && npm run test:integration",
     "pytest": "python -m pytest tests/ -v",
     "pytest:debug": "python -m debugpy --listen 5678 --wait-for-client -m pytest tests/ -v",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "ip": "ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1",
+    "mobile": "echo 'Access on mobile:' && echo 'HTTPS: https://'$(npm run ip --silent)':3001' && echo 'HTTP: http://'$(npm run ip --silent)':3000'",
+    "cert": "echo 'Generating fresh SSL certificates...' && rm -rf certs && node -e \"require('./server.js')\"",
+    "tunnel": "echo 'Install ngrok: npm install -g ngrok' && echo 'Then run: ngrok http 3000'",
+    "deploy:railway": "railway up",
+    "deploy:vercel": "vercel --prod",
+    "deploy:netlify": "netlify deploy --prod",
+    "deploy:gcp": "gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .",
+    "deploy:aws": "sam build && sam deploy --guided",
+    "build": "echo 'Build complete - static files ready'"
   },
   "repository": {
     "type": "git",
@@ -40,13 +55,22 @@
   },
   "homepage": "https://github.com/mciliv/mol#readme",
   "description": "",
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setup.js"
+    ]
+  },
   "devDependencies": {
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.26.9",
     "babel-jest": "^29.7.0",
+    "connect-livereload": "^0.6.1",
+    "dotenv": "^17.1.0",
     "jest": "^29.7.0",
     "jest-fetch-mock": "^3.0.3",
     "jsdom": "^26.1.0",
+    "livereload": "^0.9.3",
     "nodemon": "^3.1.10",
     "prettier": "^3.2.5"
   }
