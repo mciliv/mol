@@ -22,32 +22,38 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 15px 20px;
+  padding: 20px;
   background: rgba(0, 0, 0, 0.95);
   z-index: 1000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-
-
 .text-input {
-  padding: 12px 20px;
+  padding: 14px 20px;
   border: none;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.4;
   width: 100%;
   max-width: 600px;
   display: block;
   outline: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
 .text-input:focus {
   background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 .text-input::placeholder {
   color: rgba(0, 0, 0, 0.6);
-  font-style: italic;
+  font-style: normal;
+  font-weight: 400;
 }
 
 /* Input mode section */
@@ -60,8 +66,9 @@ body {
   display: flex;
   justify-content: center;
   gap: 0;
-  padding: 12px 20px;
-  background: rgba(0, 0, 0, 0.9);
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .mode-selector input[type="radio"] {
@@ -71,23 +78,27 @@ body {
 .mode-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 10px;
+  padding: 12px 20px;
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.6);
-  transition: all 0.2s ease;
-  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+  border-radius: 8px;
   user-select: none;
+  font-weight: 500;
+  border: 1px solid transparent;
 }
 
 .mode-label:hover {
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .mode-label span {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .mode-label svg {
@@ -97,7 +108,9 @@ body {
 /* Selected state */
 input[type="radio"]:checked + .mode-label {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Camera container */
@@ -116,7 +129,7 @@ input[type="radio"]:checked + .mode-label {
 
 /* Photo options container */
 .photo-options {
-  padding: 40px 20px;
+  padding: 48px 24px;
   background: #000;
   min-height: 60vh;
   display: flex;
@@ -175,16 +188,20 @@ input[type="radio"]:checked + .mode-label {
 /* Instruction text */
 .instruction-text {
   position: absolute;
-  bottom: 50px;
+  bottom: 60px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  padding: 10px 20px;
-  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 12px 20px;
+  border-radius: 24px;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
   pointer-events: none;
   z-index: 10;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.01em;
 }
 
 .permission-message {
@@ -222,17 +239,18 @@ input[type="radio"]:checked + .mode-label {
 
 /* Snapshots below camera */
 .snapshots-container {
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.85);
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.88);
   min-height: 120px;
   max-height: 40vh;
   overflow-y: auto;
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 16px;
   justify-content: center;
   position: relative;
   z-index: 1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Compact snapshots */
@@ -325,21 +343,24 @@ input[type="radio"]:checked + .mode-label {
 
 /* Text mode results */
 .snapshots-container p {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 14px 16px;
+  border-radius: 10px;
   margin: 0;
-  font-size: 12px;
-  color: #333;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #2c2c2e;
   word-wrap: break-word;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  width: 200px;
+  width: 220px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .snapshots-container p[style*="color: red"] {
-  background: rgba(255, 235, 238, 0.95);
-  border-left: 3px solid #ff4081;
+  background: rgba(255, 245, 247, 0.96);
+  border-color: rgba(255, 64, 129, 0.2);
+  color: #d63384;
 }
 
 /* Instruction text visibility */
@@ -366,16 +387,26 @@ input[type="radio"]:checked + .mode-label {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
+  .top-bar {
+    padding: 16px;
+  }
+  
+  .text-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px 16px;
+  }
+  
   .mode-selector {
-    padding: 10px 15px;
+    padding: 12px 16px;
   }
   
   .mode-label {
-    padding: 6px 12px;
+    padding: 10px 16px;
+    gap: 8px;
   }
   
   .mode-label span {
-    font-size: 13px;
+    font-size: 14px;
   }
   
   .camera-container {
@@ -383,17 +414,23 @@ input[type="radio"]:checked + .mode-label {
     max-height: 70vh;
   }
   
+  .instruction-text {
+    bottom: 40px;
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+  
   .photo-options {
-    padding: 30px 15px;
+    padding: 32px 16px;
     min-height: 50vh;
   }
   
   .upload-option {
-    max-width: 280px;
+    max-width: 300px;
   }
   
   .upload-label {
-    padding: 10px 12px;
+    padding: 16px 20px;
   }
   
   .photo-icon {
@@ -411,27 +448,38 @@ input[type="radio"]:checked + .mode-label {
   }
   
   .url-input-container {
-    padding: 6px;
-    gap: 3px;
+    padding: 8px;
+    gap: 6px;
   }
   
   #photo-url {
-    min-width: 100px;
-    font-size: 10px;
-    padding: 5px 6px;
+    min-width: 120px;
+    font-size: 14px;
+    padding: 8px 10px;
   }
   
   .url-button {
-    padding: 5px 6px;
+    padding: 8px 10px;
   }
   
   .url-text {
-    width: 40px;
+    width: 42px;
     height: 14px;
   }
   
   .url-text text {
     font-size: 9px;
+  }
+  
+  .snapshots-container {
+    padding: 20px 16px;
+    gap: 12px;
+  }
+  
+  .snapshots-container p {
+    width: 200px;
+    padding: 12px 14px;
+    font-size: 12px;
   }
 }
 
@@ -547,17 +595,45 @@ input[type="radio"]:checked + .mode-label {
 /* Object title */
 .object-title {
   color: #ffffff;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   text-align: center;
-  padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
   word-wrap: break-word;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   max-height: 80px;
   overflow-y: auto;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Molecule container with name and viewer */
+.molecule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Molecule name above each viewer */
+.molecule-name {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  padding: 10px 16px;
+  background: rgba(102, 126, 234, 0.15);
+  border-radius: 8px;
+  word-wrap: break-word;
   line-height: 1.3;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(102, 126, 234, 0.2);
 }
 
 /* Molecule viewers within an object column */
@@ -606,8 +682,8 @@ input[type="radio"]:checked + .mode-label {
 .upload-option {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-width: 300px;
+  gap: 12px;
+  max-width: 320px;
   width: 100%;
 }
 
@@ -627,18 +703,21 @@ input[type="radio"]:checked + .mode-label {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 8px;
+  gap: 8px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   user-select: none;
 }
 
 .upload-label:hover {
-  background: rgba(0, 0, 0, 0.85);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .upload-label:active {
@@ -647,12 +726,17 @@ input[type="radio"]:checked + .mode-label {
 
 .photo-icon, .upload-text {
   color: rgba(255, 255, 255, 0.9);
-  transition: color 0.2s ease;
+  transition: color 0.3s ease;
 }
 
 .upload-label:hover .photo-icon,
 .upload-label:hover .upload-text {
   color: #ffffff;
+}
+
+.upload-text text {
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .upload-label:focus-within {
@@ -663,30 +747,42 @@ input[type="radio"]:checked + .mode-label {
 /* URL input container */
 .url-input-container {
   display: flex;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 8px;
-  padding: 8px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 10px;
+  transition: all 0.3s ease;
 }
 
 .url-input-container:hover {
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.url-input-container:focus-within {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 #photo-url {
   flex: 1;
-  padding: 6px 8px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   color: white;
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 400;
   outline: none;
-  min-width: 120px;
+  min-width: 140px;
+  transition: background 0.2s ease;
 }
 
 #photo-url::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 400;
 }
 
 #photo-url:focus {
@@ -696,21 +792,28 @@ input[type="radio"]:checked + .mode-label {
 .url-button {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 6px 8px;
-  background: rgba(255, 255, 255, 0.1);
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .url-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
 .url-button svg {
   color: rgba(255, 255, 255, 0.9);
+}
+
+.url-text text {
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 
