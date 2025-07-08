@@ -529,11 +529,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const objectColumn = document.createElement("div");
     objectColumn.className = "object-column";
     
-    // Create and add title
-    const title = document.createElement("div");
-    title.className = "object-title";
-    title.textContent = objectName;
-    objectColumn.appendChild(title);
+    // Create title container with close button
+    const titleContainer = document.createElement("div");
+    titleContainer.className = "object-title";
+    
+    const titleText = document.createElement("span");
+    titleText.textContent = objectName;
+    titleContainer.appendChild(titleText);
+    
+    const closeButton = document.createElement("button");
+    closeButton.className = "column-close";
+    closeButton.textContent = "×";
+    closeButton.onclick = () => objectColumn.remove();
+    titleContainer.appendChild(closeButton);
+    
+    objectColumn.appendChild(titleContainer);
     
     if (errorMessage) {
       // Show error message
