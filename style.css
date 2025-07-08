@@ -129,9 +129,9 @@ input[type="radio"]:checked + .mode-label {
 
 /* Photo options container */
 .photo-options {
-  padding: 48px 24px;
+  padding: 60px 32px;
   background: #000;
-  min-height: 60vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -421,30 +421,31 @@ input[type="radio"]:checked + .mode-label {
   }
   
   .photo-options {
-    padding: 32px 16px;
-    min-height: 50vh;
+    padding: 40px 20px;
+    min-height: 60vh;
   }
   
   .upload-option {
-    max-width: 300px;
+    max-width: 360px;
   }
   
   .upload-label {
-    padding: 16px 20px;
+    padding: 24px 28px;
+    min-height: 120px;
   }
   
   .photo-icon {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
   }
   
   .upload-text {
-    width: 70px;
-    height: 18px;
+    width: 80px;
+    height: 20px;
   }
   
   .upload-text text {
-    font-size: 10px;
+    font-size: 11px;
   }
   
   .url-input-container {
@@ -721,8 +722,8 @@ input[type="radio"]:checked + .mode-label {
 .upload-option {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 320px;
+  gap: 16px;
+  max-width: 420px;
   width: 100%;
 }
 
@@ -742,14 +743,15 @@ input[type="radio"]:checked + .mode-label {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 20px 24px;
+  gap: 12px;
+  padding: 32px 36px;
   background: rgba(255, 255, 255, 0.08);
   border: 2px dashed rgba(255, 255, 255, 0.25);
-  border-radius: 12px;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   user-select: none;
+  min-height: 140px;
 }
 
 .upload-label:hover {
