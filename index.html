@@ -37,7 +37,7 @@
           <div class="crosshair"></div>
           <div class="instruction-text">Click on image parts or type descriptions above</div>
           
-          <!-- Photo upload option -->
+          <!-- Photo upload and URL options -->
           <div class="upload-option">
             <input type="file" id="photo-upload" accept="image/*" aria-label="Upload photo for molecular analysis">
             <label for="photo-upload" class="upload-label">
@@ -59,6 +59,19 @@
                 <text x="40" y="14" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="currentColor">Upload Photo</text>
               </svg>
             </label>
+            
+            <div class="url-input-container">
+              <input type="url" id="photo-url" placeholder="Paste image URL..." aria-label="Enter image URL for molecular analysis">
+              <button type="button" id="url-analyze" class="url-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"/>
+                </svg>
+                <svg class="url-text" width="50" height="16" viewBox="0 0 50 16">
+                  <text x="25" y="12" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="currentColor">Analyze</text>
+                </svg>
+              </button>
+            </div>
           </div>
           
           <!-- Switch camera button (hidden until multiple cameras detected) -->

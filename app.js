@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const cameraSection = document.querySelector(".camera-section");
   const cameraContainer = document.querySelector(".camera-container");
   const photoUpload = document.getElementById("photo-upload");
+  const photoUrl = document.getElementById("photo-url");
+  const urlAnalyze = document.getElementById("url-analyze");
 
   // Collapsible camera functionality
   let cameraExpanded = true;
@@ -135,6 +137,96 @@ document.addEventListener("DOMContentLoaded", () => {
     photoUpload.value = '';
   });
 
+  // Photo URL functionality
+  async function analyzeImageFromUrl(url) {
+    try {
+      // Show loading state
+      const loadingMsg = document.createElement("p");
+      loadingMsg.textContent = `🔍 Analyzing image from URL...`;
+      loadingMsg.style.fontStyle = "italic";
+      loadingMsg.style.opacity = "0.7";
+      snapshots.appendChild(loadingMsg);
+
+      // Fetch and convert image to base64
+      const imageBase64 = await urlToBase64(url);
+      
+      // Use center of image as click point
+      const mockClickX = 0.5;
+      const mockClickY = 0.5;
+
+      const res = await fetch("/image-molecules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64,
+          croppedImageBase64: imageBase64,
+          x: mockClickX,
+          y: mockClickY,
+        }),
+      });
+
+      loadingMsg.remove();
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const { output } = await res.json();
+      
+      // Display result
+      const objectName = output.object || "Image from URL";
+      const smilesCount = output.smiles ? output.smiles.length : 0;
+      
+      const result = document.createElement("p");
+      result.textContent = `🔗 ${objectName} → ${smilesCount} molecule${smilesCount !== 1 ? 's' : ''} found`;
+      snapshots.appendChild(result);
+
+      if (output.smiles && output.smiles.length > 0) {
+        generateSDFs(output.smiles, objectName);
+      }
+
+      // Clear URL input
+      photoUrl.value = '';
+
+    } catch (err) {
+      // Remove loading message if it exists
+      const loadingMsgs = snapshots.querySelectorAll('p');
+      loadingMsgs.forEach(msg => {
+        if (msg.textContent.includes('Analyzing image from URL')) {
+          msg.remove();
+        }
+      });
+      
+      const errorMsg = document.createElement("p");
+      errorMsg.textContent = `⚠ Error loading image from URL: ${err.message}`;
+      errorMsg.style.color = "red";
+      snapshots.appendChild(errorMsg);
+    }
+  }
+
+  // URL input event listeners
+  urlAnalyze.addEventListener("click", () => {
+    const url = photoUrl.value.trim();
+    if (!url) {
+      alert('Please enter an image URL');
+      return;
+    }
+    
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      alert('Please enter a valid URL');
+      return;
+    }
+    
+    analyzeImageFromUrl(url);
+  });
+
+  photoUrl.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+      urlAnalyze.click();
+    }
+  });
+
   // Helper function to convert file to base64
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -145,6 +237,38 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
+    });
+  }
+
+  // Helper function to convert URL to base64
+  async function urlToBase64(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous'; // Try to enable CORS
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        ctx.drawImage(img, 0, 0);
+        
+        try {
+          const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+          const base64 = dataURL.split(',')[1];
+          resolve(base64);
+        } catch (err) {
+          reject(new Error('Failed to convert image to base64'));
+        }
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Failed to load image from URL. Check if URL is valid and accessible.'));
+      };
+      
+      img.src = url;
     });
   }
 
