@@ -481,6 +481,12 @@ input[type="radio"]:checked + .mode-label {
     padding: 12px 14px;
     font-size: 12px;
   }
+  
+  .column-close {
+    min-width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
 }
 
 /* ==================== SPINNER ANIMATION ==================== */
@@ -608,6 +614,39 @@ input[type="radio"]:checked + .mode-label {
   line-height: 1.4;
   letter-spacing: 0.01em;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.object-title span {
+  flex: 1;
+  text-align: center;
+}
+
+.column-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 20px;
+  font-weight: 300;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  line-height: 1;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.column-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Molecule container with name and viewer */
