@@ -1,5 +1,12 @@
 # Molecular Reality (mol)
 
+## Project Context (for AI Assistants)
+**Type**: Molecular visualization web app  
+**Key Features**: Camera/photo molecular analysis using OpenAI Vision API  
+**Visualization**: Sphere-only representation (NO ball-and-stick), van der Waals radii at 0.8 scale  
+**UI Philosophy**: "Keep stupid simple" - minimal design, no extraneous elements  
+**Workflow**: Always git commit after acceptance  
+
 This project includes a Node.js server that hosts a static front-end (HTML, CSS, JavaScript) and provides back-end API endpoints for processing molecular data using the OpenAI API, as well as Python utilities for SDF file generation.
 
 ## Prerequisites

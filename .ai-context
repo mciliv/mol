@@ -1,0 +1,20 @@
+# AI Context for Molecular Visualization Project
+
+## Critical Requirements
+- Molecular visualization: SPHERE ONLY (scale 0.8 van der Waals radii)
+- UI design: "Keep stupid simple" - no borders, shadows, outlines
+- Development: Git commit after every accepted change
+- 3D Library: $3Dmol.js with black background
+- API: OpenAI Vision for molecular analysis
+
+## Architecture
+- Frontend: HTML/CSS/JavaScript (no framework)
+- Backend: Node.js/Express with Python integration
+- Molecular data: SMILES -> SDF -> 3D visualization
+- Input methods: Camera, photo upload, URL, text description
+
+## User Experience
+- Column layout for multiple analyses
+- Descriptive molecule names above viewers
+- Individual close buttons for each column
+- Mobile-responsive with HTTPS camera support 
