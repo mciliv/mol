@@ -127,6 +127,50 @@ function getChemicalProcessor(chemical) {
   return { type: 'smiles', processor: sdf, backup: crystal };
 }
 
+function findGeneratedSdfFile(chemical, sdfDir) {
+  // Try different possible filenames that the Python scripts might create
+  const possibleFilenames = [
+    `${chemical}.sdf`,  // Original filename
+    `${chemical.replace(/[^a-zA-Z0-9]/g, '_')}.sdf`,  // Safe filename
+  ];
+  
+  // For minerals, also try normalized names
+  if (isMineralFormula(chemical)) {
+    const normalized = parseMineral(chemical);
+    if (normalized !== chemical) {
+      possibleFilenames.push(`${normalized}.sdf`);
+    }
+  }
+  
+  // Check which file actually exists
+  for (const filename of possibleFilenames) {
+    const fullPath = path.join(sdfDir, filename);
+    if (fs.existsSync(fullPath)) {
+      return `/sdf_files/${filename}`;  // Return web path
+    }
+  }
+  
+  return null;
+}
+
+function parseMineral(formula) {
+  // Simple mineral name normalization (matches crystal.py logic)
+  const variations = {
+    'quartz': 'SiO2',
+    'calcite': 'CaCO3', 
+    'corundum': 'Al2O3',
+    'pyrite': 'FeS2',
+    'halite': 'NaCl',
+    'salt': 'NaCl',
+    'CaCO₃': 'CaCO3',
+    'SiO₂': 'SiO2', 
+    'Al₂O₃': 'Al2O3',
+    'FeS₂': 'FeS2'
+  };
+  
+  return variations[formula.toLowerCase()] || formula;
+}
+
 // Configurable analysis modes
 const ANALYSIS_MODES = {
   ORGANIC_ONLY: {
@@ -243,7 +287,8 @@ if (process.env.NODE_ENV === "development") {
   try {
     const liveReloadServer = livereload.createServer({
       exts: ['html', 'css', 'js'],
-      ignore: ['node_modules/**', 'sdf_files/**', '*.log']
+      ignore: ['node_modules/**', 'sdf_files/**', '*.log'],
+      port: 35730  // Use different port to avoid conflicts
     });
     liveReloadServer.watch(__dirname);
 
@@ -392,15 +437,14 @@ app.post('/generate-sdfs', async (req, res) => {
     // Get processor info (SMILES first, crystal as backup)
     const { type, processor, backup } = getChemicalProcessor(s);
     
-    // Create safe filename
-    const safeFilename = s.replace(/[^a-zA-Z0-9]/g, '_');
-    const sdfPath = `/sdf_files/${safeFilename}.sdf`;
-    const fullPath = path.join(SDF_DIR, `${safeFilename}.sdf`);
-
-    if (fs.existsSync(fullPath) && !overwrite) {
-      console.log(`✅ Using existing file: ${s}`);
-      sdfPaths.push(sdfPath);
-      return Promise.resolve();
+    // Check if SDF already exists (with smart filename detection)
+    if (!overwrite) {
+      const existingSdfPath = findGeneratedSdfFile(s, SDF_DIR);
+      if (existingSdfPath) {
+        console.log(`✅ Using existing file: ${s} → ${existingSdfPath}`);
+        sdfPaths.push(existingSdfPath);
+        return Promise.resolve();
+      }
     }
 
     return new Promise((resolve, reject) => {
@@ -409,43 +453,66 @@ app.post('/generate-sdfs', async (req, res) => {
       // Try SMILES first
       const { command, args } = processor(s, overwrite);
       const pythonProcess = spawn(command, args);
-
-      pythonProcess.stdout.on('data', data =>
-        console.log(`Python Output: ${data.toString().trim()}`));
+      
+      let pythonOutput = '';
+      pythonProcess.stdout.on('data', data => {
+        const output = data.toString().trim();
+        console.log(`Python Output: ${output}`);
+        pythonOutput += output + '\n';
+      });
+      
       pythonProcess.stderr.on('data', data =>
         console.error(`Error: ${data.toString().trim()}`));
 
       pythonProcess.on('close', code => {
         if (code === 0) {
-          console.log(`✅ Successfully generated SMILES structure: ${s}`);
-          sdfPaths.push(sdfPath);
-          resolve();
+          // Extract actual filename from Python output or check for existing files
+          const actualSdfPath = findGeneratedSdfFile(s, SDF_DIR);
+          if (actualSdfPath) {
+            console.log(`✅ Successfully generated SMILES structure: ${s} → ${actualSdfPath}`);
+            sdfPaths.push(actualSdfPath);
+            resolve();
+          } else {
+            console.log(`⚠️ SMILES succeeded but couldn't find SDF file for ${s}, trying crystal backup...`);
+            tryBackupCrystal();
+          }
         } else {
           // SMILES failed, try crystal/mineral as backup
           console.log(`⚠️ SMILES failed for ${s}, trying crystal/mineral backup...`);
-          
-          const { command: backupCmd, args: backupArgs } = backup(s, overwrite);
-          const backupProcess = spawn(backupCmd, backupArgs);
+          tryBackupCrystal();
+        }
+      });
+      
+      function tryBackupCrystal() {
+        const { command: backupCmd, args: backupArgs } = backup(s, overwrite);
+        const backupProcess = spawn(backupCmd, backupArgs);
 
-          backupProcess.stdout.on('data', data =>
-            console.log(`Backup Output: ${data.toString().trim()}`));
-          backupProcess.stderr.on('data', data =>
-            console.error(`Backup Error: ${data.toString().trim()}`));
+        backupProcess.stdout.on('data', data =>
+          console.log(`Backup Output: ${data.toString().trim()}`));
+        backupProcess.stderr.on('data', data =>
+          console.error(`Backup Error: ${data.toString().trim()}`));
 
-          backupProcess.on('close', backupCode => {
-            if (backupCode === 0) {
-              console.log(`✅ Successfully generated crystal structure: ${s}`);
-              sdfPaths.push(sdfPath);
+        backupProcess.on('close', backupCode => {
+          if (backupCode === 0) {
+            const actualSdfPath = findGeneratedSdfFile(s, SDF_DIR);
+            if (actualSdfPath) {
+              console.log(`✅ Successfully generated crystal structure: ${s} → ${actualSdfPath}`);
+              sdfPaths.push(actualSdfPath);
               resolve();
             } else {
-              const errorMsg = `Both SMILES and crystal generation failed for ${s}`;
+              const errorMsg = `Crystal generation succeeded but couldn't find SDF file for ${s}`;
               console.error(errorMsg);
               errors.push(errorMsg);
               reject(new Error(errorMsg));
             }
-          });
-        }
-      });
+          } else {
+            const errorMsg = `Both SMILES and crystal generation failed for ${s}`;
+            console.error(errorMsg);
+            errors.push(errorMsg);
+            reject(new Error(errorMsg));
+          }
+        });
+      }
     });
   });
 
@@ -465,6 +532,7 @@ app.post('/generate-sdfs', async (req, res) => {
 });
 
 // ==================== SERVER STARTUP ====================
+// Auto-deployment test - timestamp: 2025-07-09
 // Only start servers in local development (NOT in Cloud Functions, Netlify, or tests)
 const isCloudFunction = process.env.FUNCTION_NAME || process.env.FUNCTION_TARGET || process.env.K_SERVICE || process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT;
 const isNetlify = process.env.NETLIFY;
