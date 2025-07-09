@@ -609,16 +609,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const viewer = $3Dmol.createViewer(container);
       viewer.addModel(sdfData, "sdf");
       
-      // Set background color for the 3D viewer
-      // Options: 'white', 'black', 'lightgray', 'darkgray', or hex colors like '#f8f9fa'
-      viewer.setBackgroundColor('#000000');  // Black background to match app theme
+      viewer.setBackgroundColor('#000000');
       
-      // Use van der Waals radii for most accurate representation
-      viewer.setStyle({}, { 
-        sphere: { 
-          scale: 0.8  // Scale factor for van der Waals radii (0.8 gives good visual balance)
-        }
+      // Use ball and stick representation for better visibility
+      viewer.setStyle({}, {
+        stick: { radius: 0.15, colorscheme: 'default' },
+        sphere: { scale: 0.25, colorscheme: 'default' }
       });
+      
       viewer.zoomTo();
       viewer.render();
       
