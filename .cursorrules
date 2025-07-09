@@ -1,7 +1,8 @@
 # Cursor IDE Rules for Molecular Visualization App
 
-keep ui stupid simple
+keep ui stupid simple: No extraneous lines or outlining
 git commit w/ message after acceptance
+
 
 > **Note**: These rules are also used by `.copilot-codeGeneration-instructions.md` to ensure consistency across all AI code generation tools.
 
@@ -17,7 +18,7 @@ Focus on code rather than markdown. Don't overgenerate, focus on important aspec
 
 - **Camera API**: Always check for browser compatibility and HTTPS requirements
 - **Mobile-First**: Consider mobile device constraints and touch events
-- **3D Molecular Rendering**: Use $3Dmol.js library with consistent styling (sphere representation, black background)
+- **3D Molecular Rendering**: Use $3Dmol.js library with sphere representation ONLY (NO ball-and-stick), van der Waals radii with scale factor 0.8, black background
 - **User Feedback**: Provide immediate visual feedback for user interactions (loading states, click markers)
 - **Progressive Enhancement**: Gracefully degrade functionality if features aren't available
 
@@ -45,10 +46,13 @@ Focus on code rather than markdown. Don't overgenerate, focus on important aspec
 
 ## UI/UX Guidelines
 
+- **Minimal Design**: No extraneous lines, borders, shadows, or outlining - keep UI stupid simple
 - **Dark Theme**: Maintain consistent dark background (#000000) across 3D viewers
 - **Responsive Design**: Ensure molecular viewers work on both desktop and mobile
 - **Loading States**: Show clear loading indicators during AI processing and molecule generation
 - **Column Layout**: Add new object columns to the right for multiple analysis results
+- **Descriptive Names**: Show molecule names above 3D viewers for better context
+- **Individual Controls**: Allow closing individual analysis columns with close buttons
 
 ## AI Integration
 
