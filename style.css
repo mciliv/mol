@@ -296,10 +296,8 @@ input[type="radio"]:checked + .mode-label {
 
 /* Switch camera button below video */
 .switch-camera-btn {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  margin: 20px auto;
   padding: 12px 24px;
   background: rgba(102, 126, 234, 0.9);
   color: white;
@@ -323,7 +321,7 @@ input[type="radio"]:checked + .mode-label {
 
 .switch-camera-btn:hover {
   background: rgba(118, 75, 162, 0.9);
-  transform: translateX(-50%) scale(1.05);
+  transform: scale(1.05);
 }
 
 /* Text mode results */
@@ -474,6 +472,13 @@ input[type="radio"]:checked + .mode-label {
     min-width: 36px;
     height: 36px;
     font-size: 22px;
+  }
+  
+  .switch-camera-btn {
+    width: 180px;
+    height: 44px;
+    font-size: 15px;
+    margin: 16px auto;
   }
 }
 
