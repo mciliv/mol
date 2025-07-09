@@ -492,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function generateSDFs(smiles, objectName) {
     if (!smiles || smiles.length === 0) return;
     
-    console.log(`🧬 Generating SDFs for ${smiles.length} molecules from ${objectName}...`);
+    console.log(`🧬 Generating SDFs for ${smiles.length} chemicals from ${objectName}...`);
     
     try {
       const response = await fetch('/generate-sdfs', {
@@ -506,12 +506,18 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const data = await response.json();
-      if (data.sdfPaths) {
-        console.log(`✅ Loading 3D molecules for ${objectName} with ${data.sdfPaths.length} structures`);
-        createObjectColumn(objectName, data.sdfPaths, smiles);
-      } else {
-        console.error("❌ No SDF paths in response:", data);
-      }
+      console.log(`✅ SDF Response:`, data);
+      
+      // Create column with all chemicals found
+      const summary = {
+        total: smiles.length,
+        visualizable: data.sdfPaths ? data.sdfPaths.length : 0,
+        skipped: data.skipped ? data.skipped.length : 0,
+        errors: data.errors ? data.errors.length : 0
+      };
+      
+      createObjectColumn(objectName, data.sdfPaths || [], smiles, null, summary, data.skipped || []);
+      
     } catch (error) {
       console.error("❌ SDF generation error:", error);
       
@@ -520,7 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null) {
+  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = []) {
     console.log(`🧬 Creating object column for "${objectName}" with ${sdfFiles.length} molecules`);
     
     const gldiv = document.getElementById('gldiv');
@@ -544,6 +550,31 @@ document.addEventListener("DOMContentLoaded", () => {
     titleContainer.appendChild(closeButton);
     
     objectColumn.appendChild(titleContainer);
+    
+    // Add summary information if available
+    if (summary) {
+      const summaryDiv = document.createElement("div");
+      summaryDiv.className = "chemical-summary";
+      summaryDiv.innerHTML = `
+        <div>Total chemicals found: ${summary.total}</div>
+        <div>3D visualizable: ${summary.visualizable}</div>
+        ${summary.skipped > 0 ? `<div>Non-SMILES formats: ${summary.skipped}</div>` : ''}
+        ${summary.errors > 0 ? `<div>Failed: ${summary.errors}</div>` : ''}
+      `;
+      objectColumn.appendChild(summaryDiv);
+    }
+    
+    // Show skipped chemicals if any
+    if (skippedChemicals.length > 0) {
+      const skippedDiv = document.createElement("div");
+      skippedDiv.className = "skipped-chemicals";
+      skippedDiv.innerHTML = `
+        <div class="skipped-title">🧪 Other chemicals found:</div>
+        <div class="skipped-list">${skippedChemicals.join(', ')}</div>
+        <div class="skipped-note">* These likely represent minerals/crystals that can't be shown in 3D molecular view</div>
+      `;
+      objectColumn.appendChild(skippedDiv);
+    }
     
     if (errorMessage) {
       // Show error message

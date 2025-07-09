@@ -88,13 +88,43 @@ function sdf(s, overwrite) {
   return { command, args };
 }
 
-// Common SMILES validation instructions
-function getSmilesInstructions() {
-  return `IMPORTANT: Return only valid SMILES notation (e.g., CCO for ethanol, C1=CC=CC=C1 for benzene).
+// Configurable analysis modes
+const ANALYSIS_MODES = {
+  ORGANIC_ONLY: {
+    name: "organic_only",
+    instructions: `IMPORTANT: Return only valid SMILES notation (e.g., CCO for ethanol, C1=CC=CC=C1 for benzene).
 Do NOT return molecular formulas (like C6H10O5, CaCO3, SiO2).
 Do NOT return complex mineral formulas (like Mg3Si4O10(OH)2).
 If the material contains inorganic compounds that cannot be represented in SMILES, focus on organic components only.
-Each string must be parseable by RDKit/OpenBabel.`;
+Each string must be parseable by RDKit/OpenBabel.`
+  },
+  
+  MIXED_COMPOUNDS: {
+    name: "mixed_compounds", 
+    instructions: `Return chemical structures in the most appropriate format:
+- For organic molecules: use SMILES notation (e.g., CCO for ethanol, C1=CC=CC=C1 for benzene)
+- For simple inorganics that have SMILES: use SMILES (e.g., O for water, [Na+].[Cl-] for salt)
+- For minerals/crystals: use molecular formulas (e.g., CaCO3, SiO2, Mg3Si4O10(OH)2)
+- For metals: use symbols (e.g., Au, Fe, Cu)
+Each string should be chemically valid and parseable when possible.`
+  },
+
+  MINERALS_FOCUS: {
+    name: "minerals_focus",
+    instructions: `Focus on mineral and crystalline structures:
+- Return molecular formulas for minerals (e.g., CaCO3, SiO2, Al2O3)
+- Include crystal structure information when relevant
+- For organic components in minerals: use simple molecular formulas
+- Prioritize geological and mineralogical accuracy over SMILES compatibility.`
+  }
+};
+
+// Current analysis mode - can be changed via environment variable or API
+let CURRENT_MODE = process.env.ANALYSIS_MODE || 'MIXED_COMPOUNDS';
+
+function getSmilesInstructions() {
+  const mode = ANALYSIS_MODES[CURRENT_MODE] || ANALYSIS_MODES.MIXED_COMPOUNDS;
+  return mode.instructions;
 }
 
 async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64 = null) {
@@ -267,7 +297,39 @@ app.post("/object-molecules", async (req, res) => {
   }
 });
 
-// SDF generation route (latest version with proper mapping)
+// Analysis mode management routes
+app.get("/analysis-mode", (req, res) => {
+  const mode = ANALYSIS_MODES[CURRENT_MODE] || ANALYSIS_MODES.MIXED_COMPOUNDS;
+  res.json({ 
+    current_mode: CURRENT_MODE,
+    available_modes: Object.keys(ANALYSIS_MODES),
+    description: mode.name,
+    instructions: mode.instructions
+  });
+});
+
+app.post("/analysis-mode", (req, res) => {
+  const { mode } = req.body;
+  
+  if (!mode || !ANALYSIS_MODES[mode]) {
+    return res.status(400).json({ 
+      error: "Invalid mode", 
+      available_modes: Object.keys(ANALYSIS_MODES)
+    });
+  }
+  
+  // Update current mode (in production, this would be stored in database)
+  CURRENT_MODE = mode;
+  process.env.ANALYSIS_MODE = mode;
+  
+  res.json({ 
+    message: `Analysis mode changed to ${mode}`,
+    current_mode: mode,
+    instructions: ANALYSIS_MODES[mode].instructions
+  });
+});
+
+// SDF generation route (updated to handle mixed formats)
 app.post('/generate-sdfs', async (req, res) => {
   const { smiles, overwrite = false } = req.body;
 
@@ -282,12 +344,22 @@ app.post('/generate-sdfs', async (req, res) => {
 
   const sdfPaths = [];
   const errors = [];
+  const skipped = [];
 
-  // Filter out invalid SMILES and process each one
-  const validSmiles = smiles.filter(s => s && typeof s === 'string' && s.trim());
+  // Filter and categorize chemical strings
+  const validChemicals = smiles.filter(s => s && typeof s === 'string' && s.trim());
 
-  const sdfPromises = validSmiles.map(s => {
+  const sdfPromises = validChemicals.map(s => {
     if (!s) return Promise.resolve();
+
+    // Check if this looks like a SMILES string or other format
+    const isSmilesLike = /^[A-Za-z0-9\[\]()=#+\-\.@:\/\\%]*$/.test(s) && !(/^[A-Z][a-z]?[0-9]*$/.test(s));
+    
+    if (!isSmilesLike) {
+      console.log(`⚠️ Skipping non-SMILES format: ${s} (likely mineral formula)`);
+      skipped.push(s);
+      return Promise.resolve();
+    }
 
     const sdfPath = `/sdf_files/${s}.sdf`;
     const fullPath = path.join(SDF_DIR, `${s}.sdf`);
@@ -322,17 +394,22 @@ app.post('/generate-sdfs', async (req, res) => {
 
   await Promise.allSettled(sdfPromises);
 
+  const response = { 
+    sdfPaths: sdfPaths.filter(p => p),
+    message: `Generated ${sdfPaths.length} SDFs from ${validChemicals.length} chemicals`
+  };
+
   if (errors.length > 0) {
-    console.error(`SDF generation errors: ${errors.join(', ')}`);
-    // Return partial success with successful paths and error info
-    return res.json({ 
-      sdfPaths: sdfPaths.filter(p => p), 
-      errors,
-      message: `Generated ${sdfPaths.length} of ${validSmiles.length} SDFs` 
-    });
+    response.errors = errors;
+    response.message += ` (${errors.length} failed)`;
   }
 
-  res.json({ message: "Files generated", sdfPaths });
+  if (skipped.length > 0) {
+    response.skipped = skipped;
+    response.message += ` (${skipped.length} skipped - non-SMILES formats)`;
+  }
+
+  res.json(response);
 });
 
 // ==================== SERVER STARTUP ====================
