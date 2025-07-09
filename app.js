@@ -446,8 +446,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ---------- 3D Molecule Rendering ---------- */
   
-  // Get descriptive name for SMILES string
-  function getMoleculeName(smiles) {
+  // Get descriptive name for chemical string (SMILES or mineral formula)
+  function getMoleculeName(chemical) {
     const moleculeNames = {
       // Simple molecules
       'O': 'Water',
@@ -483,10 +483,27 @@ document.addEventListener("DOMContentLoaded", () => {
       // Pharmaceuticals/Complex
       'C[C@H](NC(=O)[C@@H](N)Cc1c[nH]c2ccc(Cl)cc12)C(=O)O': 'Chlorotryptophan Derivative',
       'O=C(Nc1ccc(cc1)C(=O)O)C(F)(F)F': 'Trifluoroacetyl-p-aminobenzoic Acid',
-      'C(C(C(=O)NC(C(=O)O)C(C)O)O)O': 'Threonine Derivative'
+      'C(C(C(=O)NC(C(=O)O)C(C)O)O)O': 'Threonine Derivative',
+      
+      // Minerals and Crystal Structures
+      'CaCO3': 'Calcite (Calcium Carbonate)',
+      'CaCO₃': 'Calcite (Calcium Carbonate)',
+      'SiO2': 'Quartz (Silicon Dioxide)',
+      'SiO₂': 'Quartz (Silicon Dioxide)',
+      'Al2O3': 'Corundum (Aluminum Oxide)',
+      'Al₂O₃': 'Corundum (Aluminum Oxide)',
+      'FeS2': 'Pyrite (Iron Disulfide)',
+      'FeS₂': 'Pyrite (Iron Disulfide)',
+      'NaCl': 'Halite (Sodium Chloride)',
+      'quartz': 'Quartz (Silicon Dioxide)',
+      'calcite': 'Calcite (Calcium Carbonate)',
+      'corundum': 'Corundum (Aluminum Oxide)',
+      'pyrite': 'Pyrite (Iron Disulfide)',
+      'halite': 'Halite (Sodium Chloride)',
+      'salt': 'Halite (Sodium Chloride)'
     };
     
-    return moleculeNames[smiles] || `Molecule (${smiles.substring(0, 20)}${smiles.length > 20 ? '...' : ''})`;
+    return moleculeNames[chemical] || `Structure (${chemical.substring(0, 20)}${chemical.length > 20 ? '...' : ''})`;
   }
 
   async function generateSDFs(smiles, objectName) {
