@@ -177,7 +177,7 @@ input[type="radio"]:checked + .mode-label {
 /* Instruction text */
 .instruction-text {
   position: absolute;
-  bottom: 60px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.85);
@@ -402,7 +402,7 @@ input[type="radio"]:checked + .mode-label {
   }
   
   .instruction-text {
-    bottom: 40px;
+    bottom: 60px;
     font-size: 13px;
     padding: 10px 16px;
   }
@@ -776,7 +776,7 @@ input[type="radio"]:checked + .mode-label {
 
 .uploaded-image-container .instruction-text {
   position: absolute;
-  bottom: 60px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.85);
