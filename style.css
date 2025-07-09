@@ -327,21 +327,27 @@ input[type="radio"]:checked + .mode-label {
 }
 
 /* Text mode results */
-.snapshots-container p {
-  background: rgba(255, 255, 255, 0.96);
-  padding: 14px 16px;
-  margin: 0;
-  font-size: 13px;
+.snapshots-container h3 {
+  background: none;
+  padding: 0;
+  margin: 8px 0;
+  font-size: 16px;
   font-weight: 500;
   line-height: 1.4;
-  color: #2c2c2e;
+  color: #ffffff;
   word-wrap: break-word;
-  width: 220px;
+  width: auto;
 }
 
-.snapshots-container p[style*="color: red"] {
-  background: rgba(255, 245, 247, 0.96);
-  color: #d63384;
+.snapshots-container h3[style*="color: red"] {
+  background: none;
+  color: #ff6b6b;
+}
+
+/* Loading state styling */
+.snapshots-container h3[style*="italic"] {
+  font-style: italic;
+  opacity: 0.7;
 }
 
 /* Instruction text visibility */
@@ -458,10 +464,10 @@ input[type="radio"]:checked + .mode-label {
     gap: 12px;
   }
   
-  .snapshots-container p {
-    width: 200px;
-    padding: 12px 14px;
-    font-size: 12px;
+  .snapshots-container h3 {
+    width: auto;
+    padding: 0;
+    font-size: 14px;
   }
   
   .column-close {
@@ -495,60 +501,7 @@ input[type="radio"]:checked + .mode-label {
 
 
 /* ==================== RESULT CARDS ==================== */
-.text-result-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  padding: 15px;
-  margin: 10px 0;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  color: #333;
-  min-width: 300px;
-  max-width: 600px;
-}
-
-.result-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.result-header strong, .object-name {
-  color: #667eea;
-  font-size: 16px;
-}
-
-.smiles-count {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-/* Image analysis specific styles */
-.image-result {
-  font-size: 12px;
-}
-
-.object-identification {
-  margin-bottom: 8px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.object-identification strong {
-  color: #667eea;
-  font-size: 14px;
-}
-
-.smiles-info {
-  margin: 6px 0;
-}
+/* Removed all card styling - keeping UI simple */
 
 /* ==================== 3DMOL LINEAR VIEWER STYLES ==================== */
 #gldiv {
