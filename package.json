@@ -38,6 +38,8 @@
     "tunnel": "echo 'Install ngrok: npm install -g ngrok' && echo 'Then run: ngrok http 8080'",
     "deploy:netlify": "netlify deploy --prod",
     "deploy:gcp": "gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .",
+    "deploy:watch": "node scripts/auto-deploy.js",
+    "deploy:now": "gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet",
     "deploy:aws": "sam build && sam deploy --guided",
     "build": "echo 'Build complete - static files ready'"
   },

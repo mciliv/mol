@@ -1,10 +1,7 @@
 const functions = require('@google-cloud/functions-framework');
 const app = require('./server.js');
 
-// Register HTTP function for Google Cloud Functions
-functions.http('molecularAnalysis', (req, res) => {
-  // Handle the request using the Express app
-  app(req, res);
-});
+// Register the Express app as a Cloud Function
+functions.http('molecularAnalysis', app);
 
 console.log('🟢 Google Cloud Functions - Molecular Analysis App Ready'); 

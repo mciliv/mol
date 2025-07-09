@@ -4,7 +4,7 @@ keep ui stupid simple: No extraneous lines or outlining
 git commit w/ message after acceptance
 
 
-> **Note**: These rules are also used by `.copilot-codeGeneration-instructions.md` to ensure consistency across all AI code generation tools.
+> **Note**: These ules are also used by `.copilot-codeGeneration-instructions.md` to ensure consistency across all AI code generation tools.
 
 Focus on code rather than markdown. Don't overgenerate, focus on important aspects and the goal and its correctness.
 
@@ -68,6 +68,7 @@ Focus on code rather than markdown. Don't overgenerate, focus on important aspec
 - **Environment Variables**: Set OPENAI_API_KEY via `gcloud functions deploy --set-env-vars`
 - **Domain Configuration**: Use custom domains (like queb.space) with Cloud Functions
 - **No Framework Lock-in**: Avoid platform-specific deployment frameworks - keep deployment simple
+- **Security**: Never deploy local SSL certificates - add `certs/` to `.gitignore`
 
 ## Development Workflow
 
