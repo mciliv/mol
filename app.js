@@ -611,10 +611,11 @@ document.addEventListener("DOMContentLoaded", () => {
       
       viewer.setBackgroundColor('#000000');
       
-      // Use ball and stick representation for better visibility
-      viewer.setStyle({}, {
-        stick: { radius: 0.15, colorscheme: 'default' },
-        sphere: { scale: 0.25, colorscheme: 'default' }
+      // Use van der Waals radii for accurate representation
+      viewer.setStyle({}, { 
+        sphere: { 
+          scale: 0.8  // Scale factor for van der Waals radii (Bohr radius)
+        }
       });
       
       viewer.zoomTo();
