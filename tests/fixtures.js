@@ -1,4 +1,4 @@
-// test/fixtures.js - Test fixtures and mock data
+// tests/fixtures.js - Test fixtures and mock data
 const fs = require('fs');
 const path = require('path');
 
