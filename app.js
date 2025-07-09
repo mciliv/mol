@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
     objectInput.value = "";
   });
 
-  // Photo upload functionality
-  photoUpload.addEventListener("change", async (e) => {
+  // Store event handlers for re-attachment
+  const photoUploadHandler = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -77,111 +77,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Show loading state
-    const loadingMsg = createLoadingMessage(`🔍 Analyzing uploaded photo...`);
-    snapshots.appendChild(loadingMsg);
+    // Display the uploaded image for interactive clicking
+    displayUploadedImage(file);
+  };
 
-    try {
-      // Convert to base64
-      const imageBase64 = await fileToBase64(file);
-      
-      // Use center of image as click point (50%, 50%)
-      const mockClickX = 0.5;
-      const mockClickY = 0.5;
-
-      const res = await fetch("/image-molecules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64,
-          croppedImageBase64: imageBase64, // Use full image as crop
-          x: mockClickX,
-          y: mockClickY,
-        }),
-      });
-
-      loadingMsg.remove();
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const { output } = await res.json();
-      
-      // Display result
-      const objectName = output.object || "Uploaded image";
-      processAnalysisResult(output, snapshots, "📁", objectName);
-
-      // Clear URL input
-      photoUrl.value = '';
-
-    } catch (err) {
-      loadingMsg.remove();
-      
-      const errorMsg = document.createElement("h3");
-      errorMsg.textContent = `⚠ Error analyzing photo: ${err.message}`;
-      errorMsg.style.color = "red";
-      snapshots.appendChild(errorMsg);
+  const photoUrlHandler = (e) => {
+    if (e.key === "Enter") {
+      urlAnalyzeHandler();
     }
+  };
 
-    // Reset file input
-    photoUpload.value = '';
-  });
-
-  // Photo URL functionality
-  async function analyzeImageFromUrl(url) {
-    try {
-      // Show loading state
-      const loadingMsg = createLoadingMessage(`🔍 Analyzing image from URL...`);
-      snapshots.appendChild(loadingMsg);
-
-      // Fetch and convert image to base64
-      const imageBase64 = await urlToBase64(url);
-      
-      // Use center of image as click point
-      const mockClickX = 0.5;
-      const mockClickY = 0.5;
-
-      const res = await fetch("/image-molecules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64,
-          croppedImageBase64: imageBase64,
-          x: mockClickX,
-          y: mockClickY,
-        }),
-      });
-
-      loadingMsg.remove();
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const { output } = await res.json();
-      
-      // Display result
-      const objectName = output.object || "Image from URL";
-      processAnalysisResult(output, snapshots, "🔗", objectName);
-
-      // Clear URL input
-      photoUrl.value = '';
-
-    } catch (err) {
-      // Remove loading message if it exists
-      const loadingMsgs = snapshots.querySelectorAll('h3');
-      loadingMsgs.forEach(msg => {
-        if (msg.textContent.includes('Analyzing image from URL')) {
-          msg.remove();
-        }
-      });
-      
-      const errorMsg = document.createElement("h3");
-      errorMsg.textContent = `⚠ Error loading image from URL: ${err.message}`;
-      errorMsg.style.color = "red";
-      snapshots.appendChild(errorMsg);
-    }
-  }
-
-  // URL input event listeners
-  urlAnalyze.addEventListener("click", () => {
+  const urlAnalyzeHandler = () => {
     const url = photoUrl.value.trim();
     if (!url) {
       alert('Please enter an image URL');
@@ -197,13 +103,331 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     analyzeImageFromUrl(url);
-  });
+  };
 
-  photoUrl.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      urlAnalyze.click();
+  // Photo upload functionality
+  photoUpload.addEventListener("change", photoUploadHandler);
+
+  // Display uploaded image for interactive clicking
+  async function displayUploadedImage(file) {
+    const photoOptions = document.getElementById('photo-options');
+    
+    // Clear existing content
+    photoOptions.innerHTML = '';
+    
+    // Create image display container (similar to camera container)
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'uploaded-image-container';
+    imageContainer.style.cssText = `
+      position: relative;
+      flex: 1;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: crosshair;
+      min-height: 60vh;
+      overflow: hidden;
+      -webkit-overflow-scrolling: touch;
+    `;
+    
+    // Create image element
+    const img = document.createElement('img');
+    img.style.cssText = `
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      position: relative;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+    `;
+    
+    // Create crosshair (same as camera)
+    const crosshair = document.createElement('div');
+    crosshair.className = 'crosshair';
+    crosshair.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10;
+    `;
+    
+    // Add crosshair lines
+    const beforeLine = document.createElement('div');
+    beforeLine.style.cssText = `
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.5);
+    `;
+    
+    const afterLine = document.createElement('div');
+    afterLine.style.cssText = `
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.5);
+    `;
+    
+    crosshair.appendChild(beforeLine);
+    crosshair.appendChild(afterLine);
+    
+    // Create instruction text
+    const instructionText = document.createElement('div');
+    instructionText.className = 'instruction-text';
+    instructionText.textContent = 'Click on image parts or type descriptions above';
+    instructionText.style.cssText = `
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
+      pointer-events: none;
+      z-index: 10;
+      letter-spacing: 0.01em;
+    `;
+    
+    // Create close button to return to upload options
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '×';
+    closeButton.style.cssText = `
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    `;
+    
+    closeButton.addEventListener('mouseenter', () => {
+      closeButton.style.background = 'rgba(255, 255, 255, 0.2)';
+    });
+    
+    closeButton.addEventListener('mouseleave', () => {
+      closeButton.style.background = 'rgba(0, 0, 0, 0.8)';
+    });
+    
+    closeButton.addEventListener('click', () => {
+      // Return to upload options
+      photoOptions.innerHTML = `
+        <div class="upload-option">
+          <input type="file" id="photo-upload" accept="image/*" aria-label="Upload photo for molecular analysis">
+          <label for="photo-upload" class="upload-label">
+            <svg class="photo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21,15 16,10 5,21"/>
+            </svg>
+            <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
+              <text x="40" y="14" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="currentColor">Upload Photo</text>
+            </svg>
+          </label>
+          
+          <div class="url-input-container">
+            <input type="url" id="photo-url" placeholder="Paste image URL..." aria-label="Enter image URL for molecular analysis">
+            <button type="button" id="url-analyze" class="url-button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"/>
+              </svg>
+              <svg class="url-text" width="50" height="16" viewBox="0 0 50 16">
+                <text x="25" y="12" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="currentColor">Analyze</text>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Re-attach event listeners
+      const newPhotoUpload = document.getElementById('photo-upload');
+      const newPhotoUrl = document.getElementById('photo-url');
+      const newUrlAnalyze = document.getElementById('url-analyze');
+      
+      // Re-attach with the stored handlers
+      newPhotoUpload.addEventListener('change', photoUploadHandler);
+      newPhotoUrl.addEventListener('keyup', photoUrlHandler);
+      newUrlAnalyze.addEventListener('click', urlAnalyzeHandler);
+    });
+    
+    // Load image
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.src = e.target.result;
+      
+      // Store the base64 data for later use
+      img.dataset.base64 = e.target.result.split(',')[1];
+      
+      // Add click handler for image analysis
+      imageContainer.addEventListener('click', async (evt) => {
+        await handleImageClick(evt, img);
+      });
+      
+      // Add touch handler for mobile
+      imageContainer.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleImageClick(e.touches[0], img);
+      });
+    };
+    
+    reader.readAsDataURL(file);
+    
+    // Assemble the container
+    imageContainer.appendChild(img);
+    imageContainer.appendChild(crosshair);
+    imageContainer.appendChild(instructionText);
+    imageContainer.appendChild(closeButton);
+    
+    // Add to photo options
+    photoOptions.appendChild(imageContainer);
+  }
+
+  // Handle clicks on uploaded image (similar to camera interaction)
+  async function handleImageClick(evt, img) {
+    // Hide instruction text on first click
+    const instructionText = document.querySelector('.uploaded-image-container .instruction-text');
+    if (instructionText) {
+      instructionText.style.opacity = "0";
+      instructionText.style.transition = "opacity 0.5s ease";
     }
-  });
+
+    // Get click coordinates relative to the image
+    const rect = img.getBoundingClientRect();
+    const clickX = evt.clientX - rect.left;
+    const clickY = evt.clientY - rect.top;
+    
+    // Convert to relative coordinates (0-1)
+    const relativeX = clickX / rect.width;
+    const relativeY = clickY / rect.height;
+    
+    // Get the base64 data
+    const imageBase64 = img.dataset.base64;
+    
+    // Create a canvas to crop the image around the click point
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Load the image into canvas
+    const tempImg = new Image();
+    tempImg.onload = () => {
+      canvas.width = tempImg.width;
+      canvas.height = tempImg.height;
+      ctx.drawImage(tempImg, 0, 0);
+      
+      // Calculate crop area (similar to camera logic)
+      const cropSize = Math.min(tempImg.width, tempImg.height) * 0.1; // 10% of image size
+      const cropX = Math.max(0, relativeX * tempImg.width - cropSize / 2);
+      const cropY = Math.max(0, relativeY * tempImg.height - cropSize / 2);
+      
+      // Create cropped canvas
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = cropSize;
+      cropCanvas.height = cropSize;
+      const cropCtx = cropCanvas.getContext('2d');
+      
+      cropCtx.drawImage(
+        canvas, 
+        cropX, cropY, cropSize, cropSize,
+        0, 0, cropSize, cropSize
+      );
+      
+      const croppedBase64 = cropCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+      
+      // Show loading state
+      const loadingMsg = createLoadingMessage("🔍 Analyzing...");
+      snapshots.appendChild(loadingMsg);
+      
+      // Send for analysis
+      fetch("/image-molecules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64,
+          croppedImageBase64: croppedBase64,
+          x: relativeX * tempImg.width,
+          y: relativeY * tempImg.height,
+        }),
+      })
+      .then(res => {
+        loadingMsg.remove();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(({ output }) => {
+        const objectName = output.object || "Uploaded image";
+        processAnalysisResult(output, snapshots, "📁", objectName);
+      })
+      .catch(err => {
+        loadingMsg.remove();
+        const errorMsg = document.createElement("h3");
+        errorMsg.textContent = `⚠ Error: ${err.message}`;
+        errorMsg.style.color = "red";
+        snapshots.appendChild(errorMsg);
+      });
+    };
+    
+    tempImg.src = `data:image/jpeg;base64,${imageBase64}`;
+  }
+
+  // Photo URL functionality
+  async function analyzeImageFromUrl(url) {
+    try {
+      // Fetch and convert image to base64
+      const imageBase64 = await urlToBase64(url);
+      
+      // Create a blob from the base64 data to display the image
+      const byteCharacters = atob(imageBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      const file = new File([blob], 'url-image.jpg', { type: 'image/jpeg' });
+      
+      // Display the image for interactive clicking
+      displayUploadedImage(file);
+      
+      // Clear URL input
+      photoUrl.value = '';
+
+    } catch (err) {
+      const errorMsg = document.createElement("h3");
+      errorMsg.textContent = `⚠ Error loading image from URL: ${err.message}`;
+      errorMsg.style.color = "red";
+      snapshots.appendChild(errorMsg);
+    }
+  }
+
+  // URL input event listeners
+  urlAnalyze.addEventListener("click", urlAnalyzeHandler);
+  photoUrl.addEventListener("keyup", photoUrlHandler);
 
   // Helper function to convert file to base64
   function fileToBase64(file) {
