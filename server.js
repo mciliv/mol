@@ -88,6 +88,43 @@ function sdf(s, overwrite) {
   return { command, args };
 }
 
+function crystal(s, overwrite) {
+  let command = "python";
+  let args = ["crystal.py", s, "--dir", SDF_DIR];
+  if (overwrite) args.push("--overwrite");
+  return { command, args };
+}
+
+// Known mineral formulas that can be converted to crystal structures
+const KNOWN_MINERALS = [
+  'CaCO3', 'SiO2', 'Al2O3', 'FeS2', 'NaCl',
+  'CaCO₃', 'SiO₂', 'Al₂O₃', 'FeS₂',
+  'quartz', 'calcite', 'corundum', 'pyrite', 'halite', 'salt'
+];
+
+function isMineralFormula(chemical) {
+  // Check if it's a known mineral
+  if (KNOWN_MINERALS.some(mineral => 
+    chemical.toLowerCase() === mineral.toLowerCase())) {
+    return true;
+  }
+  
+  // Check if it looks like a mineral formula (simple heuristic)
+  // Contains uppercase letters followed by numbers and no SMILES-specific characters
+  const mineralPattern = /^[A-Z][a-z]?[0-9]*[A-Z]*[a-z]*[0-9]*[₀-₉]*$/;
+  const hasNoSmilesChars = !/[\[\]()=#+\-\.@:\/\\%]/.test(chemical);
+  
+  return mineralPattern.test(chemical) && hasNoSmilesChars;
+}
+
+function getChemicalProcessor(chemical) {
+  if (isMineralFormula(chemical)) {
+    return { type: 'crystal', processor: crystal };
+  } else {
+    return { type: 'smiles', processor: sdf };
+  }
+}
+
 // Configurable analysis modes
 const ANALYSIS_MODES = {
   ORGANIC_ONLY: {
@@ -295,40 +332,7 @@ app.post("/object-molecules", async (req, res) => {
   }
 });
 
-// Analysis mode management routes
-app.get("/analysis-mode", (req, res) => {
-  const mode = ANALYSIS_MODES[CURRENT_MODE] || ANALYSIS_MODES.MIXED_COMPOUNDS;
-  res.json({ 
-    current_mode: CURRENT_MODE,
-    available_modes: Object.keys(ANALYSIS_MODES),
-    description: mode.name,
-    instructions: mode.instructions
-  });
-});
-
-app.post("/analysis-mode", (req, res) => {
-  const { mode } = req.body;
-  
-  if (!mode || !ANALYSIS_MODES[mode]) {
-    return res.status(400).json({ 
-      error: "Invalid mode", 
-      available_modes: Object.keys(ANALYSIS_MODES)
-    });
-  }
-  
-  // Update current mode (in production, this would be stored in database)
-  CURRENT_MODE = mode;
-  SMILES_INSTRUCTIONS = ANALYSIS_MODES[mode].instructions;
-  process.env.ANALYSIS_MODE = mode;
-  
-  res.json({ 
-    message: `Analysis mode changed to ${mode}`,
-    current_mode: mode,
-    instructions: ANALYSIS_MODES[mode].instructions
-  });
-});
-
-// SDF generation route (updated to handle mixed formats)
+// SDF generation route (updated to handle both SMILES and minerals)
 app.post('/generate-sdfs', async (req, res) => {
   const { smiles, overwrite = false } = req.body;
 
@@ -343,33 +347,30 @@ app.post('/generate-sdfs', async (req, res) => {
 
   const sdfPaths = [];
   const errors = [];
-  const skipped = [];
 
-  // Filter and categorize chemical strings
+  // Filter and process each chemical
   const validChemicals = smiles.filter(s => s && typeof s === 'string' && s.trim());
 
   const sdfPromises = validChemicals.map(s => {
     if (!s) return Promise.resolve();
 
-    // Check if this looks like a SMILES string or other format
-    const isSmilesLike = /^[A-Za-z0-9\[\]()=#+\-\.@:\/\\%]*$/.test(s) && !(/^[A-Z][a-z]?[0-9]*$/.test(s));
+    // Determine the appropriate processor (SMILES or crystal)
+    const { type, processor } = getChemicalProcessor(s);
     
-    if (!isSmilesLike) {
-      console.log(`⚠️ Skipping non-SMILES format: ${s} (likely mineral formula)`);
-      skipped.push(s);
-      return Promise.resolve();
-    }
-
-    const sdfPath = `/sdf_files/${s}.sdf`;
-    const fullPath = path.join(SDF_DIR, `${s}.sdf`);
+    // Create safe filename
+    const safeFilename = s.replace(/[^a-zA-Z0-9]/g, '_');
+    const sdfPath = `/sdf_files/${safeFilename}.sdf`;
+    const fullPath = path.join(SDF_DIR, `${safeFilename}.sdf`);
 
     if (fs.existsSync(fullPath) && !overwrite) {
+      console.log(`✅ Using existing ${type} file: ${s}`);
       sdfPaths.push(sdfPath);
       return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
-      const { command, args } = sdf(s, overwrite);
+      console.log(`🧬 Generating ${type} structure for: ${s}`);
+      const { command, args } = processor(s, overwrite);
       const pythonProcess = spawn(command, args);
 
       pythonProcess.stdout.on('data', data =>
@@ -379,10 +380,11 @@ app.post('/generate-sdfs', async (req, res) => {
 
       pythonProcess.on('close', code => {
         if (code === 0) {
+          console.log(`✅ Successfully generated ${type} structure: ${s}`);
           sdfPaths.push(sdfPath);
           resolve();
         } else {
-          const errorMsg = `SDF generation failed for ${s}`;
+          const errorMsg = `${type} generation failed for ${s}`;
           console.error(errorMsg);
           errors.push(errorMsg);
           reject(new Error(errorMsg));
@@ -395,17 +397,12 @@ app.post('/generate-sdfs', async (req, res) => {
 
   const response = { 
     sdfPaths: sdfPaths.filter(p => p),
-    message: `Generated ${sdfPaths.length} SDFs from ${validChemicals.length} chemicals`
+    message: `Generated ${sdfPaths.length} 3D structures from ${validChemicals.length} chemicals`
   };
 
   if (errors.length > 0) {
     response.errors = errors;
     response.message += ` (${errors.length} failed)`;
-  }
-
-  if (skipped.length > 0) {
-    response.skipped = skipped;
-    response.message += ` (${skipped.length} skipped - non-SMILES formats)`;
   }
 
   res.json(response);
