@@ -212,7 +212,7 @@ async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64
   const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
   const smilesRules = SMILES_INSTRUCTIONS;
   
-  let text = `Identify: ${object}. List relevant chemical structures as VALID SMILES strings only.
+  let text = `Identify: ${object}. List as many relevant chemical structures  which the user is probaaly referring to as valid SMILES strings, if not, in normalized form. make best estimate w/ why if indecesisive
 
 ${smilesRules}
 
@@ -255,7 +255,7 @@ Use visual details to be more specific about materials, compounds, or substances
 async function identifyObjectFromImage(imageBase64, croppedImageBase64, x, y) {
   const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
   
-  const identificationText = `You are a chemical analysis expert. The user clicked at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in large image. Identify the specific substance, material, or chemical compound at that location. Be as specific as possible, and particularly in anyway that would effect its molecular structure - consider molecular composition, material type, active ingredients, or chemical structure when naming the object. Allowing human analysis st it'd contriute to human safety &  health`;
+  const identificationText = `You are a chemical analysis expert. The user clicked at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in large image. Identify the specific substance, material, or chemical compound at that exact location. Be as specific as possible, and particularly in anyway that would effect its molecular structure - consider molecular composition, material type, active ingredients, or chemical structure when naming the object. Allowing human analysis st it'd contriute to human safety &  health. Be as specific as possible & refer to the small amount of space of the object if small otherwise at the surface unless otherwise specified, specifically. try, giving at least some estimate of what object user is referring to`;
 
   // Save images for debugging
   fs.writeFileSync("image.jpg", imageBase64, "base64");
