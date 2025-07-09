@@ -58,10 +58,10 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       loadingMsg.remove();
       
-      const p = document.createElement("p");
-      p.textContent = `⚠ Error analyzing "${object}": ${err.message}`;
-      p.style.color = "red";
-      snapshots.appendChild(p);
+      const h3 = document.createElement("h3");
+      h3.textContent = `⚠ Error analyzing "${object}": ${err.message}`;
+      h3.style.color = "red";
+      snapshots.appendChild(h3);
     }
     objectInput.value = "";
   });
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       loadingMsg.remove();
       
-      const errorMsg = document.createElement("p");
+      const errorMsg = document.createElement("h3");
       errorMsg.textContent = `⚠ Error analyzing photo: ${err.message}`;
       errorMsg.style.color = "red";
       snapshots.appendChild(errorMsg);
@@ -166,14 +166,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       // Remove loading message if it exists
-      const loadingMsgs = snapshots.querySelectorAll('p');
+      const loadingMsgs = snapshots.querySelectorAll('h3');
       loadingMsgs.forEach(msg => {
         if (msg.textContent.includes('Analyzing image from URL')) {
           msg.remove();
         }
       });
       
-      const errorMsg = document.createElement("p");
+      const errorMsg = document.createElement("h3");
       errorMsg.textContent = `⚠ Error loading image from URL: ${err.message}`;
       errorMsg.style.color = "red";
       snapshots.appendChild(errorMsg);
@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Create loading message element
   function createLoadingMessage(text) {
-    const loadingMsg = document.createElement("p");
+    const loadingMsg = document.createElement("h3");
     loadingMsg.textContent = text;
     loadingMsg.style.fontStyle = "italic";
     loadingMsg.style.opacity = "0.7";
@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle result processing for all analysis types
   function processAnalysisResult(output, container, icon, objectName, useQuotes = false) {
     const smilesCount = output.smiles ? output.smiles.length : 0;
-    const result = document.createElement("p");
+    const result = document.createElement("h3");
     result.textContent = createResultMessage(icon, objectName, smilesCount, useQuotes);
     container.appendChild(result);
 
@@ -437,7 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       loadingMsg.remove();
       
-      const errorMsg = document.createElement("p");
+      const errorMsg = document.createElement("h3");
       errorMsg.textContent = `⚠ Error: ${err.message}`;
       errorMsg.style.color = "red";
       snapshots.appendChild(errorMsg);
