@@ -109,20 +109,22 @@ function isMineralFormula(chemical) {
     return true;
   }
   
-  // Check if it looks like a mineral formula (simple heuristic)
-  // Contains uppercase letters followed by numbers and no SMILES-specific characters
-  const mineralPattern = /^[A-Z][a-z]?[0-9]*[A-Z]*[a-z]*[0-9]*[₀-₉]*$/;
+  // Exclude pure organic molecular formulas (CxHy, CxHyN, etc.) - these should be SMILES
+  if (/^C\d*H\d*(N\d*|O\d*|S\d*)*$/.test(chemical)) {
+    return false;
+  }
+  
+  // Check if it looks like a mineral formula (contains metals/metalloids)
+  const hasMetals = /[A-Z][a-z]?/.test(chemical) && 
+    !/^[CHONPS]+\d*$/.test(chemical); // Not just organic elements
   const hasNoSmilesChars = !/[\[\]()=#+\-\.@:\/\\%]/.test(chemical);
   
-  return mineralPattern.test(chemical) && hasNoSmilesChars;
+  return hasMetals && hasNoSmilesChars;
 }
 
 function getChemicalProcessor(chemical) {
-  if (isMineralFormula(chemical)) {
-    return { type: 'crystal', processor: crystal };
-  } else {
-    return { type: 'smiles', processor: sdf };
-  }
+  // Always try SMILES first, crystal as backup
+  return { type: 'smiles', processor: sdf, backup: crystal };
 }
 
 // Configurable analysis modes
@@ -387,8 +389,8 @@ app.post('/generate-sdfs', async (req, res) => {
   const sdfPromises = validChemicals.map(s => {
     if (!s) return Promise.resolve();
 
-    // Determine the appropriate processor (SMILES or crystal)
-    const { type, processor } = getChemicalProcessor(s);
+    // Get processor info (SMILES first, crystal as backup)
+    const { type, processor, backup } = getChemicalProcessor(s);
     
     // Create safe filename
     const safeFilename = s.replace(/[^a-zA-Z0-9]/g, '_');
@@ -396,13 +398,15 @@ app.post('/generate-sdfs', async (req, res) => {
     const fullPath = path.join(SDF_DIR, `${safeFilename}.sdf`);
 
     if (fs.existsSync(fullPath) && !overwrite) {
-      console.log(`✅ Using existing ${type} file: ${s}`);
+      console.log(`✅ Using existing file: ${s}`);
       sdfPaths.push(sdfPath);
       return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
-      console.log(`🧬 Generating ${type} structure for: ${s}`);
+      console.log(`🧬 Generating structure for: ${s} (trying SMILES first)`);
+      
+      // Try SMILES first
       const { command, args } = processor(s, overwrite);
       const pythonProcess = spawn(command, args);
 
@@ -413,14 +417,33 @@ app.post('/generate-sdfs', async (req, res) => {
 
       pythonProcess.on('close', code => {
         if (code === 0) {
-          console.log(`✅ Successfully generated ${type} structure: ${s}`);
+          console.log(`✅ Successfully generated SMILES structure: ${s}`);
           sdfPaths.push(sdfPath);
           resolve();
         } else {
-          const errorMsg = `${type} generation failed for ${s}`;
-          console.error(errorMsg);
-          errors.push(errorMsg);
-          reject(new Error(errorMsg));
+          // SMILES failed, try crystal/mineral as backup
+          console.log(`⚠️ SMILES failed for ${s}, trying crystal/mineral backup...`);
+          
+          const { command: backupCmd, args: backupArgs } = backup(s, overwrite);
+          const backupProcess = spawn(backupCmd, backupArgs);
+
+          backupProcess.stdout.on('data', data =>
+            console.log(`Backup Output: ${data.toString().trim()}`));
+          backupProcess.stderr.on('data', data =>
+            console.error(`Backup Error: ${data.toString().trim()}`));
+
+          backupProcess.on('close', backupCode => {
+            if (backupCode === 0) {
+              console.log(`✅ Successfully generated crystal structure: ${s}`);
+              sdfPaths.push(sdfPath);
+              resolve();
+            } else {
+              const errorMsg = `Both SMILES and crystal generation failed for ${s}`;
+              console.error(errorMsg);
+              errors.push(errorMsg);
+              reject(new Error(errorMsg));
+            }
+          });
         }
       });
     });
