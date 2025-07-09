@@ -1,4 +1,4 @@
-// test/setup.js - Jest setup file for mocking dependencies
+// tests/setup.js - Jest setup file for mocking dependencies
 
 // Mock OpenAI before any modules are imported
 jest.mock("openai", () => {

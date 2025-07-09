@@ -1,4 +1,4 @@
-// test/integration.test.js - Integration tests using separated test functionality
+// tests/integration.test.js - Integration tests using separated test functionality
 
 const request = require("supertest");
 const app = require("../server");
