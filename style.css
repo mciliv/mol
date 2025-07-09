@@ -805,6 +805,50 @@ input[type="radio"]:checked + .mode-label {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.uploaded-image-container .crosshair-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.uploaded-image-container .crosshair-line.vertical {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 20px;
+}
+
+.uploaded-image-container .crosshair-line.horizontal {
+  top: 50%;
+  left: -10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 2px;
+}
+
+.uploaded-image-container .close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.uploaded-image-container .close-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .upload-label {
   display: flex;
   flex-direction: column;
