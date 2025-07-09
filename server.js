@@ -122,14 +122,12 @@ Each string should be chemically valid and parseable when possible.`
 // Current analysis mode - can be changed via environment variable or API
 let CURRENT_MODE = process.env.ANALYSIS_MODE || 'MIXED_COMPOUNDS';
 
-function getSmilesInstructions() {
-  const mode = ANALYSIS_MODES[CURRENT_MODE] || ANALYSIS_MODES.MIXED_COMPOUNDS;
-  return mode.instructions;
-}
+// Direct constant for current instructions - updates when mode changes
+let SMILES_INSTRUCTIONS = (ANALYSIS_MODES[CURRENT_MODE] || ANALYSIS_MODES.MIXED_COMPOUNDS).instructions;
 
 async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64 = null) {
   const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
-  const smilesRules = getSmilesInstructions();
+  const smilesRules = SMILES_INSTRUCTIONS;
   
   let text = `Identify: ${object}. List relevant chemical structures as VALID SMILES strings only.
 
@@ -320,6 +318,7 @@ app.post("/analysis-mode", (req, res) => {
   
   // Update current mode (in production, this would be stored in database)
   CURRENT_MODE = mode;
+  SMILES_INSTRUCTIONS = ANALYSIS_MODES[mode].instructions;
   process.env.ANALYSIS_MODE = mode;
   
   res.json({ 
