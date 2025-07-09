@@ -88,16 +88,22 @@ function sdf(s, overwrite) {
   return { command, args };
 }
 
-async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64 = null) {
-  const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
-  
-  let text = `Identify: ${object}. List relevant chemical structures as VALID SMILES strings only. 
-
-IMPORTANT: Return only valid SMILES notation (e.g., CCO for ethanol, C1=CC=CC=C1 for benzene). 
-Do NOT return molecular formulas (like C6H10O5, CaCO3, SiO2). 
+// Common SMILES validation instructions
+function getSmilesInstructions() {
+  return `IMPORTANT: Return only valid SMILES notation (e.g., CCO for ethanol, C1=CC=CC=C1 for benzene).
+Do NOT return molecular formulas (like C6H10O5, CaCO3, SiO2).
 Do NOT return complex mineral formulas (like Mg3Si4O10(OH)2).
 If the material contains inorganic compounds that cannot be represented in SMILES, focus on organic components only.
-Each string must be parseable by RDKit/OpenBabel.
+Each string must be parseable by RDKit/OpenBabel.`;
+}
+
+async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64 = null) {
+  const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
+  const smilesRules = getSmilesInstructions();
+  
+  let text = `Identify: ${object}. List relevant chemical structures as VALID SMILES strings only.
+
+${smilesRules}
 
 Consider the specific material, compound, or substance shown.`;
   
@@ -107,14 +113,9 @@ Consider the specific material, compound, or substance shown.`;
   if (imageBase64) {
     console.log(`🖼️  Using image context for enhanced SMILES analysis`);
     content.push({ detail: "high", type: "input_image", image_url: `data:image/jpeg;base64,${imageBase64}` });
-    text = `Analyze the object "${object}" in this image. List relevant chemical structures as VALID SMILES strings only. 
+    text = `Analyze the object "${object}" in this image. List relevant chemical structures as VALID SMILES strings only.
 
-CRITICAL: Only return valid SMILES notation that can be parsed by chemical software:
-- Use proper SMILES syntax (e.g., CCO, C1=CC=CC=C1, CC(=O)O)
-- Do NOT use molecular formulas (C6H10O5, CaCO3, SiO2) 
-- Do NOT use mineral formulas (Mg3Si4O10(OH)2)
-- Focus on organic compounds that can be represented in SMILES
-- If mainly inorganic, return fewer but valid organic components
+${smilesRules}
 
 Use visual details to be more specific about materials, compounds, or substances shown.`;
     content[0].text = text;
@@ -143,7 +144,7 @@ Use visual details to be more specific about materials, compounds, or substances
 async function identifyObjectFromImage(imageBase64, croppedImageBase64, x, y) {
   const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
   
-  const identificationText = `You are a chemical analysis expert. The user clicked at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in this image. Identify the specific substance, material, or chemical compound at that location. Be as chemically specific as possible - consider molecular composition, material type, active ingredients, or chemical structure when naming the object.`;
+  const identificationText = `You are a chemical analysis expert. The user clicked at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in large image. Identify the specific substance, material, or chemical compound at that location. Be as specific as possible, and particularly in anyway that would effect its molecular structure - consider molecular composition, material type, active ingredients, or chemical structure when naming the object. Allowing human analysis st it'd contriute to human safety &  health`;
 
   // Save images for debugging
   fs.writeFileSync("image.jpg", imageBase64, "base64");
@@ -336,7 +337,7 @@ app.post('/generate-sdfs', async (req, res) => {
 
 // ==================== SERVER STARTUP ====================
 // Only start servers in local development (NOT in Cloud Functions, Netlify, or tests)
-const isCloudFunction = process.env.FUNCTION_NAME || process.env.FUNCTION_TARGET || process.env.K_SERVICE || process.env.GOOGLE_CLOUD_PROJECT;
+const isCloudFunction = process.env.FUNCTION_NAME || process.env.FUNCTION_TARGET || process.env.K_SERVICE || process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT;
 const isNetlify = process.env.NETLIFY;
 const isTestMode = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID;
 const isServerless = isCloudFunction || isNetlify;

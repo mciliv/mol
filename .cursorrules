@@ -61,6 +61,14 @@ Focus on code rather than markdown. Don't overgenerate, focus on important aspec
 - **Chemical Analysis**: Use both full image and cropped region for enhanced analysis
 - **SMILES Generation**: Prefer valid SMILES over molecular formulas
 
+## Deployment Strategy
+
+- **Minimal Dependencies**: Prefer minimal dependencies for fast cold starts and reduced complexity
+- **Google Cloud Functions**: Use GCF for serverless deployment - single function handles all routes
+- **Environment Variables**: Set OPENAI_API_KEY via `gcloud functions deploy --set-env-vars`
+- **Domain Configuration**: Use custom domains (like queb.space) with Cloud Functions
+- **No Framework Lock-in**: Avoid platform-specific deployment frameworks - keep deployment simple
+
 ## Development Workflow
 
 - **Live Reload**: Maintain nodemon configuration for efficient development

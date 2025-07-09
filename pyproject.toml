@@ -9,6 +9,12 @@ dependencies = [
     "rdkit>=2024.9.5"
 ]
 
+[project.optional-dependencies]
+util = ["util"]
+
+[tool.poetry.dependencies]
+util = { path = "../util", optional = true, develop = true }
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
 
