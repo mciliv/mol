@@ -590,6 +590,47 @@ input[type="radio"]:checked + .mode-label {
   padding: 12px;
 }
 
+/* Chemical summary section */
+.chemical-summary {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 12px;
+}
+
+.chemical-summary div {
+  margin: 4px 0;
+}
+
+/* Skipped chemicals section */
+.skipped-chemicals {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 12px;
+}
+
+.skipped-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.skipped-list {
+  margin: 6px 0;
+  word-wrap: break-word;
+  font-family: monospace;
+}
+
+.skipped-note {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  margin-top: 8px;
+}
+
 /* Molecule name above each viewer */
 .molecule-name {
   color: #ffffff;
