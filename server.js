@@ -332,6 +332,39 @@ app.post("/object-molecules", async (req, res) => {
   }
 });
 
+// Analysis mode management routes
+app.get("/analysis-mode", (req, res) => {
+  const mode = ANALYSIS_MODES[CURRENT_MODE] || ANALYSIS_MODES.MIXED_COMPOUNDS;
+  res.json({ 
+    current_mode: CURRENT_MODE,
+    available_modes: Object.keys(ANALYSIS_MODES),
+    description: mode.name,
+    instructions: mode.instructions
+  });
+});
+
+app.post("/analysis-mode", (req, res) => {
+  const { mode } = req.body;
+  
+  if (!mode || !ANALYSIS_MODES[mode]) {
+    return res.status(400).json({ 
+      error: "Invalid mode", 
+      available_modes: Object.keys(ANALYSIS_MODES)
+    });
+  }
+  
+  // Update current mode (in production, this would be stored in database)
+  CURRENT_MODE = mode;
+  SMILES_INSTRUCTIONS = ANALYSIS_MODES[mode].instructions;
+  process.env.ANALYSIS_MODE = mode;
+  
+  res.json({ 
+    message: `Analysis mode changed to ${mode}`,
+    current_mode: mode,
+    instructions: ANALYSIS_MODES[mode].instructions
+  });
+});
+
 // SDF generation route (updated to handle both SMILES and minerals)
 app.post('/generate-sdfs', async (req, res) => {
   const { smiles, overwrite = false } = req.body;
