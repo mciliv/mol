@@ -358,6 +358,15 @@ document.addEventListener("DOMContentLoaded", () => {
   function processAnalysisResult(output, container, icon, objectName, useQuotes = false) {
     const smilesCount = output.smiles ? output.smiles.length : 0;
     const result = document.createElement("h3");
+    
+    // Check if we have a description response
+    if (output.smiles && output.smiles.length === 1 && output.smiles[0].startsWith('DESCRIPTION: ')) {
+      const description = output.smiles[0].replace('DESCRIPTION: ', '');
+      result.textContent = `${icon} ${objectName} → ${description}`;
+      container.appendChild(result);
+      return result;
+    }
+    
     result.textContent = createResultMessage(icon, objectName, smilesCount, useQuotes);
     container.appendChild(result);
 
@@ -542,6 +551,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function generateSDFs(smiles, objectName) {
     if (!smiles || smiles.length === 0) return;
+    
+    // Skip if this is a description response
+    if (smiles.length === 1 && smiles[0].startsWith('DESCRIPTION: ')) return;
     
     try {
       const response = await fetch('/generate-sdfs', {

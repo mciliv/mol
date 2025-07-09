@@ -11,9 +11,10 @@ const ImageMoleculeSchema = z.object({
   smiles: z.array(z.string()),
 });
 
-// Schema for text-based molecule analysis (just SMILES list)
+// Schema for text-based molecule analysis (SMILES list and optional description)
 const TextMoleculeSchema = z.object({
   smiles: z.array(z.string()),
+  description: z.string().optional(),
 });
 
 // Schema for request body in /list-molecules-text

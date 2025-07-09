@@ -212,11 +212,13 @@ async function getSmilesForObject(object, imageBase64 = null, croppedImageBase64
   const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
   const smilesRules = SMILES_INSTRUCTIONS;
   
-  let text = `Identify: ${object}. List as many relevant chemical structures  which the user is probaaly referring to as valid SMILES strings, if not, in normalized form. make best estimate w/ why if indecesisive
+  let text = `Analyze: ${object}
+
+If this object contains chemical substances or materials that can be represented as molecular structures, list them as valid SMILES strings or chemical formulas.
 
 ${smilesRules}
 
-Consider the specific material, compound, or substance shown.`;
+If this is a person, object, or material that doesn't have specific chemical structures to analyze, provide a helpful description of what you see and any relevant material information.`;
   
   let content = [{ text: text, type: "input_text" }];
   
@@ -224,11 +226,13 @@ Consider the specific material, compound, or substance shown.`;
   if (imageBase64) {
     console.log(`🖼️  Using image context for enhanced SMILES analysis`);
     content.push({ detail: "high", type: "input_image", image_url: `data:image/jpeg;base64,${imageBase64}` });
-    text = `Analyze the object "${object}" in this image. List relevant chemical structures as VALID SMILES strings only.
+    text = `Analyze the object "${object}" in this image.
+
+If this object contains chemical substances or materials that can be represented as molecular structures, list them as valid SMILES strings or chemical formulas.
 
 ${smilesRules}
 
-Use visual details to be more specific about materials, compounds, or substances shown.`;
+If this is a person, object, or material that doesn't have specific chemical structures to analyze, provide a helpful description of what you see and any relevant material information. Use visual details to be specific about what you observe.`;
     content[0].text = text;
   }
   
@@ -249,13 +253,27 @@ Use visual details to be more specific about materials, compounds, or substances
     return [];
   }
   
+  // If we have a description but no SMILES, return a special indicator
+  if (parsed.output_parsed.description && parsed.output_parsed.smiles.length === 0) {
+    console.log("📝 Found description but no chemical structures");
+    return [`DESCRIPTION: ${parsed.output_parsed.description}`];
+  }
+  
   return parsed.output_parsed.smiles;
 }
 
 async function identifyObjectFromImage(imageBase64, croppedImageBase64, x, y) {
   const client = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
   
-  const identificationText = `You are a chemical analysis expert. The user clicked at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in large image. Identify the specific substance, material, or chemical compound at that exact location. Be as specific as possible, and particularly in anyway that would effect its molecular structure - consider molecular composition, material type, active ingredients, or chemical structure when naming the object. Allowing human analysis st it'd contriute to human safety &  health. Be as specific as possible & refer to the small amount of space of the object if small otherwise at the surface unless otherwise specified, specifically. try, giving at least some estimate of what object user is referring to`;
+  const identificationText = `You are an expert at analyzing objects and materials. The user clicked at coordinate (X: ${Math.round(x)}, Y: ${Math.round(y)}) in the image. 
+
+Identify what the user is pointing to. Be descriptive and specific about what you see - this could be:
+- A person, face, or body part
+- An object, material, or surface
+- A chemical substance or compound
+- A texture, pattern, or visual element
+
+Focus on the specific area the user clicked and describe it accurately. If it's a person or object, describe what you see. If it's a material or substance, be specific about its composition.`;
 
   // Save images for debugging
   fs.writeFileSync("image.jpg", imageBase64, "base64");
