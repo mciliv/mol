@@ -1,0 +1,46 @@
+# Development Workflow for Molecular App
+
+## Git Practices
+- **Always commit after acceptance**: Use descriptive commit messages that explain the changes
+- **Commit format**: `git commit -m "Brief description of changes"`
+- **Example**: `"Enhanced photo upload: space-filling interactive image display with click-to-analyze functionality"`
+
+## Development Environment
+- **Live Reload**: Use nodemon for automatic server restart during development
+- **SSL Certificates**: Use existing certificates in [certs/](mdc:certs/) for HTTPS development
+- **Debug Configuration**: Leverage VS Code's auto-attach debugging feature
+- **Port Management**: Handle LiveReload port conflicts gracefully
+
+## Testing Strategy
+- **Integration Tests**: Test the complete pipeline from image upload to 3D visualization
+- **Chemical Validation**: Ensure both SMILES and mineral formulas work correctly
+- **Error Handling**: Test graceful degradation for invalid inputs and API failures
+- **Mobile Testing**: Verify functionality on mobile devices with touch events
+
+## Code Quality
+- **No Comments**: Avoid adding comments unless absolutely necessary for complex algorithms
+- **Focus on Correctness**: Prioritize functional correctness over code elegance
+- **Error Handling**: Always include proper try-catch blocks for async operations
+- **Progressive Enhancement**: Gracefully degrade functionality if features aren't available
+
+## File Organization
+- **SDF Files**: Store in dedicated `sdf_files/` directory
+- **Python Scripts**: Keep chemical processing scripts in root directory
+- **Static Assets**: CSS, JS, and images in root for simple serving
+- **Documentation**: Maintain deployment and debugging documentation
+
+## Performance Considerations
+- **3D Rendering**: Batch molecule loading and optimize viewer initialization
+- **Image Processing**: Use appropriate compression for base64 image data
+- **Memory Management**: Clean up 3D viewers and streams when not needed
+- **Caching**: Consider caching generated SDF files to avoid regeneration
+
+## Deployment Strategy
+- **Minimal Dependencies**: Prefer minimal dependencies for fast cold starts
+- **Google Cloud Functions**: Use GCF for serverless deployment
+- **Environment Variables**: Set API keys via `gcloud functions deploy --set-env-vars`
+- **No Framework Lock-in**: Avoid platform-specific deployment frameworks
+description:
+globs:
+alwaysApply: false
+---
