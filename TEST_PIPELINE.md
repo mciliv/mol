@@ -2,14 +2,14 @@
 
 ## Overview
 
-The molecular visualization app uses a comprehensive 3-tier test pipeline to ensure code quality and stability throughout the development lifecycle.
+The molecular visualization app uses a standard 3-tier test pyramid to ensure code quality and reliability at every level.
 
-## Pipeline Structure
+## Test Categories
 
-### 1. Quick Tests (Pre-Development)
-**Purpose**: Fast validation before starting development  
+### 1. Unit Tests
+**Purpose**: Test individual components and functions in isolation  
 **Runtime**: < 5 seconds  
-**Command**: `npm run test:quick`
+**Command**: `npm run test:unit`
 
 **What it tests**:
 - Server loads without crashing
@@ -18,16 +18,18 @@ The molecular visualization app uses a comprehensive 3-tier test pipeline to ens
 - Python/RDKit environment ready
 - API endpoints respond
 - Stable components unchanged
+- Individual module functionality
 
 **When to use**:
 - Before starting `npm run dev` (automatically runs)
-- Before making changes to core components
-- Quick sanity check during development
+- During active development
+- Quick feedback loop
+- Continuous development validation
 
-### 2. Background Tests (During Development)
-**Purpose**: Comprehensive integration testing during active development  
+### 2. Integration Tests  
+**Purpose**: Test how different components work together
 **Runtime**: 30-60 seconds  
-**Command**: `npm run test:background`
+**Command**: `npm run test:integration`
 
 **What it tests**:
 - Complete SMILES→SDF pipeline
@@ -36,16 +38,18 @@ The molecular visualization app uses a comprehensive 3-tier test pipeline to ens
 - Error handling scenarios
 - Test utilities validation
 - API endpoint integration
+- Multi-component workflows
 
 **When to use**:
-- Runs automatically in background during development
-- After making significant changes
+- After significant changes
 - Before committing code changes
+- Validating component interactions
+- Feature completion testing
 
-### 3. Deployment Tests (Pre-Deployment)
-**Purpose**: Full system validation before production deployment  
+### 3. System Tests
+**Purpose**: End-to-end testing of the complete system
 **Runtime**: 2-5 minutes  
-**Command**: `npm run test:deployment`
+**Command**: `npm run test:system`
 
 **What it tests**:
 - System requirements validation
@@ -54,44 +58,41 @@ The molecular visualization app uses a comprehensive 3-tier test pipeline to ens
 - Error recovery
 - Deployment readiness
 - Git repository state
+- Full user workflows
 
 **When to use**:
-- Before any deployment (automatically runs)
-- Before major releases
-- Full system health check
+- Before deployment
+- Major releases
+- Complete system validation
+- Production readiness checks
 
 ## Command Reference
 
 ### Development Commands
 ```bash
-# Safe development start (with quick tests)
+# Safe development start (with unit tests)
 npm run dev
 
 # Unsafe development start (skip tests) 
 npm run dev:unsafe
-
-# Run background tests manually
-npm run test:background
 ```
 
 ### Testing Commands
 ```bash
-# Quick smoke tests only
-npm run test:quick
-
-# Standard test pipeline
-npm run test:pipeline
-
-# Full test suite including deployment
-npm run test:full
-
-# Pre-deployment validation (includes Python tests)
-npm run test:pre-deploy
-
 # Individual test categories
-npm run test:unit
-npm run test:integration
-npm run test:fixtures
+npm run test:unit         # Fast unit tests (< 5s)
+npm run test:integration  # Integration tests (30-60s)  
+npm run test:system      # System tests (2-5min)
+
+# Combined test runs
+npm run test             # Unit + Integration (standard)
+npm run test:all         # All three test levels
+npm run test:pre-deploy  # All tests + Python tests
+
+# Development utilities
+npm run test:watch       # Watch mode for active development
+npm run test:legacy      # Legacy server tests
+npm run test:fixtures    # Test fixture validation
 ```
 
 ### Deployment Commands
@@ -110,56 +111,56 @@ npm run deploy:aws
 
 ```
 tests/
-├── smoke.test.js      # Quick pre-development tests
-├── background.test.js # Integration tests during development  
-├── deployment.test.js # Comprehensive pre-deployment tests
-├── server.test.js     # Core server unit tests
-├── integration.test.js # Existing integration tests
-├── fixtures.js        # Test data and mock objects
-├── utils.js          # Test utilities and helpers
-├── config.js         # Test configuration
-└── setup.js          # Jest test setup
+├── unit.test.js           # Unit tests - individual components  
+├── integration.test.js    # Integration tests - component interactions
+├── system.test.js         # System tests - end-to-end workflows
+├── server.test.js         # Legacy server tests (test:legacy)
+├── integration.existing.js # Backup of original integration tests
+├── fixtures.js            # Test data and mock objects
+├── utils.js               # Test utilities and helpers
+├── config.js              # Test configuration
+└── setup.js               # Jest test setup
 ```
 
 ## Pipeline Integration
 
 ### With Development Workflow
-1. **Start Development**: `npm run dev` runs quick tests first
-2. **Active Development**: Background tests run automatically
-3. **Code Changes**: Quick tests validate before file changes
-4. **Commit Prep**: Run `npm run test:pipeline` before commits
+1. **Start Development**: `npm run dev` runs unit tests first
+2. **Active Development**: `npm run test:watch` for continuous feedback
+3. **Feature Complete**: `npm run test:integration` validates interactions  
+4. **Commit Prep**: `npm run test` (unit + integration) before commits
 
 ### With Deployment Workflow
 1. **Pre-Deploy**: `npm run test:pre-deploy` validates entire system
 2. **Deploy**: All deploy commands include automatic validation
-3. **Post-Deploy**: Can run quick smoke tests against live system
+3. **Post-Deploy**: `npm run test:system` can validate live system
 
 ## Error Handling
 
 ### Test Failures
-- **Quick tests fail**: Development blocked until fixed
-- **Background tests fail**: Warning but development continues
-- **Deployment tests fail**: Deployment blocked until resolved
+- **Unit tests fail**: Development blocked until fixed (fast feedback)
+- **Integration tests fail**: Feature incomplete, fix component interactions
+- **System tests fail**: Deployment blocked until resolved
 
 ### Recovery Commands
 ```bash
 # If tests are stuck, clean up processes
-pkill -f "jest" && npm run test:quick
+pkill -f "jest" && npm run test:unit
 
 # If server won't start due to port conflicts
 pkill -f "node.*server.js" && lsof -ti:8080 | xargs kill -9
 
 # Reset test environment
-rm -rf node_modules/.cache/jest && npm run test:quick
+rm -rf node_modules/.cache/jest && npm run test:unit
 ```
 
 ## Performance Targets
 
-| Test Type | Target Runtime | Max Timeout |
-|-----------|---------------|-------------|
-| Quick | < 5 seconds | 10 seconds |
-| Background | < 60 seconds | 2 minutes |
-| Deployment | < 5 minutes | 10 minutes |
+| Test Type | Target Runtime | Max Timeout | Purpose |
+|-----------|---------------|-------------|---------|
+| Unit | < 5 seconds | 10 seconds | Fast feedback loop |
+| Integration | < 60 seconds | 2 minutes | Component interactions |
+| System | < 5 minutes | 10 minutes | End-to-end validation |
 
 ## Configuration
 
@@ -181,9 +182,9 @@ rm -rf node_modules/.cache/jest && npm run test:quick
 ## Best Practices
 
 ### Writing Tests
-1. **Quick tests**: Focus on basic health checks only
-2. **Background tests**: Test real integration scenarios
-3. **Deployment tests**: Validate production readiness
+1. **Unit tests**: Test individual functions and components in isolation
+2. **Integration tests**: Test real component interactions and workflows
+3. **System tests**: Test complete user scenarios and production readiness
 
 ### Test Data
 - Use fixtures from `tests/fixtures.js`
@@ -202,7 +203,7 @@ rm -rf node_modules/.cache/jest && npm run test:quick
 **Port conflicts during tests**:
 ```bash
 lsof -ti:8080 | xargs kill -9
-npm run test:quick
+npm run test:unit
 ```
 
 **Python/RDKit not found**:
@@ -213,7 +214,7 @@ python -c "from rdkit import Chem"
 
 **Jest hanging**:
 ```bash
-npm run test:quick -- --detectOpenHandles --forceExit
+npm run test:unit -- --detectOpenHandles --forceExit
 ```
 
 **File permission errors**:
