@@ -404,7 +404,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function setupSwitchCamera() {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    if (devices.filter((d) => d.kind === "videoinput").length < 2) return;
+    const videoDevices = devices.filter((d) => d.kind === "videoinput");
+    console.log("Found video devices:", videoDevices.length, videoDevices.map(d => d.label || 'unnamed'));
+    
+    // Show switch button on desktop even with single camera for front/back switching
+    const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (videoDevices.length < 2 && !isDesktop) return;
 
     const btn = document.getElementById("switch-camera-btn");
     btn.style.display = "flex";
