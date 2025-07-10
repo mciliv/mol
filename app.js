@@ -405,19 +405,19 @@ document.addEventListener("DOMContentLoaded", () => {
   async function setupSwitchCamera() {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const videoDevices = devices.filter((d) => d.kind === "videoinput");
-    console.log("Found video devices:", videoDevices.length, videoDevices.map(d => d.label || 'unnamed'));
-    
-    // Show switch button on desktop even with single camera for front/back switching
-    const isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (videoDevices.length < 2 && !isDesktop) return;
+    console.log("Found video devices:", videoDevices.length);
 
-    const btn = document.getElementById("switch-camera-btn");
-    btn.style.display = "flex";
-    btn.onclick = () => {
-      facingMode = facingMode === "user" ? "environment" : "user";
-      startCamera();
-    };
+    if (videoDevices.length > 1) {
+      const switchCameraBtn = document.createElement('button');
+      switchCameraBtn.textContent = 'Switch Camera';
+      switchCameraBtn.classList.add('switch-camera-btn');
+      snapshots.appendChild(switchCameraBtn);
+      switchCameraBtn.style.display = 'block';
+      switchCameraBtn.onclick = () => {
+        facingMode = facingMode === "user" ? "environment" : "user";
+        startCamera();
+      };
+    }
   }
 
   video.addEventListener("click", handleInteraction);
