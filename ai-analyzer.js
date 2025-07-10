@@ -1,4 +1,4 @@
-const OpenAI = require("openai");
+const { OpenAI } = require("openai");
 const { ObjectIdentificationSchema, CHEMICAL_REPRESENTATIONS } = require("./schemas");
 
 class AIAnalyzer {
