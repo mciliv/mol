@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Visualization Test</title>
+    <style>
+        body { 
+            background: #000000; 
+            color: #ffffff; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .test-container {
+            width: 400px;
+            height: 300px;
+            background: #000000;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>3D Visualization Test</h1>
+    <div id="test-container" class="test-container"></div>
+    
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script>
+        async function testVisualization() {
+            try {
+                console.log('Testing 3D visualization...');
+                
+                // Test with a simple SDF file
+                const response = await fetch('/sdf_files/C.sdf');
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                
+                const sdfData = await response.text();
+                console.log('SDF data loaded:', sdfData.substring(0, 100) + '...');
+                
+                const container = document.getElementById('test-container');
+                const viewer = $3Dmol.createViewer(container);
+                
+                viewer.addModel(sdfData, "sdf");
+                viewer.setBackgroundColor('#000000');
+                viewer.setStyle({}, { 
+                    sphere: { 
+                        scale: 0.8
+                    }
+                });
+                
+                viewer.zoomTo();
+                viewer.render();
+                
+                console.log('✅ 3D visualization test successful!');
+                document.body.innerHTML += '<p style="color: green;">✅ 3D visualization is working!</p>';
+                
+            } catch (error) {
+                console.error('❌ 3D visualization test failed:', error);
+                document.body.innerHTML += `<p style="color: red;">❌ 3D visualization failed: ${error.message}</p>`;
+            }
+        }
+        
+        // Wait for 3Dmol.js to load
+        if (typeof $3Dmol !== 'undefined') {
+            testVisualization();
+        } else {
+            window.addEventListener('load', () => {
+                setTimeout(testVisualization, 1000);
+            });
+        }
+    </script>
+</body>
+</html> 

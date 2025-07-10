@@ -32,9 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const object = objectInput.value.trim();
     if (!object) return;
 
-    const loadingMsg = createLoadingMessage(`🔍 Analyzing "${object}"...`);
-    snapshots.appendChild(loadingMsg);
-
     try {
       const res = await fetch("/object-molecules", {
         method: "POST",
@@ -42,15 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
         body: JSON.stringify({ object }),
       });
       
-      loadingMsg.remove();
-      
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { output } = await res.json();
 
       processAnalysisResult(output, snapshots, "📝", object, true);
     } catch (err) {
-      loadingMsg.remove();
-      
       const h3 = document.createElement("h3");
       h3.textContent = `⚠ Error analyzing "${object}": ${err.message}`;
       h3.style.color = "red";
@@ -232,9 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const croppedBase64 = cropCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
       
-      const loadingMsg = createLoadingMessage("🔍 Analyzing...");
-      snapshots.appendChild(loadingMsg);
-      
       fetch("/image-molecules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -246,7 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }),
       })
       .then(res => {
-        loadingMsg.remove();
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
@@ -255,7 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
         processAnalysisResult(output, snapshots, "📁", objectName);
       })
       .catch(err => {
-        loadingMsg.remove();
         const errorMsg = document.createElement("h3");
         errorMsg.textContent = `⚠ Error: ${err.message}`;
         errorMsg.style.color = "red";
@@ -356,25 +344,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function processAnalysisResult(output, container, icon, objectName, useQuotes = false) {
-    const smilesCount = output.smiles ? output.smiles.length : 0;
-    const result = document.createElement("h3");
-    
     // Check if we have a description response
     if (output.smiles && output.smiles.length === 1 && output.smiles[0].startsWith('DESCRIPTION: ')) {
       const description = output.smiles[0].replace('DESCRIPTION: ', '');
-      result.textContent = `${icon} ${objectName} → ${description}`;
-      container.appendChild(result);
-      return result;
+      // For description responses, just show the description in the object column header
+      generateSDFs([], objectName, description);
+      return;
     }
     
-    result.textContent = createResultMessage(icon, objectName, smilesCount, useQuotes);
-    container.appendChild(result);
-
+    // For molecule responses, generate SDFs and show in object column
     if (output.smiles && output.smiles.length > 0) {
       generateSDFs(output.smiles, objectName);
     }
-    
-    return result;
   }
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -467,9 +448,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .drawImage(canvas, actualX - 50, actualY - 50, 100, 100, 0, 0, 100, 100);
     const croppedBase64 = crop.toDataURL("image/jpeg", 0.9).split(",")[1];
 
-    const loadingMsg = createLoadingMessage("🔍 Analyzing...");
-    snapshots.appendChild(loadingMsg);
-
     try {
       const res = await fetch("/image-molecules", {
         method: "POST",
@@ -482,8 +460,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }),
       });
 
-      loadingMsg.remove();
-
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const { output } = await res.json();
@@ -492,8 +468,6 @@ document.addEventListener("DOMContentLoaded", () => {
       processAnalysisResult(output, snapshots, "🔍", objectName);
 
     } catch (err) {
-      loadingMsg.remove();
-      
       const errorMsg = document.createElement("h3");
       errorMsg.textContent = `⚠ Error: ${err.message}`;
       errorMsg.style.color = "red";
@@ -549,11 +523,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return moleculeNames[chemical] || `Structure (${chemical.substring(0, 20)}${chemical.length > 20 ? '...' : ''})`;
   }
 
-  async function generateSDFs(smiles, objectName) {
-    if (!smiles || smiles.length === 0) return;
+  async function generateSDFs(smiles, objectName, description = null) {
+    // Handle description responses
+    if (description) {
+      createObjectColumn(objectName, [], [], null, null, [], description);
+      return;
+    }
     
-    // Skip if this is a description response
-    if (smiles.length === 1 && smiles[0].startsWith('DESCRIPTION: ')) return;
+    if (!smiles || smiles.length === 0) return;
     
     try {
       const response = await fetch('/generate-sdfs', {
@@ -583,7 +560,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = []) {
+  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = [], description = null) {
     const gldiv = document.getElementById('gldiv');
     
     const objectColumn = document.createElement("div");
@@ -593,7 +570,8 @@ document.addEventListener("DOMContentLoaded", () => {
     titleContainer.className = "object-title";
     
     const titleText = document.createElement("span");
-    titleText.textContent = objectName;
+    // Show description in header if available, otherwise show object name
+    titleText.textContent = description ? `${objectName}: ${description}` : objectName;
     titleContainer.appendChild(titleText);
     
     const closeButton = document.createElement("button");
@@ -672,6 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       const sdfData = await response.text();
+      
       if (!sdfData.trim()) {
         throw new Error(`Empty SDF data`);
       }
@@ -696,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return viewer;
     } catch (error) {
       console.error(`❌ Failed to load molecule:`, error);
-      container.textContent = `❌ Error loading molecule`;
+      container.textContent = `❌ Error loading molecule: ${error.message}`;
       container.style.color = 'red';
       container.style.textAlign = 'center';
       container.style.padding = '20px';
