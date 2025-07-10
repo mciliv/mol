@@ -88,6 +88,75 @@ CRYSTAL_STRUCTURES = {
             ('Na', [0.5, 0.5, 0.0]),
             ('Cl', [0.0, 0.5, 0.0])
         ]
+    },
+    
+    # Water (Ice Ih structure)
+    'H2O': {
+        'name': 'Water (Ice Ih)',
+        'space_group': 'P63/mmc',
+        'lattice': 'hexagonal',
+        'a': 4.52, 'b': 4.52, 'c': 7.36,
+        'alpha': 90, 'beta': 90, 'gamma': 120,
+        'atoms': [
+            ('O', [0.333, 0.667, 0.25]),
+            ('O', [0.667, 0.333, 0.75]),
+            ('H', [0.333, 0.667, 0.125]),
+            ('H', [0.667, 0.333, 0.875]),
+            ('H', [0.333, 0.667, 0.375]),
+            ('H', [0.667, 0.333, 0.625])
+        ]
+    },
+    
+    # Pure Elements (Face-Centered Cubic)
+    'Au': {
+        'name': 'Gold (Face-Centered Cubic)',
+        'space_group': 'Fm-3m',
+        'lattice': 'cubic',
+        'a': 4.08, 'b': 4.08, 'c': 4.08,
+        'alpha': 90, 'beta': 90, 'gamma': 90,
+        'atoms': [
+            ('Au', [0.0, 0.0, 0.0]),
+            ('Au', [0.5, 0.5, 0.0]),
+            ('Au', [0.5, 0.0, 0.5]),
+            ('Au', [0.0, 0.5, 0.5])
+        ]
+    },
+    'Cu': {
+        'name': 'Copper (Face-Centered Cubic)',
+        'space_group': 'Fm-3m',
+        'lattice': 'cubic',
+        'a': 3.61, 'b': 3.61, 'c': 3.61,
+        'alpha': 90, 'beta': 90, 'gamma': 90,
+        'atoms': [
+            ('Cu', [0.0, 0.0, 0.0]),
+            ('Cu', [0.5, 0.5, 0.0]),
+            ('Cu', [0.5, 0.0, 0.5]),
+            ('Cu', [0.0, 0.5, 0.5])
+        ]
+    },
+    'Fe': {
+        'name': 'Iron (Body-Centered Cubic)',
+        'space_group': 'Im-3m',
+        'lattice': 'cubic',
+        'a': 2.87, 'b': 2.87, 'c': 2.87,
+        'alpha': 90, 'beta': 90, 'gamma': 90,
+        'atoms': [
+            ('Fe', [0.0, 0.0, 0.0]),
+            ('Fe', [0.5, 0.5, 0.5])
+        ]
+    },
+    'Al': {
+        'name': 'Aluminum (Face-Centered Cubic)',
+        'space_group': 'Fm-3m',
+        'lattice': 'cubic',
+        'a': 4.05, 'b': 4.05, 'c': 4.05,
+        'alpha': 90, 'beta': 90, 'gamma': 90,
+        'atoms': [
+            ('Al', [0.0, 0.0, 0.0]),
+            ('Al', [0.5, 0.5, 0.0]),
+            ('Al', [0.5, 0.0, 0.5]),
+            ('Al', [0.0, 0.5, 0.5])
+        ]
     }
 }
 

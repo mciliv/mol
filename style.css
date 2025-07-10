@@ -177,7 +177,7 @@ input[type="radio"]:checked + .mode-label {
 /* Instruction text */
 .instruction-text {
   position: absolute;
-  bottom: 80px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.85);
@@ -529,6 +529,8 @@ input[type="radio"]:checked + .mode-label {
   border: none;
   overflow-x: auto;
   overflow-y: hidden;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Object column container */
@@ -663,6 +665,9 @@ input[type="radio"]:checked + .mode-label {
   outline: none;
   border: none;
   flex-shrink: 0;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .mol-viewer-container canvas {
@@ -673,6 +678,9 @@ input[type="radio"]:checked + .mode-label {
   height: 100% !important;
   outline: none !important;
   border: none !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* One column per analysis - horizontal scroll */

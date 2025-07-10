@@ -1,30 +1,41 @@
 const { z } = require("zod");
 
-// Schema for object identification only (from images)
+// Chemical representations - focus on SMILES constituents
+const CHEMICAL_REPRESENTATIONS = {
+  smiles: "Array of SMILES notation for constituent molecules (e.g., ['CCO', 'O'] for alcoholic beverage, ['C1=CC=CC=C1'] for benzene)"
+};
+
+// Simplified schema for object identification
 const ObjectIdentificationSchema = z.object({
-  object: z.string(),
+  object: z.string().describe("The identified object or material"),
+  chemicals: z.object({
+    smiles: z.array(z.string()).describe("Array of SMILES notation for constituent molecules")
+  }).describe("Chemical constituents represented as SMILES array")
 });
 
-// Schema for image-based molecule analysis (includes object identification)
+// Schema for image-based molecular analysis
 const ImageMoleculeSchema = z.object({
-  object: z.string(),
-  smiles: z.array(z.string()),
+  imageBase64: z.string().describe("Base64 encoded image data"),
+  croppedImageBase64: z.string().optional().describe("Base64 encoded cropped region"),
+  x: z.number().optional().describe("X coordinate of click"),
+  y: z.number().optional().describe("Y coordinate of click")
 });
 
-// Schema for text-based molecule analysis (SMILES list and optional description)
+// Schema for text-based molecular analysis
 const TextMoleculeSchema = z.object({
-  smiles: z.array(z.string()),
-  description: z.string().optional(),
+  object: z.string().describe("Text description of object or material")
 });
 
-// Schema for request body in /list-molecules-text
-const ListMoleculesTextRequestSchema = z.object({
-  object: z.string(),
+// Schema for generating SDF files
+const SdfGenerationSchema = z.object({
+  smiles: z.array(z.string()).describe("Array of SMILES notation to convert to SDF files"),
+  overwrite: z.boolean().optional().default(false).describe("Whether to overwrite existing SDF files")
 });
 
 module.exports = {
   ObjectIdentificationSchema,
   ImageMoleculeSchema,
   TextMoleculeSchema,
-  ListMoleculesTextRequestSchema,
+  SdfGenerationSchema,
+  CHEMICAL_REPRESENTATIONS
 };
