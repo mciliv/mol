@@ -427,12 +427,29 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function handleInteraction(evt) {
-    if (!cameraMode.checked) return;
+    console.log('🔍 Camera interaction detected:', { 
+      cameraModeChecked: cameraMode.checked, 
+      photoModeChecked: photoMode.checked,
+      eventType: evt.type 
+    });
+    
+    if (!cameraMode.checked) {
+      console.log('❌ Camera mode not checked, skipping interaction');
+      return;
+    }
     
     if (instructionText) {
       instructionText.style.opacity = "0";
       instructionText.style.transition = "opacity 0.5s ease";
     }
+
+    console.log('📹 Video properties:', {
+      videoWidth: video.videoWidth,
+      videoHeight: video.videoHeight,
+      clientWidth: video.clientWidth,
+      clientHeight: video.clientHeight,
+      readyState: video.readyState
+    });
 
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
@@ -455,6 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const croppedBase64 = crop.toDataURL("image/jpeg", 0.9).split(",")[1];
 
     try {
+      console.log('🚀 Making API call to /image-molecules');
       const res = await fetch("/image-molecules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -466,14 +484,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }),
       });
 
+      console.log('📡 API response status:', res.status);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const { output } = await res.json();
+      console.log('📦 API response:', output);
       
       const objectName = output.object || "Unknown object";
       processAnalysisResult(output, snapshots, "🔍", objectName);
 
     } catch (err) {
+      console.error('❌ API call failed:', err);
       const errorMsg = document.createElement("h3");
       errorMsg.textContent = `⚠ Error: ${err.message}`;
       errorMsg.style.color = "red";
