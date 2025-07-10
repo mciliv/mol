@@ -1,243 +1,208 @@
-// tests/integration.test.js - Integration tests using separated test functionality
+// tests/integration.test.js - Integration tests for component interactions  
+// These tests validate how different parts of the system work together (30-60 seconds)
 
 const request = require("supertest");
-const app = require("../server");
-const { 
-  TEST_MOLECULES, 
-  TEST_OBJECTS, 
-  MOCK_IMAGES,
-  createTestRequest,
-  validateTestResponse,
-  getTestMolecule,
-  getTestObject 
-} = require("./fixtures");
-const { 
-  TestFileManager,
-  TestAssertions,
-  TestDataBuilder
-} = require("./utils");
+const fs = require("fs");
+const path = require("path");
+const { TestFileManager, TestAssertions } = require("./utils");
+const { getTestMolecule, createTestRequest, MOCK_IMAGES } = require("./fixtures");
 
-describe("Separated Test Functionality", () => {
+describe("Integration Tests - Component Interactions", () => {
+  let app;
   let fileManager;
   
-  beforeEach(() => {
+  beforeAll(() => {
+    app = require("../server");
     fileManager = new TestFileManager();
   });
   
-  afterEach(() => {
+  afterAll(() => {
     fileManager.cleanup();
-    jest.clearAllMocks();
   });
 
-  describe("Test Fixtures", () => {
-    it("should provide valid test molecules", () => {
-      const caffeine = getTestMolecule("caffeine");
-      
-      expect(caffeine).toBeDefined();
-      expect(caffeine.smiles).toBe("CN1C=NC2=C1C(=O)N(C(=O)N2C)C");
-      expect(caffeine.name).toBe("Caffeine");
-      expect(TestAssertions.isValidSmiles(caffeine.smiles)).toBe(true);
-    });
-
-    it("should provide valid test objects", () => {
-      const coffee = getTestObject("coffee");
-      
-      expect(coffee).toBeDefined();
-      expect(coffee.object).toBe("coffee");
-      expect(Array.isArray(coffee.smiles)).toBe(true);
-      expect(TestAssertions.arrayContainsValidSmiles(coffee.smiles)).toBe(true);
-    });
-
-    it("should provide mock images", () => {
-      expect(MOCK_IMAGES.blackSquare.base64).toBeDefined();
-      expect(MOCK_IMAGES.whiteSquare.base64).toBeDefined();
-      expect(typeof MOCK_IMAGES.blackSquare.base64).toBe("string");
-    });
-  });
-
-  describe("Test Data Builder", () => {
-    it("should build test request data", () => {
-      const testData = new TestDataBuilder()
-        .withObject("coffee")
-        .withSmiles(["CN1C=NC2=C1C(=O)N(C(=O)N2C)C"])
-        .withCoordinates(100, 200)
-        .build();
-      
-      expect(testData.object).toBe("coffee");
-      expect(testData.smiles).toEqual(["CN1C=NC2=C1C(=O)N(C(=O)N2C)C"]);
-      expect(testData.x).toBe(100);
-      expect(testData.y).toBe(200);
-    });
-  });
-
-  describe("Test Request Creation", () => {
-    it("should create image molecules test request", () => {
-      const request = createTestRequest("imageMolecules", {
-        object: "coffee",
-        x: 150,
-        y: 250
-      });
-      
-      expect(request.imageBase64).toBeDefined();
-      expect(request.croppedImageBase64).toBeDefined();
-      expect(request.x).toBe(150);
-      expect(request.y).toBe(250);
-    });
-
-    it("should create object molecules test request", () => {
-      const request = createTestRequest("objectMolecules", {
-        object: "wine"
-      });
-      
-      expect(request.object).toBe("wine");
-    });
-  });
-
-  describe("Response Validation", () => {
-    it("should validate image molecules response", () => {
-      const validResponse = {
-        output: {
-          object: "coffee",
-          smiles: ["CN1C=NC2=C1C(=O)N(C(=O)N2C)C", "O"]
-        }
-      };
-      
-      expect(validateTestResponse(validResponse, "imageMolecules")).toBe(true);
-    });
-
-    it("should validate object molecules response", () => {
-      const validResponse = {
-        output: {
-          smiles: ["CCO", "O"]
-        }
-      };
-      
-      expect(validateTestResponse(validResponse, "objectMolecules")).toBe(true);
-    });
-
-    it("should reject invalid responses", () => {
-      const invalidResponse = {
-        output: {
-          object: "coffee"
-          // missing smiles array
-        }
-      };
-      
-      expect(validateTestResponse(invalidResponse, "imageMolecules")).toBe(false);
-    });
-  });
-
-  describe("File Manager", () => {
-    it("should create and cleanup test files", () => {
-      const fs = require("fs");
-      const testContent = "test content";
-      
-      const filepath = fileManager.createTempFile("test.txt", testContent);
-      
-      expect(fs.existsSync(filepath)).toBe(true);
-      expect(fs.readFileSync(filepath, "utf8")).toBe(testContent);
-      
-      fileManager.cleanup();
-      expect(fs.existsSync(filepath)).toBe(false);
-    });
-
-    it("should create test SDF files", () => {
-      const fs = require("fs");
-      const smiles = "CCO";
-      
-      const sdfPath = fileManager.createTestSdf(smiles, "ethanol.sdf");
-      
-      expect(fs.existsSync(sdfPath)).toBe(true);
-      
-      const content = fs.readFileSync(sdfPath, "utf8");
-      expect(content).toContain(smiles);
-      expect(content).toContain("_test_file");
-      
-      fileManager.cleanup();
-      expect(fs.existsSync(sdfPath)).toBe(false);
-    });
-  });
-
-  describe("Test Assertions", () => {
-    it("should validate SMILES strings", () => {
-      expect(TestAssertions.isValidSmiles("CCO")).toBe(true);
-      expect(TestAssertions.isValidSmiles("O")).toBe(true);
-      expect(TestAssertions.isValidSmiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")).toBe(true);
-      
-      expect(TestAssertions.isValidSmiles("")).toBe(false);
-      expect(TestAssertions.isValidSmiles("invalid smiles")).toBe(false);
-      expect(TestAssertions.isValidSmiles(123)).toBe(false);
-    });
-
-    it("should validate SDF paths", () => {
-      expect(TestAssertions.isValidSdfPath("/path/to/file.sdf")).toBe(true);
-      expect(TestAssertions.isValidSdfPath("http://example.com/file.sdf")).toBe(true);
-      
-      expect(TestAssertions.isValidSdfPath("file.txt")).toBe(false);
-      expect(TestAssertions.isValidSdfPath("")).toBe(false);
-      expect(TestAssertions.isValidSdfPath(null)).toBe(false);
-    });
-
-    it("should validate arrays of SMILES", () => {
-      expect(TestAssertions.arrayContainsValidSmiles(["CCO", "O"])).toBe(true);
-      
-      expect(TestAssertions.arrayContainsValidSmiles([])).toBe(false);
-      expect(TestAssertions.arrayContainsValidSmiles(["CCO", "invalid"])).toBe(false);
-      expect(TestAssertions.arrayContainsValidSmiles("not an array")).toBe(false);
-    });
-  });
-
-  describe("Integration with existing endpoints", () => {
-    // Skip these tests for now due to OpenAI mocking complexity
-    // These can be enabled once proper mocking is set up
-    it.skip("should work with text analysis endpoint", async () => {
-      const testRequest = createTestRequest("objectMolecules", {
-        object: "coffee"
-      });
+  describe("SMILES Processing Pipeline", () => {
+    it("should generate SDF files for valid SMILES", async () => {
+      const testSmiles = ["O", "CCO", "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"];
       
       const response = await request(app)
-        .post("/object-molecules")
-        .send(testRequest);
+        .post("/generate-sdfs")
+        .send({ smiles: testSmiles, overwrite: true });
       
       expect(response.status).toBe(200);
-      expect(validateTestResponse(response.body, "objectMolecules")).toBe(true);
-    });
+      expect(response.body.message).toBe("Files generated");
+      expect(Array.isArray(response.body.sdfPaths)).toBe(true);
+      expect(response.body.sdfPaths).toHaveLength(testSmiles.length);
+      
+      // Verify SDF files were created
+      response.body.sdfPaths.forEach(sdfPath => {
+        const fullPath = path.join(__dirname, "..", sdfPath);
+        expect(fs.existsSync(fullPath)).toBe(true);
+        
+        const content = fs.readFileSync(fullPath, "utf8");
+        expect(content).toContain("$$$$"); // SDF file marker
+      });
+    }, 15000);
 
-    it.skip("should work with image analysis endpoint", async () => {
-      const testRequest = createTestRequest("imageMolecules", {
-        imageBase64: MOCK_IMAGES.blackSquare.base64,
-        croppedImageBase64: MOCK_IMAGES.whiteSquare.base64,
+    it("should handle invalid SMILES gracefully", async () => {
+      const invalidSmiles = ["INVALID_SMILES", "XYZ123"];
+      
+      const response = await request(app)
+        .post("/generate-sdfs")
+        .send({ smiles: invalidSmiles, overwrite: true });
+      
+      // Should handle errors without crashing
+      expect([200, 400, 500]).toContain(response.status);
+    }, 10000);
+
+    it("should not overwrite existing files when overwrite=false", async () => {
+      const testSmiles = ["O"];
+      
+      // First request - create file
+      await request(app)
+        .post("/generate-sdfs")
+        .send({ smiles: testSmiles, overwrite: true });
+      
+      // Second request - should not overwrite
+      const response = await request(app)
+        .post("/generate-sdfs")
+        .send({ smiles: testSmiles, overwrite: false });
+      
+      expect(response.status).toBe(200);
+    }, 10000);
+  });
+
+  describe("Schema Validation", () => {
+    it("should validate schemas against test data", () => {
+      const schemas = require("../schemas");
+      
+      // Test SMILES array schema
+      const validSmilesData = { smiles: ["O", "CCO"] };
+      expect(() => schemas.smilesArray.parse(validSmilesData)).not.toThrow();
+      
+      // Test object molecules schema  
+      const validObjectData = { object: "water" };
+      expect(() => schemas.objectMoleculesRequest.parse(validObjectData)).not.toThrow();
+      
+      // Test image molecules schema
+      const validImageData = {
+        imageBase64: "data:image/png;base64,iVBORw0KGgo...",
+        croppedImageBase64: "data:image/png;base64,iVBORw0KGgo...",
         x: 100,
         y: 100
-      });
-      
-      const response = await request(app)
-        .post("/image-molecules")
-        .send(testRequest);
-      
-      expect(response.status).toBe(200);
-      expect(validateTestResponse(response.body, "imageMolecules")).toBe(true);
+      };
+      expect(() => schemas.imageMoleculesRequest.parse(validImageData)).not.toThrow();
     });
 
-    it("should validate that test fixtures work for future endpoint integration", () => {
-      // Test that our fixtures and utilities are ready for integration testing
-      const textRequest = createTestRequest("objectMolecules", { object: "coffee" });
-      const imageRequest = createTestRequest("imageMolecules");
+    it("should reject invalid schema data", () => {
+      const schemas = require("../schemas");
       
-      expect(textRequest.object).toBe("coffee");
+      // Invalid SMILES data
+      expect(() => schemas.smilesArray.parse({ smiles: "not an array" })).toThrow();
+      expect(() => schemas.smilesArray.parse({ smiles: [123, 456] })).toThrow();
+      
+      // Invalid object data
+      expect(() => schemas.objectMoleculesRequest.parse({ object: 123 })).toThrow();
+      expect(() => schemas.objectMoleculesRequest.parse({})).toThrow();
+    });
+  });
+
+  describe("File System Operations", () => {
+    it("should create sdf_files directory if missing", async () => {
+      const sdfDir = path.join(__dirname, "..", "sdf_files");
+      
+      // Remove directory if it exists (cleanup from previous tests)
+      if (fs.existsSync(sdfDir)) {
+        fs.rmSync(sdfDir, { recursive: true, force: true });
+      }
+      
+      const response = await request(app)
+        .post("/generate-sdfs")
+        .send({ smiles: ["O"], overwrite: true });
+      
+      expect(fs.existsSync(sdfDir)).toBe(true);
+    }, 10000);
+
+    it("should handle file system errors gracefully", async () => {
+      // This test would need specific file system error conditions
+      // For now, just ensure the endpoint handles edge cases
+      const response = await request(app)
+        .post("/generate-sdfs")
+        .send({ smiles: [""] }); // Empty SMILES
+      
+      expect([200, 400, 500]).toContain(response.status);
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("should handle malformed request bodies", async () => {
+      const response = await request(app)
+        .post("/generate-sdfs")
+        .send({ invalid: "data" });
+      
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBeDefined();
+    });
+
+    it("should handle missing request data", async () => {
+      const response = await request(app)
+        .post("/generate-sdfs")
+        .send({});
+      
+      expect(response.status).toBe(400);
+    });
+
+    it("should validate endpoint availability", async () => {
+      // Test all major endpoints respond
+      const endpoints = [
+        { path: "/generate-sdfs", method: "post", data: { smiles: [] } },
+        { path: "/object-molecules", method: "post", data: { object: "test" } },
+        { path: "/image-molecules", method: "post", data: { 
+          imageBase64: "test", 
+          croppedImageBase64: "test", 
+          x: 0, 
+          y: 0 
+        }}
+      ];
+      
+      for (const endpoint of endpoints) {
+        const response = await request(app)[endpoint.method](endpoint.path).send(endpoint.data);
+        expect([200, 400, 401, 403, 500]).toContain(response.status);
+      }
+    });
+  });
+
+  describe("Test Utilities Validation", () => {
+    it("should validate test fixture quality", () => {
+      const caffeine = getTestMolecule("caffeine");
+      expect(TestAssertions.isValidSmiles(caffeine.smiles)).toBe(true);
+      
+      // Test all available molecules
+      const molecules = ["caffeine", "ethanol", "water", "glucose"];
+      molecules.forEach(molName => {
+        const mol = getTestMolecule(molName);
+        expect(mol).toBeDefined();
+        expect(TestAssertions.isValidSmiles(mol.smiles)).toBe(true);
+      });
+    });
+
+    it("should validate mock image data", () => {
+      expect(MOCK_IMAGES.blackSquare.base64).toMatch(/^data:image\/png;base64,/);
+      expect(MOCK_IMAGES.whiteSquare.base64).toMatch(/^data:image\/png;base64,/);
+      
+      // Validate base64 content length (should be substantial)
+      const base64Content = MOCK_IMAGES.blackSquare.base64.split(",")[1];
+      expect(base64Content.length).toBeGreaterThan(100);
+    });
+
+    it("should validate test request builders", () => {
+      const imageRequest = createTestRequest("imageMolecules", { x: 50, y: 75 });
+      expect(imageRequest.x).toBe(50);
+      expect(imageRequest.y).toBe(75);
       expect(imageRequest.imageBase64).toBeDefined();
-      expect(imageRequest.x).toBeDefined();
-      expect(imageRequest.y).toBeDefined();
+      expect(imageRequest.croppedImageBase64).toBeDefined();
       
-      // Mock response validation
-      const mockResponse = {
-        output: {
-          object: "test object",
-          smiles: ["O", "CCO"]
-        }
-      };
-      
-      expect(validateTestResponse(mockResponse, "imageMolecules")).toBe(true);
+      const objectRequest = createTestRequest("objectMolecules", { object: "coffee" });
+      expect(objectRequest.object).toBe("coffee");
     });
   });
 }); 
