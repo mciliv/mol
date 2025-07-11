@@ -8,9 +8,7 @@ const CHEMICAL_REPRESENTATIONS = {
 // Simplified schema for object identification
 const ObjectIdentificationSchema = z.object({
   object: z.string().describe("The identified object or material"),
-  chemicals: z.object({
-    smiles: z.array(z.string()).describe("Array of SMILES notation for constituent molecules")
-  }).describe("Chemical constituents represented as SMILES array")
+  smiles: z.array(z.string()).describe("Array of SMILES notation for constituent molecules")
 });
 
 // Schema for image-based molecular analysis
