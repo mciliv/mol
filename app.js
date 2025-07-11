@@ -344,17 +344,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function processAnalysisResult(output, container, icon, objectName, useQuotes = false) {
+    // Handle nested chemicals structure from AI analyzer
+    const smiles = output.chemicals?.smiles || output.smiles || [];
+    
     // Check if we have a description response
-    if (output.smiles && output.smiles.length === 1 && output.smiles[0].startsWith('DESCRIPTION: ')) {
-      const description = output.smiles[0].replace('DESCRIPTION: ', '');
+    if (smiles.length === 1 && smiles[0].startsWith('DESCRIPTION: ')) {
+      const description = smiles[0].replace('DESCRIPTION: ', '');
       // For description responses, just show the description in the object column header
       generateSDFs([], objectName, description);
       return;
     }
     
     // For molecule responses, generate SDFs and show in object column
-    if (output.smiles && output.smiles.length > 0) {
-      generateSDFs(output.smiles, objectName);
+    if (smiles.length > 0) {
+      generateSDFs(smiles, objectName);
     }
   }
 
