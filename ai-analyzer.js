@@ -14,7 +14,7 @@ class AIAnalyzer {
     
     return `Analyze the image and identify what the user clicked on. Return a JSON object with:
 - "object": brief description of what you see  
-- "smiles": array of SMILES notation for constituent molecules
+- "chemicals": dictionary with "smiles" key containing an array of constituent molecules
 
 IMPORTANT: 
 - Include any constituents as SMILES array (use proper SMILES notation, not chemical formulas)
@@ -28,32 +28,44 @@ ${instructions}
 Example responses:
 {
   "object": "A glass of water",
-  "smiles": ["O"]
+  "chemicals": {
+    "smiles": ["O"]
+  }
 }
 
 {
   "object": "Limestone (calcium carbonate)",
-  "smiles": ["C(=O)([O-])[O-].[Ca+2]"]
+  "chemicals": {
+    "smiles": ["C(=O)([O-])[O-].[Ca+2]"]
+  }
 }
 
 {
   "object": "Alcoholic beverage",
-  "smiles": ["CCO", "O"]
+  "chemicals": {
+    "smiles": ["CCO", "O"]
+  }
 }
 
 {
   "object": "Plastic bottle (PET)",
-  "smiles": ["O=C(C1=CC=C(CO)C=C1)OC"]
+  "chemicals": {
+    "smiles": ["O=C(C1=CC=C(CO)C=C1)OC"]
+  }
 }
 
 {
   "object": "Human hand",
-  "smiles": ["O", "NCCNCCNCCN", "CC(C)CC(N)C(=O)O"]
+  "chemicals": {
+    "smiles": ["O", "NCCNCCNCCN", "CC(C)CC(N)C(=O)O"]
+  }
 }
 
 {
   "object": "Coffee cup (ceramic)",
-  "smiles": ["O"]
+  "chemicals": {
+    "smiles": ["O"]
+  }
 }`;
   }
 
@@ -105,7 +117,7 @@ Example responses:
       
       return {
         object: parsed.object || "Unknown object",
-        smiles: parsed.smiles || []
+        chemicals: parsed.chemicals || {}
       };
 
     } catch (error) {
@@ -133,7 +145,7 @@ Example responses:
       
       return {
         object: parsed.object || object,
-        smiles: parsed.smiles || []
+        chemicals: parsed.chemicals || {}
       };
 
     } catch (error) {
@@ -159,13 +171,17 @@ Example responses:
       if (content.includes("unable to identify or analyze people")) {
         return {
           object: "Human body (generic composition)",
-          smiles: ["O", "NCCNCCNCCN", "CC(C)CC(N)C(=O)O", "CCCCCCCCCCCCCCCC(=O)O"]
+          chemicals: {
+            smiles: ["O", "NCCNCCNCCN", "CC(C)CC(N)C(=O)O", "CCCCCCCCCCCCCCCC(=O)O"]
+          }
         };
       }
       
       return {
         object: "Analysis failed",
-        smiles: []
+        chemicals: {
+          smiles: []
+        }
       };
     }
   }
