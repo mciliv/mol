@@ -98,7 +98,7 @@ if (process.env.NODE_ENV === "development") {
     const liveReloadServer = livereload.createServer({
       exts: ['html', 'css', 'js'],
       ignore: ['node_modules/**', 'sdf_files/**', '*.log'],
-      port: 35732  // Use different port to avoid conflicts
+      port: 0  // Let system assign an available port automatically
     });
     liveReloadServer.watch(__dirname);
 

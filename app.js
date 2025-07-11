@@ -344,20 +344,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function processAnalysisResult(output, container, icon, objectName, useQuotes = false) {
-    // Handle nested chemicals structure from AI analyzer
-    const smiles = output.chemicals?.smiles || output.smiles || [];
+    // Handle new chemicals structure with names and SMILES
+    const chemicals = output.chemicals || [];
     
     // Check if we have a description response
-    if (smiles.length === 1 && smiles[0].startsWith('DESCRIPTION: ')) {
-      const description = smiles[0].replace('DESCRIPTION: ', '');
+    if (chemicals.length === 1 && chemicals[0].smiles && chemicals[0].smiles.startsWith('DESCRIPTION: ')) {
+      const description = chemicals[0].smiles.replace('DESCRIPTION: ', '');
       // For description responses, just show the description in the object column header
       generateSDFs([], objectName, description);
       return;
     }
     
+    // Extract SMILES array from chemicals
+    const smiles = chemicals.map(chem => chem.smiles).filter(Boolean);
+    
     // For molecule responses, generate SDFs and show in object column
     if (smiles.length > 0) {
-      generateSDFs(smiles, objectName);
+      generateSDFs(smiles, objectName, null, chemicals);
     }
   }
 
@@ -553,7 +556,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return moleculeNames[chemical] || `Structure (${chemical.substring(0, 20)}${chemical.length > 20 ? '...' : ''})`;
   }
 
-  async function generateSDFs(smiles, objectName, description = null) {
+  async function generateSDFs(smiles, objectName, description = null, chemicals = null) {
     // Handle description responses
     if (description) {
       createObjectColumn(objectName, [], [], null, null, [], description);
@@ -582,15 +585,15 @@ document.addEventListener("DOMContentLoaded", () => {
         errors: data.errors ? data.errors.length : 0
       };
       
-      createObjectColumn(objectName, data.sdfPaths || [], smiles, null, summary, data.skipped || []);
+      createObjectColumn(objectName, data.sdfPaths || [], smiles, null, summary, data.skipped || [], null, chemicals);
       
     } catch (error) {
       console.error("❌ SDF generation error:", error);
-      createObjectColumn(objectName, [], smiles, '🧬 Working on 3D structures...');
+      createObjectColumn(objectName, [], smiles, '🧬 Working on 3D structures...', null, [], null, chemicals);
     }
   }
 
-  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = [], description = null) {
+  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = [], description = null, chemicals = null) {
     const gldiv = document.getElementById('gldiv');
     
     const objectColumn = document.createElement("div");
@@ -653,7 +656,15 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const moleculeName = document.createElement("div");
         moleculeName.className = "molecule-name";
-        moleculeName.textContent = getMoleculeName(moleculeSmiles);
+        
+        // Use chemical name from data if available, otherwise fall back to lookup
+        let displayName;
+        if (chemicals && chemicals[i] && chemicals[i].name) {
+          displayName = chemicals[i].name;
+        } else {
+          displayName = getMoleculeName(moleculeSmiles);
+        }
+        moleculeName.textContent = displayName;
         moleculeContainer.appendChild(moleculeName);
         
         const container = document.createElement("div");
