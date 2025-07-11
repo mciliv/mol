@@ -5,12 +5,13 @@ const CHEMICAL_REPRESENTATIONS = {
   smiles: "Array of SMILES notation for constituent molecules (e.g., ['CCO', 'O'] for alcoholic beverage, ['C1=CC=CC=C1'] for benzene)"
 };
 
-// Schema for object identification with nested chemicals structure
+// Schema for object identification with chemical names and SMILES
 const ObjectIdentificationSchema = z.object({
   object: z.string().describe("The identified object or material"),
-  chemicals: z.object({
-    smiles: z.array(z.string()).describe("Array of SMILES notation for constituent molecules")
-  }).describe("Chemical constituents represented as SMILES array")
+  chemicals: z.array(z.object({
+    name: z.string().describe("Chemical name or common name"),
+    smiles: z.string().describe("SMILES notation for the molecule")
+  })).describe("Array of chemical constituents with names and SMILES notation")
 });
 
 // Schema for image-based molecular analysis

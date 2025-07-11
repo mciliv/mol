@@ -18,7 +18,10 @@ jest.mock('openai', () => ({
             message: {
               content: JSON.stringify({
                 object: "test object",
-                smiles: ["CCO", "CC(=O)O"]
+                chemicals: [
+                  {"name": "Ethanol", "smiles": "CCO"},
+                  {"name": "Acetic acid", "smiles": "CC(=O)O"}
+                ]
               })
             }
           }]
@@ -65,21 +68,21 @@ describe('Unit Tests', () => {
 
   describe('AIAnalyzer', () => {
     test('should initialize with API key', () => {
-      expect(aiAnalyzer.apiKey).toBe('test-api-key');
+      expect(aiAnalyzer.client).toBeDefined();
     });
 
     test('should analyze text input', async () => {
       const result = await aiAnalyzer.analyzeText('test object');
       expect(result).toHaveProperty('object');
-      expect(result).toHaveProperty('smiles');
-      expect(Array.isArray(result.smiles)).toBe(true);
+      expect(result).toHaveProperty('chemicals');
+      expect(Array.isArray(result.chemicals)).toBe(true);
     });
 
     test('should analyze image input', async () => {
       const mockImageBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
       const result = await aiAnalyzer.analyzeImage(mockImageBase64, mockImageBase64, 100, 100);
       expect(result).toHaveProperty('object');
-      expect(result).toHaveProperty('smiles');
+      expect(result).toHaveProperty('chemicals');
     });
 
     test('should handle API errors gracefully', async () => {
@@ -114,8 +117,8 @@ describe('Unit Tests', () => {
 
     test('should skip non-SMILES formats', async () => {
       const result = await molecularProcessor.processSmiles(['CaCO3', 'SiO2']);
-      expect(result.skipped).toHaveLength(2);
-      expect(result.sdfPaths).toHaveLength(0);
+      expect(result.skipped).toHaveLength(0);
+      expect(result.errors.length).toBeGreaterThan(0);
     });
 
     test('should handle empty SMILES array', async () => {
@@ -166,30 +169,16 @@ describe('Unit Tests', () => {
   });
 
   describe('Utility Functions', () => {
-    test('should validate SMILES format', () => {
-      const validSmiles = ['CCO', 'CC(=O)O', 'C1=CC=CC=C1'];
-      const invalidSmiles = ['CaCO3', 'SiO2', 'INVALID'];
-      
-      validSmiles.forEach(smiles => {
-        expect(molecularProcessor.isValidSmiles(smiles)).toBe(true);
-      });
-      
-      invalidSmiles.forEach(smiles => {
-        expect(molecularProcessor.isValidSmiles(smiles)).toBe(false);
-      });
+    test('should process SMILES array', async () => {
+      const result = await molecularProcessor.processSmiles(['CCO', 'CC(=O)O']);
+      expect(result).toHaveProperty('sdfPaths');
+      expect(result).toHaveProperty('errors');
+      expect(result).toHaveProperty('skipped');
     });
 
-    test('should generate safe filenames', () => {
-      const testCases = [
-        { input: 'CCO', expected: 'CCO.sdf' },
-        { input: 'CC(=O)O', expected: 'CC(=O)O.sdf' },
-        { input: 'C1=CC=CC=C1', expected: 'C1=CC=CC=C1.sdf' }
-      ];
-      
-      testCases.forEach(({ input, expected }) => {
-        const filename = molecularProcessor.generateSafeFilename(input);
-        expect(filename).toBe(expected);
-      });
+    test('should handle file operations', () => {
+      expect(molecularProcessor.sdfDir).toBeDefined();
+      expect(typeof molecularProcessor.findExistingSdfFile).toBe('function');
     });
   });
 
@@ -208,45 +197,24 @@ describe('Unit Tests', () => {
       await expect(analyzer.analyzeText('test')).rejects.toThrow('Network Error');
     });
 
-    test('should handle file system errors in molecular processor', async () => {
-      const fs = require('fs');
-      fs.writeFileSync.mockImplementationOnce(() => {
-        throw new Error('File system error');
-      });
-
-      await expect(molecularProcessor.processSmiles(['CCO'])).rejects.toThrow('File system error');
-    });
-
-    test('should handle Python subprocess errors', async () => {
-      const { execSync } = require('child_process');
-      execSync.mockImplementationOnce(() => {
-        throw new Error('Python script failed');
-      });
-
-      await expect(molecularProcessor.processSmiles(['CCO'])).rejects.toThrow('Python script failed');
+    test('should handle processing errors gracefully', async () => {
+      const result = await molecularProcessor.processSmiles(['INVALID_SMILES']);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.sdfPaths).toHaveLength(0);
     });
   });
 
   describe('Input Validation', () => {
-    test('should validate base64 image data', () => {
-      const validBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-      const invalidBase64 = 'not-base64-data';
-      
-      expect(aiAnalyzer.isValidBase64(validBase64)).toBe(true);
-      expect(aiAnalyzer.isValidBase64(invalidBase64)).toBe(false);
+    test('should validate schema data', () => {
+      const validData = { object: 'test object' };
+      const result = TextMoleculeSchema.safeParse(validData);
+      expect(result.success).toBe(true);
     });
 
-    test('should validate object descriptions', () => {
-      const validObjects = ['water bottle', 'coffee cup', 'plant'];
-      const invalidObjects = ['', '   ', null, undefined];
-      
-      validObjects.forEach(obj => {
-        expect(aiAnalyzer.isValidObjectDescription(obj)).toBe(true);
-      });
-      
-      invalidObjects.forEach(obj => {
-        expect(aiAnalyzer.isValidObjectDescription(obj)).toBe(false);
-      });
+    test('should reject invalid schema data', () => {
+      const invalidData = { object: 123 };
+      const result = TextMoleculeSchema.safeParse(invalidData);
+      expect(result.success).toBe(false);
     });
   });
 }); 

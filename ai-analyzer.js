@@ -14,59 +14,143 @@ class AIAnalyzer {
     
     return `Analyze the image and identify what the user clicked on. Return a JSON object with:
 - "object": brief description of what you see  
-- "chemicals": dictionary with "smiles" key containing an array of constituent molecules
+- "chemicals": array of objects with "name" and "smiles" fields (include both major and minor components when possible)
 
-IMPORTANT: 
-- Include any constituents as SMILES array (use proper SMILES notation, not chemical formulas)
-- Break down materials into their molecular components when possible
-- Use SMILES format like "O" for water, "CCO" for ethanol, NOT formulas like "H2O" or "C2H6O"
-- If you see a person or body part, return generic human body composition (water, proteins, etc.)
+IMPORTANT:
+- Be as chemically specific and realistic as possible. For food, beverages, and natural materials, include both major and minor chemical constituents (e.g., minerals, ions, organic acids, polyphenols, sugars, etc.).
+- Use proper SMILES notation, not chemical formulas or trivial names.
+- For mixtures (e.g., wine, seawater), list the most abundant and characteristic molecules.
+- For generic objects (e.g., "alcoholic beverage"), prefer to infer the likely type (e.g., wine, beer, spirits) and break down accordingly.
+- If you see a person or body part, return a realistic set of major body constituents (water, proteins, lipids, etc.).
 
 Chemical types and their representations:
 ${instructions}
 
 Example responses:
 {
-  "object": "A glass of water",
-  "chemicals": {
-    "smiles": ["O"]
-  }
+  "object": "Tap water",
+  "chemicals": [
+    {"name": "Water", "smiles": "O"},
+    {"name": "Sodium ion", "smiles": "[Na+]"},
+    {"name": "Chloride ion", "smiles": "[Cl-]"},
+    {"name": "Calcium ion", "smiles": "[Ca+2]"},
+    {"name": "Magnesium ion", "smiles": "[Mg+2]"},
+    {"name": "Potassium ion", "smiles": "[K+]"},
+    {"name": "Bicarbonate ion", "smiles": "[HCO3-]"}
+  ]
 }
 
 {
-  "object": "Limestone (calcium carbonate)",
-  "chemicals": {
-    "smiles": ["C(=O)([O-])[O-].[Ca+2]"]
-  }
+  "object": "Mineral water",
+  "chemicals": [
+    {"name": "Water", "smiles": "O"},
+    {"name": "Sodium ion", "smiles": "[Na+]"},
+    {"name": "Chloride ion", "smiles": "[Cl-]"},
+    {"name": "Calcium ion", "smiles": "[Ca+2]"},
+    {"name": "Magnesium ion", "smiles": "[Mg+2]"},
+    {"name": "Potassium ion", "smiles": "[K+]"},
+    {"name": "Bicarbonate ion", "smiles": "[HCO3-]"},
+    {"name": "Sulfate ion", "smiles": "[SO4-2]"},
+    {"name": "Iron(II) ion", "smiles": "[Fe+2]"},
+    {"name": "Zinc ion", "smiles": "[Zn+2]"}
+  ]
 }
 
 {
-  "object": "Alcoholic beverage",
-  "chemicals": {
-    "smiles": ["CCO", "O"]
-  }
+  "object": "Seawater",
+  "chemicals": [
+    {"name": "Water", "smiles": "O"},
+    {"name": "Sodium ion", "smiles": "[Na+]"},
+    {"name": "Chloride ion", "smiles": "[Cl-]"},
+    {"name": "Magnesium ion", "smiles": "[Mg+2]"},
+    {"name": "Sulfate ion", "smiles": "[SO4-2]"},
+    {"name": "Calcium ion", "smiles": "[Ca+2]"},
+    {"name": "Potassium ion", "smiles": "[K+]"},
+    {"name": "Bicarbonate ion", "smiles": "[HCO3-]"},
+    {"name": "Bromide ion", "smiles": "[Br-]"},
+    {"name": "Strontium ion", "smiles": "[Sr+2]"},
+    {"name": "Fluoride ion", "smiles": "[F-]"}
+  ]
+}
+
+{
+  "object": "Wine",
+  "chemicals": [
+    {"name": "Ethanol", "smiles": "CCO"},
+    {"name": "Water", "smiles": "O"},
+    {"name": "Tartaric acid", "smiles": "OC(C(O)C(O)=O)C(O)=O"},
+    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
+    {"name": "Fructose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
+    {"name": "Malic acid", "smiles": "C(C(=O)O)C(C(=O)O)O"},
+    {"name": "Citric acid", "smiles": "C(C(=O)O)C(O)(C(=O)O)O"},
+    {"name": "Resveratrol", "smiles": "C1=CC(=C(C=C1)O)O"},
+    {"name": "Phenol", "smiles": "C1=CC=C(C=C1)O"},
+    {"name": "Benzyl alcohol", "smiles": "C1=CC=C(C=C1)CO"},
+    {"name": "Benzoic acid", "smiles": "C1=CC=C(C=C1)C(=O)O"}
+  ]
+}
+
+{
+  "object": "Beer",
+  "chemicals": [
+    {"name": "Ethanol", "smiles": "CCO"},
+    {"name": "Water", "smiles": "O"},
+    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
+    {"name": "Fructose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
+    {"name": "Acetic acid", "smiles": "CC(=O)O"},
+    {"name": "Pyruvic acid", "smiles": "CC(=O)C(=O)O"},
+    {"name": "Phenol", "smiles": "C1=CC=C(C=C1)O"},
+    {"name": "Benzyl alcohol", "smiles": "C1=CC=C(C=C1)CO"},
+    {"name": "Benzoic acid", "smiles": "C1=CC=C(C=C1)C(=O)O"}
+  ]
+}
+
+{
+  "object": "Coffee",
+  "chemicals": [
+    {"name": "Water", "smiles": "O"},
+    {"name": "Caffeine", "smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"},
+    {"name": "Chlorogenic acid", "smiles": "C1=CC(=C(C=C1)O)O"},
+    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
+    {"name": "Phenol", "smiles": "C1=CC=C(C=C1)O"},
+    {"name": "Benzyl alcohol", "smiles": "C1=CC=C(C=C1)CO"}
+  ]
 }
 
 {
   "object": "Plastic bottle (PET)",
-  "chemicals": {
-    "smiles": ["O=C(C1=CC=C(CO)C=C1)OC"]
-  }
+  "chemicals": [
+    {"name": "PET repeat unit", "smiles": "O=C(C1=CC=CC=C1)OC2=CC=CC=C2C(=O)O"},
+    {"name": "Isobutyric acid", "smiles": "CC(C)C(=O)O"},
+    {"name": "Acetic acid", "smiles": "CC(=O)O"},
+    {"name": "Ethanol", "smiles": "CCO"}
+  ]
 }
 
 {
   "object": "Human hand",
-  "chemicals": {
-    "smiles": ["O", "NCCNCCNCCN", "CC(C)CC(N)C(=O)O"]
-  }
+  "chemicals": [
+    {"name": "Water", "smiles": "O"},
+    {"name": "Leucine", "smiles": "CC(C)C(C(=O)O)N"},
+    {"name": "Glycine", "smiles": "C(C(=O)O)N"},
+    {"name": "Palmitic acid", "smiles": "CCCCCCCCCCCCCCCC(=O)O"},
+    {"name": "Lactic acid", "smiles": "C(C(=O)O)O"},
+    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"}
+  ]
 }
 
 {
-  "object": "Coffee cup (ceramic)",
-  "chemicals": {
-    "smiles": ["O"]
-  }
-}`;
+  "object": "Grape",
+  "chemicals": [
+    {"name": "Water", "smiles": "O"},
+    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
+    {"name": "Fructose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
+    {"name": "Tartaric acid", "smiles": "OC(C(O)C(O)=O)C(O)=O"},
+    {"name": "Malic acid", "smiles": "C(C(=O)O)C(C(=O)O)O"},
+    {"name": "Resveratrol", "smiles": "C1=CC(=C(C=C1)O)O"}
+  ]
+}
+`;
   }
 
   async analyzeImage(imageBase64, croppedImageBase64 = null, x = null, y = null) {
@@ -117,7 +201,7 @@ Example responses:
       
       return {
         object: parsed.object || "Unknown object",
-        chemicals: parsed.chemicals || {}
+        chemicals: parsed.chemicals || []
       };
 
     } catch (error) {
@@ -145,7 +229,7 @@ Example responses:
       
       return {
         object: parsed.object || object,
-        chemicals: parsed.chemicals || {}
+        chemicals: parsed.chemicals || []
       };
 
     } catch (error) {
@@ -171,17 +255,18 @@ Example responses:
       if (content.includes("unable to identify or analyze people")) {
         return {
           object: "Human body (generic composition)",
-          chemicals: {
-            smiles: ["O", "NCCNCCNCCN", "CC(C)CC(N)C(=O)O", "CCCCCCCCCCCCCCCC(=O)O"]
-          }
+          chemicals: [
+            {"name": "Water", "smiles": "O"},
+            {"name": "Polyethylene glycol", "smiles": "NCCNCCNCCN"},
+            {"name": "Leucine", "smiles": "CC(C)CC(N)C(=O)O"},
+            {"name": "Palmitic acid", "smiles": "CCCCCCCCCCCCCCCC(=O)O"}
+          ]
         };
       }
       
       return {
         object: "Analysis failed",
-        chemicals: {
-          smiles: []
-        }
+        chemicals: []
       };
     }
   }
