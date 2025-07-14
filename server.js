@@ -35,13 +35,22 @@ app.use('/sdf_files', express.static(path.join(__dirname, 'sdf_files')));
 // Image analysis route
 app.post("/image-molecules", async (req, res) => {
   try {
-    const { imageBase64, croppedImageBase64, x, y } = req.body;
+    // Validate input schema
+    const validation = ImageMoleculeSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ 
+        error: "Invalid input data", 
+        details: validation.error.issues 
+      });
+    }
+
+    const { imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize } = req.body;
     
     if (!imageBase64) {
       return res.status(400).json({ error: "No image data provided" });
     }
 
-    const result = await aiAnalyzer.analyzeImage(imageBase64, croppedImageBase64, x, y);
+    const result = await aiAnalyzer.analyzeImage(imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize);
     res.json({ output: result });
   } catch (error) {
     console.error("Image analysis error:", error);
@@ -52,6 +61,15 @@ app.post("/image-molecules", async (req, res) => {
 // Text analysis route
 app.post("/object-molecules", async (req, res) => {
   try {
+    // Validate input schema
+    const validation = TextMoleculeSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ 
+        error: "Invalid input data", 
+        details: validation.error.issues 
+      });
+    }
+
     const { object } = req.body;
     
     if (!object) {
@@ -69,6 +87,15 @@ app.post("/object-molecules", async (req, res) => {
 // SDF generation route
 app.post('/generate-sdfs', async (req, res) => {
   try {
+    // Validate input schema
+    const validation = SdfGenerationSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ 
+        error: "Invalid input data", 
+        details: validation.error.issues 
+      });
+    }
+
     const { smiles, overwrite = false } = req.body;
     
     if (!smiles || !Array.isArray(smiles)) {
