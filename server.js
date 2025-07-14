@@ -134,16 +134,32 @@ const isNetlify = process.env.NETLIFY;
 const isTestMode = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID;
 const isServerless = isCloudFunction || isNetlify;
 
+// Store server instances for cleanup
+let httpServer;
+let httpsServerInstance;
+
 if (!isServerless && !isTestMode) {
   // Local development mode
-  app.listen(PORT, '0.0.0.0', () => {
+  httpServer = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 HTTP server running on http://0.0.0.0:${PORT}`);
+  });
+  
+  // Handle port binding errors
+  httpServer.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`❌ Port ${PORT} is already in use`);
+      console.log(`💡 Try: pkill -f "node.*server.js" or use a different port`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', error);
+      process.exit(1);
+    }
   });
 
   // Start HTTPS server for development
   if (process.env.NODE_ENV !== 'production') {
     const httpsServer = new HttpsServer(app, HTTPS_PORT);
-    httpsServer.start();
+    httpsServerInstance = httpsServer.start();
   }
 } else {
   // Serverless mode
@@ -157,6 +173,45 @@ if (!isServerless && !isTestMode) {
     console.error('❌ OPENAI_API_KEY environment variable is required for production');
     process.exit(1);
   }
+}
+
+// Graceful shutdown handling for nodemon restarts
+if (!isServerless && !isTestMode) {
+  const gracefulShutdown = (signal) => {
+    console.log(`\n${signal} received: closing HTTP/HTTPS servers gracefully`);
+    
+    const closeServer = (server, name) => {
+      return new Promise((resolve) => {
+        if (server) {
+          server.close(() => {
+            console.log(`✅ ${name} server closed`);
+            resolve();
+          });
+        } else {
+          resolve();
+        }
+      });
+    };
+    
+    Promise.all([
+      closeServer(httpServer, 'HTTP'),
+      closeServer(httpsServerInstance, 'HTTPS')
+    ]).then(() => {
+      console.log('👋 Shutdown complete');
+      process.exit(0);
+    });
+    
+    // Force exit after 5 seconds
+    setTimeout(() => {
+      console.error('⚠️ Forced shutdown after timeout');
+      process.exit(1);
+    }, 5000);
+  };
+  
+  // Listen for termination signals
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  process.on('SIGUSR2', () => gracefulShutdown('SIGUSR2')); // Nodemon uses this
 }
 
 // Always export the app for Cloud Functions
