@@ -610,7 +610,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeButton = document.createElement("button");
     closeButton.className = "column-close";
     closeButton.textContent = "×";
-    closeButton.onclick = () => objectColumn.remove();
+    closeButton.onclick = () => {
+      objectColumn.remove();
+      updateScrollHandles();
+    };
     titleContainer.appendChild(closeButton);
     
     objectColumn.appendChild(titleContainer);
@@ -681,6 +684,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     gldiv.appendChild(objectColumn);
+    
+    // Update scroll handles after adding new column
+    updateScrollHandles();
   }
 
   async function render(sdfFile, container) {
@@ -723,6 +729,162 @@ document.addEventListener("DOMContentLoaded", () => {
       return null;
     }
   }
+
+  // Create scroll handle buttons
+  function createScrollHandles() {
+    const gldiv = document.getElementById('gldiv');
+    if (!gldiv) return;
+    
+    // Create left scroll button
+    const leftHandle = document.createElement('button');
+    leftHandle.className = 'scroll-handle scroll-handle-left';
+    leftHandle.textContent = '◀';
+    leftHandle.setAttribute('aria-label', 'Scroll left');
+    leftHandle.setAttribute('title', 'Scroll left (or press Left arrow)');
+    leftHandle.id = 'scroll-left-btn';
+    
+    // Create right scroll button
+    const rightHandle = document.createElement('button');
+    rightHandle.className = 'scroll-handle scroll-handle-right';
+    rightHandle.textContent = '▶';
+    rightHandle.setAttribute('aria-label', 'Scroll right');
+    rightHandle.setAttribute('title', 'Scroll right (or press Right arrow)');
+    rightHandle.id = 'scroll-right-btn';
+    
+    // Add click handlers with throttling
+    let clickThrottle = false;
+    leftHandle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (clickThrottle) return;
+      clickThrottle = true;
+      setTimeout(() => clickThrottle = false, 100);
+      
+      const scrollAmount = 450;
+      gldiv.scrollLeft -= scrollAmount;
+      updateScrollHandles();
+    });
+    
+    rightHandle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (clickThrottle) return;
+      clickThrottle = true;
+      setTimeout(() => clickThrottle = false, 100);
+      
+      const scrollAmount = 450;
+      gldiv.scrollLeft += scrollAmount;
+      updateScrollHandles();
+    });
+    
+    // Add keyboard support
+    leftHandle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        leftHandle.click();
+      }
+    });
+    
+    rightHandle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        rightHandle.click();
+      }
+    });
+    
+    // Append to gldiv
+    gldiv.appendChild(leftHandle);
+    gldiv.appendChild(rightHandle);
+  }
+
+  // Update scroll handle visibility with throttling
+  let updateScrollHandlesTimeout;
+  function updateScrollHandles() {
+    // Debounce rapid calls
+    clearTimeout(updateScrollHandlesTimeout);
+    updateScrollHandlesTimeout = setTimeout(() => {
+      updateScrollHandlesInternal();
+    }, 10);
+  }
+
+  function updateScrollHandlesInternal() {
+    const gldiv = document.getElementById('gldiv');
+    if (!gldiv) return;
+    
+    const leftHandle = document.getElementById('scroll-left-btn');
+    const rightHandle = document.getElementById('scroll-right-btn');
+    if (!leftHandle || !rightHandle) return;
+    
+    // Avoid unnecessary updates if scroll position hasn't changed
+    const currentScrollLeft = gldiv.scrollLeft;
+    const currentScrollWidth = gldiv.scrollWidth;
+    const currentClientWidth = gldiv.clientWidth;
+    
+    if (updateScrollHandlesInternal.lastScrollLeft === currentScrollLeft && 
+        updateScrollHandlesInternal.lastScrollWidth === currentScrollWidth && 
+        updateScrollHandlesInternal.lastClientWidth === currentClientWidth) {
+      return;
+    }
+    
+    updateScrollHandlesInternal.lastScrollLeft = currentScrollLeft;
+    updateScrollHandlesInternal.lastScrollWidth = currentScrollWidth;
+    updateScrollHandlesInternal.lastClientWidth = currentClientWidth;
+    
+    const canScrollLeft = gldiv.scrollLeft > 0;
+    const canScrollRight = gldiv.scrollLeft < (gldiv.scrollWidth - gldiv.clientWidth);
+    
+    // Only show handles if content overflows
+    const hasOverflow = gldiv.scrollWidth > gldiv.clientWidth;
+    
+    const shouldShowLeft = hasOverflow && canScrollLeft;
+    const shouldShowRight = hasOverflow && canScrollRight;
+    
+    // Only update if visibility state actually changes
+    if (shouldShowLeft !== leftHandle.classList.contains('show')) {
+      if (shouldShowLeft) {
+        leftHandle.classList.add('show');
+        leftHandle.setAttribute('tabindex', '0');
+      } else {
+        leftHandle.classList.remove('show');
+        leftHandle.setAttribute('tabindex', '-1');
+      }
+    }
+    
+    if (shouldShowRight !== rightHandle.classList.contains('show')) {
+      if (shouldShowRight) {
+        rightHandle.classList.add('show');
+        rightHandle.setAttribute('tabindex', '0');
+      } else {
+        rightHandle.classList.remove('show');
+        rightHandle.setAttribute('tabindex', '-1');
+      }
+    }
+  }
+
+  // Initialize scroll handles
+  document.addEventListener('DOMContentLoaded', () => {
+    // Create scroll handles after DOM is ready
+    createScrollHandles();
+    
+    // Update scroll handles on scroll (throttled)
+    let scrollTimeout;
+    document.addEventListener('scroll', (e) => {
+      if (e.target.id === 'gldiv') {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(updateScrollHandles, 16); // ~60fps
+      }
+    }, true);
+    
+    // Update scroll handles on window resize (throttled)
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateScrollHandles, 100); // Throttle resize events
+    });
+    
+    // Initial update
+    updateScrollHandles();
+  });
 
   (async () => {
     try {
