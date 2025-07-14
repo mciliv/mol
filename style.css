@@ -701,6 +701,71 @@ input[type="radio"]:checked + .mode-label {
   background: rgba(255, 255, 255, 0.5);
 }
 
+/* Custom scroll handles */
+.scroll-handle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.scroll-handle.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.scroll-handle:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.scroll-handle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.scroll-handle:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+.scroll-handle-left {
+  left: 10px;
+}
+
+.scroll-handle-right {
+  right: 10px;
+}
+
+/* Hide scroll handles on mobile */
+@media (max-width: 768px) {
+  .scroll-handle {
+    display: none;
+  }
+}
+
 /* Photo upload option */
 .upload-option {
   display: flex;
