@@ -1,0 +1,88 @@
+# File Organization Patterns
+
+## Project Structure
+```
+mol/
+├── app.js                    # Main frontend application
+├── server.js                 # Express.js backend server
+├── AtomPredictor.js          # AI analysis module
+├── molecular-processor.js    # Molecular data processing
+├── schemas.js               # Data validation schemas
+├── index.html               # Main HTML template
+├── style.css                # Application styling
+├── waves.svg                # UI icons and assets
+├── camera.svg
+├── water.svg
+├── sdf_files/               # Generated molecular structures
+├── tests/                   # Test files
+│   ├── unit.test.js
+│   ├── integration.test.js
+│   └── smoke.test.js
+├── scripts/                 # Utility scripts
+├── dock/                    # Docking-related modules
+├── certs/                   # SSL certificates (development)
+└── .cursor/rules/           # Cursor IDE rules
+```
+
+## File Naming Conventions
+- **Main Files**: Use descriptive names (e.g., `app.js`, `server.js`)
+- **Module Files**: Use PascalCase for classes (e.g., `AtomPredictor.js`)
+- **Utility Files**: Use descriptive names (e.g., `molecular-processor.js`)
+- **Asset Files**: Use descriptive names (e.g., `waves.svg`, `camera.svg`)
+
+## Directory Organization
+- **Root Level**: Keep main application files at root for simple serving
+- **Generated Files**: Store in dedicated directories (e.g., `sdf_files/`)
+- **Test Files**: Organize in `tests/` directory with descriptive names
+- **Scripts**: Keep utility scripts in `scripts/` directory
+- **Configuration**: Store config files at root level
+- **Documentation**: Keep docs at root level for easy access
+
+## Import/Export Organization
+```javascript
+// Group imports by type
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+
+// Local modules
+const HttpsServer = require("./https-server");
+const AtomPredictor = require("./AtomPredictor");
+const MolecularProcessor = require("./molecular-processor");
+const { ImageMoleculeSchema, TextMoleculeSchema } = require("./schemas");
+```
+
+## Asset Organization
+- **SVG Icons**: Store at root level for simple serving
+- **Generated SDFs**: Store in `sdf_files/` directory
+- **Static Assets**: Keep CSS, JS, and images in root
+- **Temporary Files**: Use appropriate temp directories
+
+## Configuration Files
+- **Environment**: Use `.env` files for environment variables
+- **Package Management**: Keep `package.json` and `pyproject.toml` at root
+- **IDE Configuration**: Store in `.vscode/` and `.cursor/` directories
+- **Deployment**: Keep deployment configs at root level
+
+## Test Organization
+- **Unit Tests**: Test individual components and functions
+- **Integration Tests**: Test complete workflows and API endpoints
+- **Smoke Tests**: Test basic functionality and startup
+- **Fixtures**: Store test data in `tests/fixtures/` if needed
+
+## Documentation Organization
+- **README**: Keep main documentation at root
+- **Deployment**: Store deployment guides at root
+- **API Documentation**: Include in code comments and README
+- **Development Guides**: Store in markdown files at root
+
+## Security Considerations
+- **Sensitive Files**: Never commit API keys or secrets
+- **SSL Certificates**: Store in `certs/` directory (add to .gitignore)
+- **Environment Variables**: Use `.env` files for configuration
+- **Access Control**: Implement proper authentication and authorization
+description:
+globs:
+alwaysApply: false
+---

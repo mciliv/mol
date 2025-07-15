@@ -1,0 +1,46 @@
+# Naming Conventions
+
+## File Naming
+- **JavaScript Files**: Use PascalCase for classes (e.g., `AtomPredictor.js`, `MolecularProcessor.js`)
+- **Python Files**: Use snake_case (e.g., `molecular_processor.py`, `crystal.py`)
+- **Test Files**: Use descriptive names with `.test.js` suffix (e.g., `unit.test.js`, `integration.test.js`)
+- **SVG Files**: Use descriptive names (e.g., `waves.svg`, `camera.svg`, `water.svg`)
+
+## Class Naming
+- **JavaScript Classes**: Use PascalCase (e.g., `AtomPredictor`, `MolecularProcessor`)
+- **Python Classes**: Use PascalCase (e.g., `CrystalProcessor`, `MolecularAnalyzer`)
+- **Test Classes**: Use descriptive names (e.g., `UnitTests`, `IntegrationTests`)
+
+## Variable Naming
+- **JavaScript Variables**: Use camelCase (e.g., `atomPredictor`, `molecularProcessor`)
+- **Python Variables**: Use snake_case (e.g., `molecular_processor`, `crystal_data`)
+- **Constants**: Use UPPER_SNAKE_CASE (e.g., `OPENAI_API_KEY`, `CHEMICAL_REPRESENTATIONS`)
+
+## Function Naming
+- **JavaScript Functions**: Use camelCase (e.g., `analyzeImage`, `generateSDFs`)
+- **Python Functions**: Use snake_case (e.g., `analyze_molecule`, `generate_sdf`)
+- **Async Functions**: Use descriptive names with async context (e.g., `analyzeImage`, `processSmiles`)
+
+## Import/Export Naming
+- **Module Imports**: Use consistent naming (e.g., `const AtomPredictor = require("./AtomPredictor")`)
+- **Variable Imports**: Match the exported name (e.g., `const { ImageMoleculeSchema } = require("./schemas")`)
+- **Default Exports**: Use PascalCase for classes, camelCase for functions
+
+## Database/API Naming
+- **API Endpoints**: Use kebab-case (e.g., `/image-molecules`, `/object-molecules`)
+- **Database Fields**: Use snake_case (e.g., `molecule_name`, `smiles_string`)
+- **Environment Variables**: Use UPPER_SNAKE_CASE (e.g., `OPENAI_API_KEY`, `NODE_ENV`)
+
+## CSS Class Naming
+- **Component Classes**: Use kebab-case (e.g., `molecule-container`, `photo-upload`)
+- **Utility Classes**: Use descriptive names (e.g., `loading-indicator`, `error-message`)
+- **State Classes**: Use clear state names (e.g., `is-loading`, `has-error`)
+
+## Error Handling
+- **Error Variables**: Use descriptive names (e.g., `validationError`, `apiError`)
+- **Error Messages**: Use clear, actionable messages
+- **Error Types**: Use specific error names (e.g., `ValidationError`, `APIError`)
+description:
+globs:
+alwaysApply: false
+---

@@ -1,0 +1,93 @@
+# Performance Optimization Patterns
+
+## 3D Rendering Optimization
+- **Batch Loading**: Load multiple molecules efficiently
+- **Viewer Cleanup**: Properly dispose of 3D viewers when not needed
+- **Memory Management**: Clean up WebGL contexts and resources
+- **Lazy Loading**: Load SDF files only when needed
+- **Caching**: Cache generated SDF files to avoid regeneration
+
+## Image Processing Optimization
+- **Compression**: Use appropriate image compression (JPEG 0.9 for photos)
+- **Base64 Handling**: Optimize base64 encoding/decoding
+- **Canvas Operations**: Minimize canvas redraws and operations
+- **Crop Optimization**: Efficient image cropping for AI analysis
+- **Mobile Optimization**: Handle mobile device constraints
+
+## API Performance
+- **Request Batching**: Batch multiple API calls when possible
+- **Caching**: Cache API responses for repeated requests
+- **Error Handling**: Implement proper timeout and retry logic
+- **Rate Limiting**: Handle API rate limits gracefully
+- **Response Optimization**: Minimize response payload size
+
+## Memory Management
+```javascript
+// Clean up 3D viewers
+function cleanupViewer(viewer) {
+  if (viewer) {
+    viewer.dispose();
+    viewer = null;
+  }
+}
+
+// Clean up streams
+function cleanupStream(stream) {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+}
+
+// Clean up event listeners
+function removeEventListeners(element, events) {
+  events.forEach(event => {
+    element.removeEventListener(event.type, event.handler);
+  });
+}
+```
+
+## File System Optimization
+- **SDF Generation**: Generate SDF files efficiently with RDKit
+- **File Caching**: Cache generated files to avoid regeneration
+- **Cleanup**: Remove temporary files after processing
+- **Error Handling**: Handle file system errors gracefully
+- **Concurrent Processing**: Handle multiple file operations efficiently
+
+## Network Optimization
+- **CDN Usage**: Use CDN for static assets when possible
+- **Compression**: Enable gzip compression for responses
+- **Caching Headers**: Set appropriate cache headers
+- **Connection Pooling**: Reuse connections when possible
+- **Timeout Handling**: Implement proper request timeouts
+
+## Database Optimization
+- **Query Optimization**: Use efficient database queries
+- **Indexing**: Create appropriate indexes for frequent queries
+- **Connection Pooling**: Reuse database connections
+- **Batch Operations**: Use batch operations for multiple records
+- **Caching**: Cache frequently accessed data
+
+## Mobile Performance
+- **Touch Optimization**: Optimize touch event handling
+- **Battery Usage**: Minimize battery consumption
+- **Network Usage**: Optimize data usage for mobile networks
+- **Memory Constraints**: Handle limited mobile memory
+- **Processing Limits**: Respect mobile device processing limits
+
+## Monitoring and Profiling
+- **Performance Metrics**: Monitor key performance indicators
+- **Memory Usage**: Track memory consumption
+- **Response Times**: Monitor API response times
+- **Error Rates**: Track error rates and types
+- **User Experience**: Monitor user interaction performance
+
+## Optimization Best Practices
+- **Measure First**: Profile before optimizing
+- **Incremental Optimization**: Optimize incrementally
+- **User-Centric**: Focus on user experience improvements
+- **Maintainability**: Keep optimizations maintainable
+- **Testing**: Test performance improvements thoroughly
+description:
+globs:
+alwaysApply: false
+---
