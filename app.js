@@ -641,9 +641,10 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Found video devices:", videoDevices.length);
 
     if (videoDevices.length > 1) {
+      const switchCameraContainer = document.querySelector('.switch-camera-container');
       const switchCameraBtn = document.getElementById('switch-camera-btn');
-      if (switchCameraBtn) {
-        switchCameraBtn.style.display = 'block';
+      if (switchCameraContainer && switchCameraBtn) {
+        switchCameraContainer.style.display = 'block';
         switchCameraBtn.onclick = () => {
           facingMode = facingMode === "user" ? "environment" : "user";
           startCamera();
