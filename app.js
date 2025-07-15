@@ -641,15 +641,14 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Found video devices:", videoDevices.length);
 
     if (videoDevices.length > 1) {
-      const switchCameraBtn = document.createElement('button');
-      switchCameraBtn.textContent = 'Switch Camera';
-      switchCameraBtn.classList.add('switch-camera-btn');
-      snapshots.appendChild(switchCameraBtn);
-      switchCameraBtn.style.display = 'block';
-      switchCameraBtn.onclick = () => {
-        facingMode = facingMode === "user" ? "environment" : "user";
-        startCamera();
-      };
+      const switchCameraBtn = document.getElementById('switch-camera-btn');
+      if (switchCameraBtn) {
+        switchCameraBtn.style.display = 'block';
+        switchCameraBtn.onclick = () => {
+          facingMode = facingMode === "user" ? "environment" : "user";
+          startCamera();
+        };
+      }
     }
   }
 
