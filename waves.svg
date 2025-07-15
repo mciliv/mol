@@ -2,8 +2,6 @@
   <!-- Square boundary -->
   <rect x="2" y="2" width="20" height="20" rx="1" stroke-width="1" opacity="0.3"/>
   
-  <!-- Clear wave pattern within square -->
-  <path d="M4 8c1.5-1.5 3-1.5 4.5-1.5s3 0 4.5 1.5 3 1.5 4.5 1.5 3 0 4.5-1.5" opacity="0.9"/>
-  <path d="M4 12c1.5-1.5 3-1.5 4.5-1.5s3 0 4.5 1.5 3 1.5 4.5 1.5 3 0 4.5-1.5" opacity="0.7"/>
-  <path d="M4 16c1.5-1.5 3-1.5 4.5-1.5s3 0 4.5 1.5 3 1.5 4.5 1.5 3 0 4.5-1.5" opacity="0.5"/>
+  <!-- Single curved wave -->
+  <path d="M4 12c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.8"/>
 </svg> 
