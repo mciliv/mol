@@ -1,0 +1,6 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Simple wave pattern -->
+  <path d="M2 12c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.8"/>
+  <path d="M2 16c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.6"/>
+  <path d="M2 20c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.4"/>
+</svg> 

@@ -2,8 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Atomic Reality</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>Atomizer - Molecular Analysis</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -13,7 +16,7 @@
         <input
           id="object-input"
           type="text"
-          placeholder="Describe any object or part of the image and press Enter..."
+          placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter..."
           class="text-input"
         />
       </div>
@@ -21,21 +24,22 @@
       <!-- Input mode selection -->
       <div class="input-mode-section">
         <div class="mode-selector">
-          <input type="radio" id="camera-mode" name="input-mode" value="camera" checked>
+          <input type="checkbox" id="camera-mode" checked>
           <label for="camera-mode" class="mode-label">
             <svg class="camera-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="5" fill="currentColor" opacity="0.8"/>
-              <circle cx="12" cy="12" r="9" stroke="currentColor" fill="none"/>
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
             </svg>
             <span>Camera</span>
           </label>
           
-          <input type="radio" id="photo-mode" name="input-mode" value="photo">
+          <input type="checkbox" id="photo-mode">
           <label for="photo-mode" class="mode-label">
-            <svg class="photo-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21,15 16,10 5,21"/>
+            <svg class="photo-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Simple wave pattern -->
+              <path d="M2 12c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.8"/>
+              <path d="M2 16c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.6"/>
+              <path d="M2 20c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.4"/>
             </svg>
             <span>Photo</span>
           </label>
@@ -43,13 +47,13 @@
         
         <!-- Camera section -->
         <div class="camera-container" id="camera-container">
-          <video id="video-feed" autoplay playsinline muted width="100%"></video>
+          <video id="video-feed" autoplay playsinline muted webkit-playsinline x-webkit-airplay="allow" width="100%"></video>
           <div class="permission-message" hidden></div>
           <div class="crosshair"></div>
           
 
           
-          <div class="instruction-text">Click on image parts or type descriptions above</div>
+          <div class="instruction-text">Center object in circle & tap, or type name above</div>
         </div>
         
         <!-- Photo upload options -->
@@ -57,10 +61,11 @@
           <div class="upload-option">
             <input type="file" id="photo-upload" accept="image/*" aria-label="Upload photo for molecular analysis">
             <label for="photo-upload" class="upload-label">
-              <svg class="photo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21,15 16,10 5,21"/>
+              <svg class="photo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <!-- Simple wave pattern -->
+                <path d="M2 12c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.8"/>
+                <path d="M2 16c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.6"/>
+                <path d="M2 20c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.4"/>
               </svg>
               <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
                 <text x="40" y="14" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="currentColor">Upload Photo</text>
@@ -89,7 +94,62 @@
       <div id="gldiv"></div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <!-- HTML Templates -->
+    <template id="photo-upload-template">
+      <div class="upload-option">
+        <input type="file" id="photo-upload" accept="image/*" aria-label="Upload photo for molecular analysis">
+        <label for="photo-upload" class="upload-label">
+          <svg class="photo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Simple wave pattern -->
+            <path d="M2 12c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.8"/>
+            <path d="M2 16c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.6"/>
+            <path d="M2 20c2-2 4-2 6-2s4 0 6 2 4 2 6 2 4 0 6-2" opacity="0.4"/>
+          </svg>
+          <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
+            <text x="40" y="14" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="currentColor">Upload Photo</text>
+          </svg>
+        </label>
+        
+        <div class="url-input-container">
+          <input type="url" id="photo-url" placeholder="Paste image URL..." aria-label="Enter image URL for molecular analysis">
+          <button type="button" id="url-analyze" class="url-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"/>
+            </svg>
+            <svg class="url-text" width="50" height="16" viewBox="0 0 50 16">
+              <text x="25" y="12" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="currentColor">Analyze</text>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <template id="mobile-reticle-template">
+      <div class="reticle-circle"></div>
+      <div class="reticle-crosshair-h"></div>
+      <div class="reticle-crosshair-v"></div>
+    </template>
+
+    <template id="chemical-summary-template">
+      <div class="chemical-summary">
+        <div>Total chemicals found: <span class="summary-total"></span></div>
+        <div>3D visualizable: <span class="summary-visualizable"></span></div>
+        <div class="summary-skipped" style="display: none;">Non-SMILES formats: <span class="summary-skipped-count"></span></div>
+        <div class="summary-errors" style="display: none;">Failed: <span class="summary-errors-count"></span></div>
+      </div>
+    </template>
+
+    <template id="skipped-chemicals-template">
+      <div class="skipped-chemicals">
+        <div class="skipped-title">Other chemicals found:</div>
+        <div class="skipped-list"></div>
+        <div class="skipped-note">* These likely represent minerals/crystals that can't be shown in 3D molecular view</div>
+      </div>
+    </template>
+
+        <script type="module" src="app.js"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <!-- LiveReload disabled - using nodemon for server restarts -->
   </body>
 </html>
