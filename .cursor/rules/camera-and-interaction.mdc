@@ -1,0 +1,67 @@
+# Camera and User Interaction Patterns
+
+## Camera API Requirements
+- **Always check for browser compatibility** and HTTPS requirements
+- Implement proper error handling for camera access denial
+- Handle Safari-specific camera constraints and attributes
+- Support both mobile and desktop camera modes
+- Implement camera switching for devices with multiple cameras
+
+## Mobile vs Desktop Handling
+- Use `facingMode: "environment"` for mobile devices
+- Use `facingMode: "user"` for desktop devices
+- Implement mobile-specific touch handling and reticle targeting
+- Handle Safari-specific video attributes and constraints
+- Provide different interaction patterns for mobile and desktop
+
+## Camera Constraints
+```javascript
+// Safari-specific constraints
+const safariConstraints = () => ({ 
+  video: {
+    facingMode,
+    width: { min: 640, ideal: 1280, max: 1920 },
+    height: { min: 480, ideal: 720, max: 1080 }
+  } 
+});
+
+// Basic constraints for fallback
+const basicConstraints = () => ({ 
+  video: {
+    width: { ideal: 1280 },
+    height: { ideal: 720 }
+  } 
+});
+```
+
+## User Interaction Patterns
+- Implement click and touch event handling
+- Use relative coordinates for accurate targeting
+- Show visual feedback for user interactions (crop outlines)
+- Handle mobile reticle targeting for precise object selection
+- Implement proper event prevention for mobile devices
+
+## Image Processing
+- Capture video frames using canvas
+- Implement proper image cropping for AI analysis
+- Use base64 encoding for image transmission
+- Handle image compression and quality settings
+- Implement proper coordinate scaling between display and video
+
+## Error Handling
+- Handle camera permission denial gracefully
+- Provide clear error messages for different failure modes
+- Implement fallback constraints for unsupported devices
+- Handle Safari-specific camera limitations
+- Provide alternative input methods when camera fails
+
+## Mobile-Specific Features
+- Add targeting reticle for mobile devices
+- Implement touch event prevention for zoom
+- Handle mobile-specific video attributes
+- Provide visual feedback for reticle targeting
+- Implement proper mobile interaction patterns
+description:
+globs:
+alwaysApply: false
+---
