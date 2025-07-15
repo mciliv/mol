@@ -43,18 +43,18 @@ class MolecularProcessor {
     if (!overwrite) {
       const existingPath = this.findExistingSdfFile(smiles);
       if (existingPath) {
-        console.log(`✅ Using existing file: ${smiles} → ${existingPath}`);
+        console.log(`Using existing file: ${smiles} → ${existingPath}`);
         return existingPath;
       }
     }
 
     // Generate from SMILES
     try {
-      console.log(`🧬 Generating SMILES structure for: ${smiles}`);
+      console.log(`Generating SMILES structure for: ${smiles}`);
       const sdfPath = await this.generateSmilesSDF(smiles);
       if (sdfPath) return sdfPath;
     } catch (error) {
-      console.log(`⚠️ SMILES generation failed for ${smiles}`);
+              console.log(`SMILES generation failed for ${smiles}`);
       throw error;
     }
 
@@ -80,7 +80,7 @@ class MolecularProcessor {
         if (code === 0) {
           const sdfPath = this.findExistingSdfFile(chemical);
           if (sdfPath) {
-            console.log(`✅ Successfully generated SMILES structure: ${chemical} → ${sdfPath}`);
+            console.log(`Successfully generated SMILES structure: ${chemical} → ${sdfPath}`);
             resolve(sdfPath);
           } else {
             reject(new Error(`SMILES succeeded but couldn't find SDF file for ${chemical}`));

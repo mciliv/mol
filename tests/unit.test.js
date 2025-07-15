@@ -4,7 +4,7 @@
 const request = require("supertest");
 const fs = require("fs");
 const path = require("path");
-const AIAnalyzer = require('../ai-analyzer');
+const AtomPredictor = require('../AtomPredictor');
 const MolecularProcessor = require('../molecular-processor');
 const { ImageMoleculeSchema, TextMoleculeSchema, SdfGenerationSchema } = require('../schemas');
 
@@ -58,21 +58,21 @@ beforeAll(() => {
 });
 
 describe('Unit Tests', () => {
-  let aiAnalyzer;
+  let atomPredictor;
   let molecularProcessor;
 
   beforeEach(() => {
-    aiAnalyzer = new AIAnalyzer('test-api-key');
+    atomPredictor = new AtomPredictor('test-api-key');
     molecularProcessor = new MolecularProcessor();
   });
 
-  describe('AIAnalyzer', () => {
+  describe('AtomPredictor', () => {
     test('should initialize with API key', () => {
-      expect(aiAnalyzer.client).toBeDefined();
+              expect(atomPredictor.client).toBeDefined();
     });
 
     test('should analyze text input', async () => {
-      const result = await aiAnalyzer.analyzeText('test object');
+      const result = await atomPredictor.analyzeText('test object');
       expect(result).toHaveProperty('object');
       expect(result).toHaveProperty('chemicals');
       expect(Array.isArray(result.chemicals)).toBe(true);
@@ -80,7 +80,7 @@ describe('Unit Tests', () => {
 
     test('should analyze image input', async () => {
       const mockImageBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-      const result = await aiAnalyzer.analyzeImage(mockImageBase64, mockImageBase64, 100, 100);
+      const result = await atomPredictor.analyzeImage(mockImageBase64, mockImageBase64, 100, 100);
       expect(result).toHaveProperty('object');
       expect(result).toHaveProperty('chemicals');
     });
@@ -95,7 +95,7 @@ describe('Unit Tests', () => {
         }
       }));
 
-      const analyzer = new AIAnalyzer('invalid-key');
+      const analyzer = new AtomPredictor('invalid-key');
       await expect(analyzer.analyzeText('test')).rejects.toThrow('API Error');
     });
   });
@@ -193,7 +193,7 @@ describe('Unit Tests', () => {
         }
       }));
 
-      const analyzer = new AIAnalyzer('test-key');
+      const analyzer = new AtomPredictor('test-key');
       await expect(analyzer.analyzeText('test')).rejects.toThrow('Network Error');
     });
 

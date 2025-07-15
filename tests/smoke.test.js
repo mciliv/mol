@@ -17,7 +17,7 @@ describe('Smoke Tests', () => {
       const response = await request(app).get('/');
       expect(response.status).toBe(200);
       expect(response.text).toContain('<!doctype html>');
-      expect(response.text).toContain('Atomic Reality');
+      expect(response.text).toContain('Atomizer - Molecular Analysis');
     });
 
     test('should have required core files', () => {
@@ -27,7 +27,7 @@ describe('Smoke Tests', () => {
         'app.js',
         'style.css',
         'schemas.js',
-        'ai-analyzer.js',
+        'AtomPredictor.js',
         'molecular-processor.js',
         'package.json'
       ];
@@ -165,7 +165,7 @@ describe('Smoke Tests', () => {
     });
 
     test('should have valid JavaScript files', () => {
-      const jsFiles = ['app.js', 'server.js', 'ai-analyzer.js', 'molecular-processor.js'];
+      const jsFiles = ['app.js', 'server.js', 'AtomPredictor.js', 'molecular-processor.js'];
       
       jsFiles.forEach(file => {
         const filePath = path.join(__dirname, '..', file);

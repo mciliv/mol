@@ -14,23 +14,56 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlAnalyze = document.getElementById("url-analyze");
 
   function updateInputMode() {
-    if (cameraMode.checked) {
-      cameraContainer.style.display = "flex";
-      photoOptions.style.display = "none";
-    } else {
-      cameraContainer.style.display = "none";
-      photoOptions.style.display = "flex";
-    }
+    // Show/hide camera based on checkbox state
+    cameraContainer.style.display = cameraMode.checked ? "flex" : "none";
+    
+    // Show/hide photo options based on checkbox state
+    photoOptions.style.display = photoMode.checked ? "flex" : "none";
   }
 
+  // Auto-switch checkboxes based on user interaction
+  function switchToCameraMode() {
+    cameraMode.checked = true;
+    photoMode.checked = false;
+    updateInputMode();
+  }
+
+  function switchToPhotoMode() {
+    photoMode.checked = true;
+    cameraMode.checked = false;
+    updateInputMode();
+  }
+
+  function clearModeSelection() {
+    cameraMode.checked = false;
+    photoMode.checked = false;
+    updateInputMode();
+  }
+
+  // Event listeners for checkbox changes
   cameraMode.addEventListener("change", updateInputMode);
   photoMode.addEventListener("change", updateInputMode);
+  
+  // Auto-switch based on user interaction
+  video.addEventListener("click", switchToCameraMode);
+  video.addEventListener("touchstart", switchToCameraMode);
+  
+  photoUpload.addEventListener("change", switchToPhotoMode);
+  photoUrl.addEventListener("focus", switchToPhotoMode);
+  urlAnalyze.addEventListener("click", switchToPhotoMode);
+  
+  // Text input interaction clears mode selection
+  objectInput.addEventListener("focus", clearModeSelection);
+  
   updateInputMode();
   
   objectInput.addEventListener("keyup", async (e) => {
     if (e.key !== "Enter") return;
     const object = objectInput.value.trim();
     if (!object) return;
+
+    // Show immediate loading feedback
+    const loadingColumn = createLoadingColumn(`Analyzing "${object}"...`);
 
     try {
       const res = await fetch("/object-molecules", {
@@ -42,12 +75,16 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { output } = await res.json();
 
-      processAnalysisResult(output, snapshots, "📝", object, true);
+      // Remove loading column
+      loadingColumn.remove();
+      updateScrollHandles();
+
+      processAnalysisResult(output, snapshots, "Text", object, true);
     } catch (err) {
-      const h3 = document.createElement("h3");
-      h3.textContent = `⚠ Error analyzing "${object}": ${err.message}`;
-      h3.style.color = "red";
-      snapshots.appendChild(h3);
+      // Remove loading column on error
+      loadingColumn.remove();
+      updateScrollHandles();
+      createClosableErrorMessage(`Error analyzing "${object}": ${err.message}`);
     }
     objectInput.value = "";
   });
@@ -99,55 +136,35 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const img = document.createElement('img');
     
-    const crosshair = document.createElement('div');
-    crosshair.className = 'crosshair';
-    
-    const beforeLine = document.createElement('div');
-    beforeLine.className = 'crosshair-line vertical';
-    
-    const afterLine = document.createElement('div');
-    afterLine.className = 'crosshair-line horizontal';
-    
-    crosshair.appendChild(beforeLine);
-    crosshair.appendChild(afterLine);
+    // Only show crosshair on mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    let crosshair;
+    if (isMobile) {
+      crosshair = document.createElement('div');
+      crosshair.className = 'crosshair';
+      const beforeLine = document.createElement('div');
+      beforeLine.className = 'crosshair-line vertical';
+      const afterLine = document.createElement('div');
+      afterLine.className = 'crosshair-line horizontal';
+      crosshair.appendChild(beforeLine);
+      crosshair.appendChild(afterLine);
+    }
     
     const instructionText = document.createElement('div');
     instructionText.className = 'instruction-text';
-    instructionText.textContent = 'Click on image parts or type descriptions above';
+    instructionText.textContent = isMobile
+      ? 'Center object in circle & tap, or type name above'
+      : 'Click on object or type name above';
     
     const closeButton = document.createElement('button');
     closeButton.textContent = '×';
     closeButton.className = 'close-button';
     
     closeButton.addEventListener('click', () => {
-      photoOptions.innerHTML = `
-        <div class="upload-option">
-          <input type="file" id="photo-upload" accept="image/*" aria-label="Upload photo for molecular analysis">
-          <label for="photo-upload" class="upload-label">
-            <svg class="photo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21,15 16,10 5,21"/>
-            </svg>
-            <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
-              <text x="40" y="14" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="currentColor">Upload Photo</text>
-            </svg>
-          </label>
-          
-          <div class="url-input-container">
-            <input type="url" id="photo-url" placeholder="Paste image URL..." aria-label="Enter image URL for molecular analysis">
-            <button type="button" id="url-analyze" class="url-button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"/>
-              </svg>
-              <svg class="url-text" width="50" height="16" viewBox="0 0 50 16">
-                <text x="25" y="12" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="currentColor">Analyze</text>
-              </svg>
-            </button>
-          </div>
-        </div>
-      `;
+      const template = document.getElementById('photo-upload-template');
+      const clone = template.content.cloneNode(true);
+      photoOptions.innerHTML = '';
+      photoOptions.appendChild(clone);
       
       const newPhotoUpload = document.getElementById('photo-upload');
       const newPhotoUrl = document.getElementById('photo-url');
@@ -164,11 +181,13 @@ document.addEventListener("DOMContentLoaded", () => {
       img.dataset.base64 = e.target.result.split(',')[1];
       
       imageContainer.addEventListener('click', async (evt) => {
+        switchToPhotoMode();
         await handleImageClick(evt, img);
       });
       
       imageContainer.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        switchToPhotoMode();
         handleImageClick(e.touches[0], img);
       });
     };
@@ -176,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsDataURL(file);
     
     imageContainer.appendChild(img);
-    imageContainer.appendChild(crosshair);
+    if (isMobile && crosshair) imageContainer.appendChild(crosshair);
     imageContainer.appendChild(instructionText);
     imageContainer.appendChild(closeButton);
     
@@ -184,11 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function handleImageClick(evt, img) {
-    const instructionText = document.querySelector('.uploaded-image-container .instruction-text');
-    if (instructionText) {
-      instructionText.style.opacity = "0";
-      instructionText.style.transition = "opacity 0.5s ease";
-    }
+    // Keep instruction text visible - it's meant to describe the functionality
 
     const rect = img.getBoundingClientRect();
     const clickX = evt.clientX - rect.left;
@@ -216,6 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cropCanvas.width = cropSize;
       cropCanvas.height = cropSize;
       const cropCtx = cropCanvas.getContext('2d');
+      cropCtx.imageSmoothingEnabled = false;
       
       cropCtx.drawImage(
         canvas, 
@@ -223,7 +239,23 @@ document.addEventListener("DOMContentLoaded", () => {
         0, 0, cropSize, cropSize
       );
       
+      // Calculate the exact middle pixel of the cropped image
+      const middleX = Math.floor(cropSize / 2);
+      const middleY = Math.floor(cropSize / 2);
+      
+      // Draw a visible red square centered on the middle pixel
+      // Scale the box size to be visible on screen (about 10% of crop size)
+      const boxSize = Math.max(8, Math.floor(cropSize * 0.1));
+      cropCtx.save();
+      cropCtx.strokeStyle = '#ff0000';
+      cropCtx.lineWidth = Math.max(2, Math.floor(cropSize * 0.02)); // Thicker line for visibility
+      cropCtx.strokeRect(middleX - boxSize/2, middleY - boxSize/2, boxSize, boxSize);
+      cropCtx.restore();
+      
       const croppedBase64 = cropCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+      
+      // Show immediate loading feedback
+      const loadingColumn = createLoadingColumn("Analyzing...", croppedBase64);
       
       fetch("/image-molecules", {
         method: "POST",
@@ -233,6 +265,9 @@ document.addEventListener("DOMContentLoaded", () => {
           croppedImageBase64: croppedBase64,
           x: relativeX * tempImg.width,
           y: relativeY * tempImg.height,
+          cropMiddleX: middleX,
+          cropMiddleY: middleY,
+          cropSize: cropSize,
         }),
       })
       .then(res => {
@@ -240,14 +275,18 @@ document.addEventListener("DOMContentLoaded", () => {
         return res.json();
       })
       .then(({ output }) => {
+        // Remove loading column
+        loadingColumn.remove();
+        updateScrollHandles();
+        
         const objectName = output.object || "Uploaded image";
-        processAnalysisResult(output, snapshots, "📁", objectName);
+        processAnalysisResult(output, snapshots, "Photo", objectName, false, croppedBase64);
       })
       .catch(err => {
-        const errorMsg = document.createElement("h3");
-        errorMsg.textContent = `⚠ Error: ${err.message}`;
-        errorMsg.style.color = "red";
-        snapshots.appendChild(errorMsg);
+        // Remove loading column on error
+        loadingColumn.remove();
+        updateScrollHandles();
+        createClosableErrorMessage(`Error: ${err.message}`);
       });
     };
     
@@ -276,10 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
       photoUrl.value = '';
 
     } catch (err) {
-      const errorMsg = document.createElement("h3");
-      errorMsg.textContent = `⚠ Error loading image from URL: ${err.message}`;
-      errorMsg.style.color = "red";
-      snapshots.appendChild(errorMsg);
+      createClosableErrorMessage(`Error loading image from URL: ${err.message}`);
     }
   }
 
@@ -336,6 +372,114 @@ document.addEventListener("DOMContentLoaded", () => {
     loadingMsg.style.opacity = "0.7";
     return loadingMsg;
   }
+
+  function createLoadingColumn(loadingText, croppedImageData = null) {
+    const gldiv = document.getElementById('gldiv');
+    
+    const loadingColumn = document.createElement("div");
+    loadingColumn.className = "object-column loading-column";
+    
+    const titleContainer = document.createElement("div");
+    titleContainer.className = "object-title";
+    
+    const titleText = document.createElement("span");
+    titleText.textContent = loadingText;
+    titleContainer.appendChild(titleText);
+    
+    loadingColumn.appendChild(titleContainer);
+    
+    // Add cropped image if available
+    if (croppedImageData) {
+      const croppedImageContainer = document.createElement("div");
+      croppedImageContainer.className = "cropped-image-container";
+      
+      const croppedImage = document.createElement("img");
+      croppedImage.src = `data:image/jpeg;base64,${croppedImageData}`;
+      croppedImage.alt = "Cropped region";
+      croppedImage.className = "cropped-image";
+      croppedImage.style.border = "1px solid #ff0000";
+      
+      croppedImageContainer.appendChild(croppedImage);
+      loadingColumn.appendChild(croppedImageContainer);
+    }
+    
+    // Add loading indicator
+    const loadingIndicator = document.createElement("div");
+    loadingIndicator.className = "loading-indicator";
+    loadingIndicator.style.cssText = `
+      text-align: center;
+      padding: 40px 20px;
+      color: #ffffff;
+      font-style: italic;
+      opacity: 0.7;
+      font-size: 14px;
+    `;
+    loadingIndicator.textContent = "Processing with AI...";
+    loadingColumn.appendChild(loadingIndicator);
+    
+    gldiv.appendChild(loadingColumn);
+    
+    return loadingColumn;
+  }
+
+  function createClosableErrorMessage(message, container = snapshots) {
+    const errorContainer = document.createElement("div");
+    errorContainer.className = "error-message";
+    errorContainer.style.cssText = `
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ff6b6b;
+      font-size: 14px;
+      font-weight: 500;
+    `;
+    
+    const errorText = document.createElement("span");
+    errorText.textContent = message;
+    errorContainer.appendChild(errorText);
+    
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "×";
+    closeButton.style.cssText = `
+      background: none;
+      border: none;
+      color: #ff6b6b;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 12px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    `;
+    
+    closeButton.addEventListener('mouseenter', () => {
+      closeButton.style.background = 'rgba(255, 107, 107, 0.2)';
+    });
+    
+    closeButton.addEventListener('mouseleave', () => {
+      closeButton.style.background = 'none';
+    });
+    
+    closeButton.addEventListener('click', () => {
+      errorContainer.remove();
+    });
+    
+    errorContainer.appendChild(closeButton);
+    container.appendChild(errorContainer);
+    
+    return errorContainer;
+  }
   
   function createResultMessage(icon, objectName, smilesCount, useQuotes = false) {
     const name = useQuotes ? `"${objectName}"` : objectName;
@@ -343,7 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return `${icon} ${name} → ${smilesCount} molecule${plural} found`;
   }
 
-  function processAnalysisResult(output, container, icon, objectName, useQuotes = false) {
+  function processAnalysisResult(output, container, icon, objectName, useQuotes = false, croppedImageData = null) {
     // Handle new chemicals structure with names and SMILES
     const chemicals = output.chemicals || [];
     
@@ -351,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chemicals.length === 1 && chemicals[0].smiles && chemicals[0].smiles.startsWith('DESCRIPTION: ')) {
       const description = chemicals[0].smiles.replace('DESCRIPTION: ', '');
       // For description responses, just show the description in the object column header
-      generateSDFs([], objectName, description);
+      generateSDFs([], objectName, description, null, croppedImageData);
       return;
     }
     
@@ -360,12 +504,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // For molecule responses, generate SDFs and show in object column
     if (smiles.length > 0) {
-      generateSDFs(smiles, objectName, null, chemicals);
+      generateSDFs(smiles, objectName, null, chemicals, croppedImageData);
     }
   }
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    console.error("❌ Camera API not available");
+    console.error("Camera API not available");
     msgBox.hidden = false;
     msgBox.textContent = "Camera API not supported in this browser";
     return;
@@ -374,37 +518,120 @@ document.addEventListener("DOMContentLoaded", () => {
   const isSecureContext = window.isSecureContext || location.protocol === 'https:';
   if (!isSecureContext && !location.hostname.includes('localhost')) {
     msgBox.hidden = false;
-    msgBox.textContent = "⚠️ Camera requires HTTPS on mobile devices. Please use HTTPS or localhost.";
+    msgBox.textContent = "Camera requires HTTPS on mobile devices. Please use HTTPS or localhost.";
     return;
   }
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   let facingMode = isMobile ? "environment" : "user";
   let currentStream = null;
 
-  const simpleConstraints = () => ({ video: { facingMode } });
-  const basicConstraints = () => ({ video: true });
+  const simpleConstraints = () => ({ 
+    video: { 
+      facingMode,
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    } 
+  });
+  const basicConstraints = () => ({ 
+    video: {
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
+    } 
+  });
+  const safariConstraints = () => ({ 
+    video: {
+      facingMode,
+      width: { min: 640, ideal: 1280, max: 1920 },
+      height: { min: 480, ideal: 720, max: 1080 }
+    } 
+  });
 
   async function startCamera() {
     currentStream?.getTracks().forEach(t => t.stop());
 
     try {
       let stream;
+      
+      // Safari-specific handling
+      if (isSafari || isIOS) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(safariConstraints());
+        } catch (err) {
+          console.log("Safari constraints failed, trying basic:", err);
+          stream = await navigator.mediaDevices.getUserMedia(basicConstraints());
+        }
+      } else {
       try {
         stream = await navigator.mediaDevices.getUserMedia(simpleConstraints());
       } catch (err) {
         stream = await navigator.mediaDevices.getUserMedia(basicConstraints());
+        }
       }
       
       currentStream = stream;
       video.srcObject = stream;
+      
+      // Safari-specific video attributes
+      video.setAttribute('playsinline', 'true');
+      video.setAttribute('webkit-playsinline', 'true');
+      video.setAttribute('x-webkit-airplay', 'allow');
+      
       await video.play();
       msgBox.hidden = true;
+      
+      // Add mobile targeting reticle if on mobile, remove if on desktop
+      if (isMobile) {
+        addMobileTargetingReticle();
+      } else {
+        removeMobileTargetingReticle();
+      }
       
     } catch (err) {
       console.error("Camera error:", err);
       msgBox.hidden = false;
-      msgBox.textContent = `📷 Camera error: ${err.message}`;
+      
+      // Better error messages for Safari
+      if (err.name === 'NotAllowedError') {
+        msgBox.textContent = "Camera access denied. Please allow camera access in Safari settings.";
+      } else if (err.name === 'NotFoundError') {
+        msgBox.textContent = "No camera found on this device.";
+      } else if (isSafari && err.name === 'NotSupportedError') {
+        msgBox.textContent = "Camera not supported in Safari. Try using Chrome or Firefox.";
+      } else {
+              msgBox.textContent = `Camera error: ${err.message}`;
+      }
+    }
+  }
+
+  function addMobileTargetingReticle() {
+    // Remove existing reticle if any
+    const existingReticle = document.querySelector('.mobile-reticle');
+    if (existingReticle) {
+      existingReticle.remove();
+    }
+
+    const reticle = document.createElement('div');
+    reticle.className = 'mobile-reticle';
+    const template = document.getElementById('mobile-reticle-template');
+    const clone = template.content.cloneNode(true);
+    reticle.appendChild(clone);
+    
+    // Append to video element instead of camera container for proper positioning
+    video.appendChild(reticle);
+    
+    // Add pulsing animation to draw attention
+    setTimeout(() => {
+      reticle.style.animation = 'reticlePulse 2s ease-in-out infinite';
+    }, 1000);
+  }
+
+  function removeMobileTargetingReticle() {
+    const existingReticle = document.querySelector('.mobile-reticle');
+    if (existingReticle) {
+      existingReticle.remove();
     }
   }
 
@@ -426,36 +653,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  video.addEventListener("click", handleInteraction);
+  video.addEventListener("click", (e) => {
+    switchToCameraMode();
+    handleInteraction(e);
+  });
   video.addEventListener("touchstart", (e) => {
     e.preventDefault();
+    switchToCameraMode();
     handleInteraction(e.touches[0]);
   });
-
-  async function handleInteraction(evt) {
-    console.log('🔍 Camera interaction detected:', { 
-      cameraModeChecked: cameraMode.checked, 
-      photoModeChecked: photoMode.checked,
-      eventType: evt.type 
+  
+  // Safari-specific touch handling
+  if (isSafari || isIOS) {
+    video.addEventListener("touchend", (e) => {
+      e.preventDefault();
     });
     
+    // Prevent zoom on double tap
+    let lastTouchEnd = 0;
+    video.addEventListener("touchend", (e) => {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+  }
+
+  async function handleInteraction(evt) {
     if (!cameraMode.checked) {
-      console.log('❌ Camera mode not checked, skipping interaction');
       return;
     }
     
-    if (instructionText) {
-      instructionText.style.opacity = "0";
-      instructionText.style.transition = "opacity 0.5s ease";
+    // On mobile, check if tap is within reticle area
+    if (isMobile) {
+      const rect = video.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const tapX = evt.clientX;
+      const tapY = evt.clientY;
+      
+      // Larger reticle area for easier targeting (100px diameter circle)
+      const reticleRadius = 50;
+      const distanceFromCenter = Math.sqrt(
+        Math.pow(tapX - centerX, 2) + Math.pow(tapY - centerY, 2)
+      );
+      
+      if (distanceFromCenter > reticleRadius) {
+        showReticleFeedback();
+        return;
+      }
     }
+    
+    // Show red crop outline at click/tap position
+    showCropOutline(evt);
 
-    console.log('📹 Video properties:', {
-      videoWidth: video.videoWidth,
-      videoHeight: video.videoHeight,
-      clientWidth: video.clientWidth,
-      clientHeight: video.clientHeight,
-      readyState: video.readyState
-    });
+    // Keep instruction text visible - it's meant to describe the functionality
 
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
@@ -472,13 +725,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const crop = document.createElement("canvas");
     crop.width = crop.height = 100;
-    crop
-      .getContext("2d")
-      .drawImage(canvas, actualX - 50, actualY - 50, 100, 100, 0, 0, 100, 100);
+    const cropCtx = crop.getContext("2d");
+    cropCtx.imageSmoothingEnabled = false;
+    cropCtx.drawImage(canvas, actualX - 50, actualY - 50, 100, 100, 0, 0, 100, 100);
+    
+    // Calculate the exact middle pixel of the cropped image
+    const middleX = Math.floor(100 / 2);
+    const middleY = Math.floor(100 / 2);
+    
+    // Draw a visible red square centered on the middle pixel
+    // Scale the box size to be visible on screen (about 10% of crop size)
+    const boxSize = Math.max(8, Math.floor(100 * 0.1)); // 10px for 100px crop
+    cropCtx.save();
+    cropCtx.strokeStyle = '#ff0000';
+    cropCtx.lineWidth = Math.max(2, Math.floor(100 * 0.02)); // Thicker line for visibility
+    cropCtx.strokeRect(middleX - boxSize/2, middleY - boxSize/2, boxSize, boxSize);
+    cropCtx.restore();
+    
     const croppedBase64 = crop.toDataURL("image/jpeg", 0.9).split(",")[1];
 
+    // Show immediate loading feedback
+    const loadingColumn = createLoadingColumn("Analyzing...", croppedBase64);
+
     try {
-      console.log('🚀 Making API call to /image-molecules');
       const res = await fetch("/image-molecules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -487,25 +756,65 @@ document.addEventListener("DOMContentLoaded", () => {
           croppedImageBase64: croppedBase64,
           x: actualX,
           y: actualY,
+          cropMiddleX: middleX,
+          cropMiddleY: middleY,
+          cropSize: 100,
         }),
       });
 
-      console.log('📡 API response status:', res.status);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const { output } = await res.json();
-      console.log('📦 API response:', output);
+      
+      // Remove loading column
+      loadingColumn.remove();
+      updateScrollHandles();
       
       const objectName = output.object || "Unknown object";
-      processAnalysisResult(output, snapshots, "🔍", objectName);
+      processAnalysisResult(output, snapshots, "Camera", objectName, false, croppedBase64);
 
     } catch (err) {
-      console.error('❌ API call failed:', err);
-      const errorMsg = document.createElement("h3");
-      errorMsg.textContent = `⚠ Error: ${err.message}`;
-      errorMsg.style.color = "red";
-      snapshots.appendChild(errorMsg);
+      console.error('API call failed:', err);
+      // Remove loading column on error
+      loadingColumn.remove();
+      updateScrollHandles();
+      createClosableErrorMessage(`Error: ${err.message}`);
     }
+  }
+
+  function showReticleFeedback() {
+    const reticle = document.querySelector('.mobile-reticle');
+    if (reticle) {
+      reticle.style.animation = 'reticlePulse 0.5s ease';
+      setTimeout(() => {
+        reticle.style.animation = '';
+      }, 500);
+    }
+  }
+
+  function showCropOutline(evt) {
+    const rect = video.getBoundingClientRect();
+    const cropSize = 100;
+    const outline = document.createElement('div');
+    outline.className = 'crop-outline';
+    outline.style.position = 'fixed'; // Use fixed positioning for accurate placement
+    outline.style.width = cropSize + 'px';
+    outline.style.height = cropSize + 'px';
+    outline.style.border = '2.5px solid #ff0000';
+    outline.style.boxSizing = 'border-box';
+    outline.style.pointerEvents = 'none';
+    outline.style.zIndex = 20;
+    outline.style.left = (evt.clientX - cropSize/2) + 'px'; // Center on cursor X
+    outline.style.top = (evt.clientY - cropSize/2) + 'px';  // Center on cursor Y
+    outline.style.borderRadius = '0';
+    outline.style.background = 'none';
+    outline.style.transition = 'opacity 0.2s';
+    outline.style.opacity = '1';
+    document.body.appendChild(outline); // Append to body for fixed positioning
+    setTimeout(() => {
+      outline.style.opacity = '0';
+      setTimeout(() => outline.remove(), 200);
+    }, 500);
   }
 
   function getMoleculeName(chemical) {
@@ -556,10 +865,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return moleculeNames[chemical] || `Structure (${chemical.substring(0, 20)}${chemical.length > 20 ? '...' : ''})`;
   }
 
-  async function generateSDFs(smiles, objectName, description = null, chemicals = null) {
+  async function generateSDFs(smiles, objectName, description = null, chemicals = null, croppedImageData = null) {
     // Handle description responses
     if (description) {
-      createObjectColumn(objectName, [], [], null, null, [], description);
+      createObjectColumn(objectName, [], [], null, null, [], description, chemicals, croppedImageData);
       return;
     }
     
@@ -585,15 +894,15 @@ document.addEventListener("DOMContentLoaded", () => {
         errors: data.errors ? data.errors.length : 0
       };
       
-      createObjectColumn(objectName, data.sdfPaths || [], smiles, null, summary, data.skipped || [], null, chemicals);
+      createObjectColumn(objectName, data.sdfPaths || [], smiles, null, summary, data.skipped || [], null, chemicals, croppedImageData);
       
     } catch (error) {
-      console.error("❌ SDF generation error:", error);
-      createObjectColumn(objectName, [], smiles, '🧬 Working on 3D structures...', null, [], null, chemicals);
+      console.error("SDF generation error:", error);
+      createObjectColumn(objectName, [], smiles, 'Working on 3D structures...', null, [], null, chemicals, croppedImageData);
     }
   }
 
-  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = [], description = null, chemicals = null) {
+  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = [], description = null, chemicals = null, croppedImageData = null) {
     const gldiv = document.getElementById('gldiv');
     
     const objectColumn = document.createElement("div");
@@ -618,26 +927,51 @@ document.addEventListener("DOMContentLoaded", () => {
     
     objectColumn.appendChild(titleContainer);
     
+    // Add cropped image if available
+    if (croppedImageData) {
+      const croppedImageContainer = document.createElement("div");
+      croppedImageContainer.className = "cropped-image-container";
+      
+      const croppedImage = document.createElement("img");
+      croppedImage.src = `data:image/jpeg;base64,${croppedImageData}`;
+      croppedImage.alt = "Cropped region";
+      croppedImage.className = "cropped-image";
+      croppedImage.style.border = "1px solid #ff0000";
+      
+      croppedImageContainer.appendChild(croppedImage);
+      objectColumn.appendChild(croppedImageContainer);
+    }
+    
     if (summary) {
-      const summaryDiv = document.createElement("div");
-      summaryDiv.className = "chemical-summary";
-      summaryDiv.innerHTML = `
-        <div>Total chemicals found: ${summary.total}</div>
-        <div>3D visualizable: ${summary.visualizable}</div>
-        ${summary.skipped > 0 ? `<div>Non-SMILES formats: ${summary.skipped}</div>` : ''}
-        ${summary.errors > 0 ? `<div>Failed: ${summary.errors}</div>` : ''}
-      `;
+      const template = document.getElementById('chemical-summary-template');
+      const clone = template.content.cloneNode(true);
+      const summaryDiv = clone.querySelector('.chemical-summary');
+      
+      summaryDiv.querySelector('.summary-total').textContent = summary.total;
+      summaryDiv.querySelector('.summary-visualizable').textContent = summary.visualizable;
+      
+      if (summary.skipped > 0) {
+        const skippedDiv = summaryDiv.querySelector('.summary-skipped');
+        skippedDiv.style.display = 'block';
+        skippedDiv.querySelector('.summary-skipped-count').textContent = summary.skipped;
+      }
+      
+      if (summary.errors > 0) {
+        const errorsDiv = summaryDiv.querySelector('.summary-errors');
+        errorsDiv.style.display = 'block';
+        errorsDiv.querySelector('.summary-errors-count').textContent = summary.errors;
+      }
+      
       objectColumn.appendChild(summaryDiv);
     }
     
     if (skippedChemicals.length > 0) {
-      const skippedDiv = document.createElement("div");
-      skippedDiv.className = "skipped-chemicals";
-      skippedDiv.innerHTML = `
-        <div class="skipped-title">🧪 Other chemicals found:</div>
-        <div class="skipped-list">${skippedChemicals.join(', ')}</div>
-        <div class="skipped-note">* These likely represent minerals/crystals that can't be shown in 3D molecular view</div>
-      `;
+      const template = document.getElementById('skipped-chemicals-template');
+      const clone = template.content.cloneNode(true);
+      const skippedDiv = clone.querySelector('.skipped-chemicals');
+      
+      skippedDiv.querySelector('.skipped-list').textContent = skippedChemicals.join(', ');
+      
       objectColumn.appendChild(skippedDiv);
     }
     
@@ -657,6 +991,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const moleculeContainer = document.createElement("div");
         moleculeContainer.className = "molecule-container";
         
+        const container = document.createElement("div");
+        container.className = "mol-viewer-container";
+        moleculeContainer.appendChild(container);
+        
         const moleculeName = document.createElement("div");
         moleculeName.className = "molecule-name";
         
@@ -667,12 +1005,33 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           displayName = getMoleculeName(moleculeSmiles);
         }
-        moleculeName.textContent = displayName;
-        moleculeContainer.appendChild(moleculeName);
         
-        const container = document.createElement("div");
-        container.className = "mol-viewer-container";
-        moleculeContainer.appendChild(container);
+        // Create clickable Wikipedia link
+        const wikipediaLink = document.createElement("a");
+        wikipediaLink.textContent = displayName;
+        wikipediaLink.href = `https://en.wikipedia.org/wiki/${encodeURIComponent(displayName)}`;
+        wikipediaLink.target = "_blank";
+        wikipediaLink.rel = "noopener noreferrer";
+        wikipediaLink.style.cssText = `
+          color: #ffffff;
+          text-decoration: none;
+          font-size: 12px;
+          opacity: 0.8;
+          transition: opacity 0.2s ease;
+        `;
+        
+        wikipediaLink.addEventListener('mouseenter', () => {
+          wikipediaLink.style.opacity = '1';
+          wikipediaLink.style.textDecoration = 'underline';
+        });
+        
+        wikipediaLink.addEventListener('mouseleave', () => {
+          wikipediaLink.style.opacity = '0.8';
+          wikipediaLink.style.textDecoration = 'none';
+        });
+        
+        moleculeName.appendChild(wikipediaLink);
+        moleculeContainer.appendChild(moleculeName);
         
         objectColumn.appendChild(moleculeContainer);
         
@@ -691,7 +1050,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function render(sdfFile, container) {
     try {
-      const response = await fetch(sdfFile);
+      console.log(`Attempting to fetch SDF file: ${sdfFile}`);
+      const urlParts = sdfFile.split('/');
+      const filename = urlParts.pop();
+      const encodedFilename = encodeURIComponent(filename);
+      const encodedPath = urlParts.join('/') + '/' + encodedFilename;
+      
+      console.log(`URL-encoded path: ${encodedPath}`);
+      const response = await fetch(encodedPath);
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
@@ -721,8 +1087,8 @@ document.addEventListener("DOMContentLoaded", () => {
       
       return viewer;
     } catch (error) {
-      console.error(`❌ Failed to load molecule:`, error);
-      container.textContent = `❌ Error loading molecule: ${error.message}`;
+      console.error(`Failed to load molecule:`, error);
+              container.textContent = `Error loading molecule: ${error.message}`;
       container.style.color = 'red';
       container.style.textAlign = 'center';
       container.style.padding = '20px';
@@ -730,6 +1096,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  (async () => {
+    try {
+      await startCamera();
+      await setupSwitchCamera();
+      
+      // Ensure reticle is only shown on mobile
+      if (!isMobile) {
+        removeMobileTargetingReticle();
+      }
+    } catch (err) {
+      console.error("Camera setup failed:", err);
+    }
+  })();
+  
+  // Add keyboard navigation for 3D viewer scrolling
+  document.addEventListener('keydown', (e) => {
+    const gldiv = document.getElementById('gldiv');
+    if (!gldiv) return;
+    
+    const scrollAmount = 450; // Width of one column + gap
+    
+    switch(e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        gldiv.scrollLeft -= scrollAmount;
+        updateScrollHandles();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        gldiv.scrollLeft += scrollAmount;
+        updateScrollHandles();
+        break;
+      case 'Home':
+        e.preventDefault();
+        gldiv.scrollLeft = 0;
+        updateScrollHandles();
+        break;
+      case 'End':
+        e.preventDefault();
+        gldiv.scrollLeft = gldiv.scrollWidth;
+        updateScrollHandles();
+        break;
+    }
+  });
+  
   // Create scroll handle buttons
   function createScrollHandles() {
     const gldiv = document.getElementById('gldiv');
@@ -796,8 +1207,8 @@ document.addEventListener("DOMContentLoaded", () => {
     gldiv.appendChild(leftHandle);
     gldiv.appendChild(rightHandle);
   }
-
-  // Update scroll handle visibility with throttling
+  
+  // Update scroll handle visibility
   let updateScrollHandlesTimeout;
   function updateScrollHandles() {
     // Debounce rapid calls
@@ -806,7 +1217,7 @@ document.addEventListener("DOMContentLoaded", () => {
       updateScrollHandlesInternal();
     }, 10);
   }
-
+  
   function updateScrollHandlesInternal() {
     const gldiv = document.getElementById('gldiv');
     if (!gldiv) return;
@@ -860,38 +1271,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-
-  // Initialize scroll handles
-  document.addEventListener('DOMContentLoaded', () => {
-    // Create scroll handles after DOM is ready
-    createScrollHandles();
-    
-    // Update scroll handles on scroll (throttled)
-    let scrollTimeout;
-    document.addEventListener('scroll', (e) => {
-      if (e.target.id === 'gldiv') {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(updateScrollHandles, 16); // ~60fps
-      }
-    }, true);
-    
-    // Update scroll handles on window resize (throttled)
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(updateScrollHandles, 100); // Throttle resize events
-    });
-    
-    // Initial update
-    updateScrollHandles();
-  });
-
-  (async () => {
-    try {
-      await startCamera();
-      await setupSwitchCamera();
-    } catch (err) {
-      console.error("❌ Camera setup failed:", err);
+  
+  // Create scroll handles after DOM is ready
+  createScrollHandles();
+  
+  // Update scroll handles on scroll (throttled)
+  let scrollTimeout;
+  document.addEventListener('scroll', (e) => {
+    if (e.target.id === 'gldiv') {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(updateScrollHandles, 16); // ~60fps
     }
-  })();
+  }, true);
+  
+  // Update scroll handles on window resize (throttled)
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(updateScrollHandles, 100); // Throttle resize events
+  });
+  
+  // Initial update
+  updateScrollHandles();
 });
