@@ -32,7 +32,7 @@
 ```javascript
 // AI API calls
 try {
-  const result = await aiAnalyzer.analyzeImage(imageBase64, croppedImageBase64);
+  const result = await atomPredictor.analyzeImage(imageBase64, croppedImageBase64);
   if (!result || !result.chemicals) {
     throw new Error('Invalid AI response format');
   }

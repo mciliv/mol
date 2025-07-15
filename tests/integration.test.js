@@ -97,7 +97,7 @@ describe('Integration Tests', () => {
         .expect(200);
 
       expect(response.text).toContain('<!doctype html>');
-      expect(response.text).toContain('Atomic Reality');
+      expect(response.text).toContain('Atomizer - Molecular Analysis');
       expect(response.text).toContain('app.js');
     });
 

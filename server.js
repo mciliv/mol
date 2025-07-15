@@ -7,7 +7,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const HttpsServer = require("./https-server");
-const AIAnalyzer = require("./ai-analyzer");
+const AtomPredictor = require("./AtomPredictor");
 const MolecularProcessor = require("./molecular-processor");
 const {
   ImageMoleculeSchema,
@@ -21,12 +21,81 @@ const PORT = process.env.PORT || 8080;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
 
 // Initialize modules
-const aiAnalyzer = new AIAnalyzer(process.env.OPENAI_API_KEY);
+const atomPredictor = new AtomPredictor(process.env.OPENAI_API_KEY);
 const molecularProcessor = new MolecularProcessor();
 
 // ==================== MIDDLEWARE ====================
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+
+// ==================== DEVELOPMENT MIDDLEWARE ====================
+// Live reload disabled - using external tools if needed
+if (false && process.env.NODE_ENV === "development") {
+  const livereload = require("livereload");
+  const connectLivereload = require("connect-livereload");
+  const net = require("net");
+
+  const isPortAvailable = (port) => {
+    return new Promise((resolve) => {
+      const tester = net.createServer()
+        .once('error', () => resolve(false))
+        .once('listening', () => {
+          tester.once('close', () => resolve(true))
+            .close();
+        })
+        .listen(port);
+    });
+  };
+
+  const startLiveReload = async (port) => {
+    try {
+      const available = await isPortAvailable(port);
+      if (!available) {
+        console.log(`LiveReload port ${port} is already in use`);
+        if (port === 35729) {
+          console.log("Trying alternative port 35730...");
+          return startLiveReload(35730);
+        } else {
+          console.log("Continuing without LiveReload...");
+          return;
+        }
+      }
+
+      const liveReloadServer = livereload.createServer({
+        exts: ['html', 'css', 'js'],
+        ignore: ['node_modules/**', 'sdf_files/**', '*.log'],
+        port: port
+      });
+      
+      // Add error handler for unexpected errors
+      liveReloadServer.server.on('error', (err) => {
+        console.error("LiveReload server error:", err.message);
+      });
+
+      // Only proceed if server starts successfully
+      liveReloadServer.server.once('listening', () => {
+        liveReloadServer.watch(__dirname);
+        app.use(connectLivereload());
+
+        liveReloadServer.server.once("connection", () => {
+          setTimeout(() => {
+            liveReloadServer.refresh("/");
+          }, 100);
+        });
+        
+        console.log(`LiveReload server started on port ${port}`);
+      });
+      
+    } catch (err) {
+      console.log("LiveReload server failed to start:", err.message);
+              console.log("Continuing without LiveReload...");
+    }
+  };
+
+  // Start LiveReload with fallback port
+  startLiveReload(35729);
+}
+
 app.use(express.static(__dirname));
 app.use('/sdf_files', express.static(path.join(__dirname, 'sdf_files')));
 
@@ -50,7 +119,7 @@ app.post("/image-molecules", async (req, res) => {
       return res.status(400).json({ error: "No image data provided" });
     }
 
-    const result = await aiAnalyzer.analyzeImage(imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize);
+    const result = await atomPredictor.analyzeImage(imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize);
     res.json({ output: result });
   } catch (error) {
     console.error("Image analysis error:", error);
@@ -76,7 +145,7 @@ app.post("/object-molecules", async (req, res) => {
       return res.status(400).json({ error: "No object description provided" });
     }
 
-    const result = await aiAnalyzer.analyzeText(object);
+    const result = await atomPredictor.analyzeText(object);
     res.json({ output: result });
   } catch (error) {
     console.error("Text analysis error:", error);
@@ -116,34 +185,6 @@ app.post('/generate-sdfs', async (req, res) => {
   }
 });
 
-// ==================== DEVELOPMENT MIDDLEWARE ====================
-if (process.env.NODE_ENV === "development") {
-  const livereload = require("livereload");
-  const connectLivereload = require("connect-livereload");
-
-  try {
-    const liveReloadServer = livereload.createServer({
-      exts: ['html', 'css', 'js'],
-      ignore: ['node_modules/**', 'sdf_files/**', '*.log'],
-      port: 0  // Let system assign an available port automatically
-    });
-    liveReloadServer.watch(__dirname);
-
-    app.use(connectLivereload());
-
-    liveReloadServer.server.once("connection", () => {
-      setTimeout(() => {
-        liveReloadServer.refresh("/");
-      }, 100);
-    });
-    
-    console.log("✅ LiveReload server started");
-  } catch (err) {
-    console.log("⚠️ LiveReload server failed to start:", err.message);
-    console.log("🔄 Continuing without LiveReload...");
-  }
-}
-
 // Static routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
@@ -151,7 +192,16 @@ app.get("/", (req, res) => {
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`Incoming request: ${req.method} ${req.url}`);
+  // Skip logging Chrome DevTools discovery requests
+  if (!req.url.includes('.well-known/appspecific/com.chrome.devtools')) {
+    console.log(`Incoming request: ${req.method} ${req.url}`);
+  }
+  
+  // Handle Chrome DevTools discovery request
+  if (req.url === '/.well-known/appspecific/com.chrome.devtools.json') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  
   next();
 });
 
@@ -168,14 +218,14 @@ let httpsServerInstance;
 if (!isServerless && !isTestMode) {
   // Local development mode
   httpServer = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 HTTP server running on http://0.0.0.0:${PORT}`);
+    console.log(`HTTP server running on http://0.0.0.0:${PORT}`);
   });
   
   // Handle port binding errors
   httpServer.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use`);
-      console.log(`💡 Try: pkill -f "node.*server.js" or use a different port`);
+      console.error(`Port ${PORT} is already in use`);
+              console.log(`Try: pkill -f "node.*server.js" or use a different port`);
       process.exit(1);
     } else {
       console.error('Server error:', error);
@@ -191,13 +241,13 @@ if (!isServerless && !isTestMode) {
 } else {
   // Serverless mode
   if (isCloudFunction) {
-    console.log(`☁️ Running in Cloud Functions mode`);
+    console.log(`Running in Cloud Functions mode`);
   } else if (isNetlify) {
-    console.log(`◈ Running in Netlify mode`);
+          console.log(`Running in Netlify mode`);
   }
   
   if (process.env.NODE_ENV === 'production' && !process.env.OPENAI_API_KEY) {
-    console.error('❌ OPENAI_API_KEY environment variable is required for production');
+    console.error('OPENAI_API_KEY environment variable is required for production');
     process.exit(1);
   }
 }
@@ -211,7 +261,7 @@ if (!isServerless && !isTestMode) {
       return new Promise((resolve) => {
         if (server) {
           server.close(() => {
-            console.log(`✅ ${name} server closed`);
+            console.log(`${name} server closed`);
             resolve();
           });
         } else {
@@ -224,13 +274,13 @@ if (!isServerless && !isTestMode) {
       closeServer(httpServer, 'HTTP'),
       closeServer(httpsServerInstance, 'HTTPS')
     ]).then(() => {
-      console.log('👋 Shutdown complete');
+      console.log('Shutdown complete');
       process.exit(0);
     });
     
     // Force exit after 5 seconds
     setTimeout(() => {
-      console.error('⚠️ Forced shutdown after timeout');
+      console.error('Forced shutdown after timeout');
       process.exit(1);
     }, 5000);
   };
