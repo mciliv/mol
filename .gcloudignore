@@ -13,5 +13,40 @@
 .git
 .gitignore
 
+# Development files
 node_modules
+tests/
+scripts/
+certs/
+.vscode/
+.cursor/
+.cursorrules
+.copilot-codeGeneration-instructions.md
+mol.code-workspace
+DEBUGGING.md
+debug*
+nodemon.json
+https-server.js
+lambda.js
+jobs.html
+test_visualization.html
+
+# Documentation
+README.md
+PRODUCTION_REQUIREMENTS.md
+DEPENDENCIES_ROADMAP.md
+TEST_PIPELINE.md
+
+# Development tools
+.python-version
+poetry.lock
+pyproject.toml
+
+# Generated files
+sdf_files/
+*.log
+
+# Docker
+.dockerignore
+
 #!include:.gitignore

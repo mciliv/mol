@@ -140,6 +140,37 @@ NODE_ENV=development
 npm run deploy
 ```
 
+This command:
+1. Runs all tests to ensure code quality
+2. Prepares a clean deployment directory with only essential files
+3. Deploys to Google Cloud Functions from the clean directory
+
+### Deployment Structure
+
+The deployment uses a clean `deploy/` directory containing only essential files:
+
+**Core Application:**
+- `index.js` - Cloud Function entry point
+- `server.js` - Express server with API endpoints
+- `app.js` - Frontend JavaScript application
+- `index.html` - Main HTML page
+- `style.css` - Application styles
+- `schemas.js` - Input validation schemas
+
+**Molecular Processing:**
+- `molecular-processor.js` - SMILES processing logic
+- `AtomPredictor.js` - AI prediction integration
+- `sdf.py`, `crystal.py`, `uniprot.py`, `usdz.py` - Python processing scripts
+
+**Assets:**
+- SVG icons for camera, water, waves
+
+**Benefits:**
+- **Faster deployments** - Smaller upload size (~200KB vs full project)
+- **Cleaner environment** - No development files or documentation
+- **Reduced costs** - Less storage and processing overhead
+- **Better security** - No sensitive development files in production
+
 
 
 ## License
