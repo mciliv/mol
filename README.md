@@ -102,8 +102,8 @@ npm run dev
 - `npm run mobile` - Show mobile access URLs
 - `npm run cert` - Regenerate SSL certificates
 - `npm run tunnel` - Instructions for ngrok tunneling
-- `npm run ship` - Complete workflow: commit, test, deploy, push
-- `npm run deploy` - Deploy to Google Cloud Functions (no git changes)
+- `npm run ship` - Complete workflow: commit, test, deploy to production, push to git
+- `npm run deploy` - Deploy to Google Cloud Functions (production server only)
 
 ### Features
 - 📷 Camera-based molecule analysis
@@ -138,12 +138,12 @@ NODE_ENV=development
 
 ### Deploy to Production
 
-**Quick Deploy (with git commit & push):**
+**Complete Workflow (commit, test, deploy to production, push to git):**
 ```bash
 npm run ship
 ```
 
-**Deploy Only (no git changes):**
+**Production Deploy Only (no git changes):**
 ```bash
 npm run deploy
 ```
@@ -152,8 +152,8 @@ The `ship` command:
 1. Stages all changes (`git add .`)
 2. Commits with timestamp (`git commit`)
 3. Runs all tests to ensure code quality
-4. Deploys to Google Cloud Functions
-5. Pushes changes to repository (`git push`)
+4. **Deploys to Google Cloud Functions (production server)**
+5. **Pushes changes to git repository**
 
 ### Deployment Structure
 
