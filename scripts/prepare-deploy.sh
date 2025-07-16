@@ -25,6 +25,8 @@ cp crystal.py deploy/
 cp uniprot.py deploy/
 cp usdz.py deploy/
 
+# Note: Excluding development scripts (scripts.py, kmeans.py, etc.)
+
 # Copy assets
 echo "🎨 Copying assets..."
 cp *.svg deploy/
