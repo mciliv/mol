@@ -142,12 +142,11 @@ npm run deploy
 
 This command:
 1. Runs all tests to ensure code quality
-2. Prepares a clean deployment directory with only essential files
-3. Deploys to Google Cloud Functions from the clean directory
+2. Deploys to Google Cloud Functions with only essential files
 
 ### Deployment Structure
 
-The deployment uses a clean `deploy/` directory containing only essential files:
+The deployment uses `.gcloudignore` to include only essential files:
 
 **Core Application:**
 - `index.js` - Cloud Function entry point
@@ -178,6 +177,7 @@ The deployment uses a clean `deploy/` directory containing only essential files:
 - **Cleaner environment** - No development files or documentation
 - **Reduced costs** - Less storage and processing overhead
 - **Better security** - No sensitive development files in production
+- **Simpler structure** - Flat file organization, no copying needed
 
 
 
