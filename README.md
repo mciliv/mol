@@ -1,246 +1,214 @@
-# Molecular Reality (mol)
+# WebKit - Shared Development Toolkit
 
-## Project Context (for AI Assistants)
-**Type**: Molecular visualization web app  
-**Key Features**: Camera/photo molecular analysis using OpenAI Vision API  
-**Visualization**: Sphere-only representation (NO ball-and-stick), van der Waals radii at 0.8 scale  
-**UI Philosophy**: "Keep stupid simple" - minimal design, no extraneous elements  
-**Workflow**: Always git commit after acceptance  
-
-This project includes a Node.js server that hosts a static front-end (HTML, CSS, JavaScript) and provides back-end API endpoints for processing molecular data using the OpenAI API, as well as Python utilities for SDF file generation.
-
-## Prerequisites
-
-- [Node.js](https://nodejs.org/) (>= 18)
-- [Python](https://www.python.org/) (>= 3.8)
-- [poetry](https://python-poetry.org/) (for Python dependencies)
-
-## Python Environment Setup
-
-To set up the Python virtual environment and install dependencies:
-
-```bash
-chmod +x scripts/helper.sh
-./scripts/helper.sh
-```
-
-## Node.js Setup
-
-Install Node.js dependencies (including development dependencies):
-
-```bash
-npm install
-```
-
-### Environment Variables
-
-Set your OpenAI API key:
-
-```bash
-export OPENAI_API_KEY=<your_api_key_here>
-```
-
-### Running the Server
-
-Start the Node.js server (serves both front-end and back-end API):
-
-```bash
-npm start
-```
-
-For development with automatic reloads:
-
-```bash
-npm run dev
-```
-
-The application will be available at [http://localhost:3000](http://localhost:3000).
-
-## Mobile Setup (iPhone/iPad)
-
-### 1. Start the Server
-```bash
-npm run dev
-```
-
-### 2. Get Your Computer's IP Address
-```bash
-npm run mobile
-```
-This will show URLs like:
-- HTTPS: `https://192.168.1.100:3001`
-- HTTP: `http://192.168.1.100:3000`
-
-### 3. Access on iPhone
-1. **Use the HTTPS URL** (iPhone requires HTTPS for camera access)
-2. Navigate to `https://[your-ip]:3001` in Safari
-3. **Accept the certificate warning**:
-   - Tap "Advanced" 
-   - Tap "Proceed to [your-ip] (unsafe)"
-   - OR tap the "AA" icon in address bar and select "Allow"
-
-### 4. Grant Camera Permission
-- When prompted, tap "Allow" for camera access
-- If denied, go to Settings > Safari > Camera > Allow
-
-### 5. Troubleshooting
-- **Black screen**: Try refreshing the page
-- **Permission denied**: Check Safari settings or use the "Try Again" button
-- **Certificate issues**: Make sure you're using HTTPS and accepted the certificate
-- **Still not working**: Try using ngrok: `npm install -g ngrok && ngrok http 3000`
-
-## Development
-
-### Quick Start
-```bash
-npm install
-npm run dev
-```
-
-### Available Scripts
-- `npm run dev` - Start development server with hot reload
-- `npm run mobile` - Show mobile access URLs
-- `npm run cert` - Regenerate SSL certificates
-- `npm run tunnel` - Instructions for ngrok tunneling
-- `npm run ship` - Complete workflow: commit, test, deploy to production, push to git
-- `npm run deploy` - Deploy to Google Cloud Functions (production server only)
-
-### Features
-- 📷 Camera-based molecule analysis
-- ✏️ Text-based molecule lookup
-- 🔍 SMILES string generation
-- 🔒 HTTPS support for mobile devices
-- 🔄 Hot reload during development
-
-### Technology Stack
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Backend**: Node.js, Express
-- **AI**: OpenAI GPT-4 Vision
-- **Chemistry**: SMILES notation, molecular analysis
-- **Deployment**: Google Cloud Functions
-
-## API Endpoints
-
-- `POST /list-molecules`: Analyze an image click and return possible molecule structures.
-- `POST /list-molecules-text`: Provide an object description and get molecule SMILES in JSON.
-
-## Environment Variables
-```bash
-OPENAI_API_KEY=your_openai_api_key_here
-NODE_ENV=development
-```
-
-## Deployment
-
-### Prerequisites
-- Google Cloud CLI installed and authenticated
-- OpenAI API key set in environment
-
-### Deploy to Production
-
-**Complete Workflow (commit, test, deploy to production, push to git):**
-```bash
-npm run ship
-```
-
-**Production Deploy Only (no git changes):**
-```bash
-npm run deploy
-```
-
-The `ship` command:
-1. Stages all changes (`git add .`)
-2. Commits with timestamp (`git commit`)
-3. Runs all tests to ensure code quality
-4. **Deploys to Google Cloud Functions (production server)**
-5. **Pushes changes to git repository**
-
-### Deployment Structure
-
-The deployment uses `.gcloudignore` to include only essential files:
-
-**Core Application:**
-- `index.js` - Cloud Function entry point
-- `server.js` - Express server with API endpoints
-- `app.js` - Frontend JavaScript application
-- `index.html` - Main HTML page
-- `style.css` - Application styles
-- `schemas.js` - Input validation schemas
-
-**Molecular Processing:**
-- `molecular-processor.js` - SMILES processing logic
-- `AtomPredictor.js` - AI prediction integration
-- `sdf.py`, `crystal.py`, `uniprot.py`, `usdz.py` - Core Python processing modules
-
-**Excluded Development Scripts:**
-- `scripts.py` - Development script runner
-- `kmeans.py` - Data analysis script
-- `jobs.html` - Development interface
-- `https-server.js` - Development server
-- `lambda.js` - AWS Lambda handler
-- `nodemon.json` - Development configuration
-
-**Assets:**
-- SVG icons for camera, water, waves
-
-**Benefits:**
-- **Faster deployments** - Smaller upload size (~200KB vs full project)
-- **Cleaner environment** - No development files or documentation
-- **Reduced costs** - Less storage and processing overhead
-- **Better security** - No sensitive development files in production
-- **Simpler structure** - Flat file organization, no copying needed
-
-# Deployment Scripts
+A collection of reusable utilities for Google Cloud projects, designed to be shared across multiple applications like a web engine.
 
 ## Overview
-Top-level deployment scripts that orchestrate the entire workflow.
 
-## Scripts
+WebKit provides standardized utilities for:
+- **Google Cloud Functions** deployment and management
+- **Domain management** and DNS configuration
+- **Logging** with consistent formatting and levels
+- **Python environment** setup and management
+- **Project configuration** templates
 
-### `deploy-to-production` - Production Server Deployment
-**Command:** `npm run deploy`
+## Quick Start
 
-**What it does:**
-1. ✅ Validates environment variables
-2. ✅ Runs pre-deployment tests
-3. ✅ Deploys to Google Cloud Functions
-4. ✅ Shows deployment URL
+### 1. Clone WebKit
+```bash
+git clone <webkit-repo-url> webkit
+cd webkit
+```
 
-**Configuration:**
-- Function: `molecular-analysis`
-- Runtime: `nodejs20`
-- Region: `us-central1`
-- Memory: `1GB`
-- Timeout: `540s`
+### 2. Use in Your Project
+```bash
+# Source the utilities
+source webkit/webkit.sh
 
-### `ship-to-production-with-git` - Complete Workflow
-**Command:** `npm run ship`
+# Use the functions
+log_info "Hello from WebKit!"
+check_gcloud_auth
+```
 
-**What it does:**
-1. ✅ Stages all changes (`git add .`)
-2. ✅ Commits with timestamp (`git commit`)
-3. ✅ Runs pre-deployment tests
-4. ✅ Deploys to Google Cloud Functions
-5. ✅ Pushes to git repository (`git push`)
+### 3. Create Project Scripts
+Copy templates from `templates/` and customize:
+```bash
+cp templates/deploy.sh.template myproject/scripts/deploy.sh
+cp config/config.sh.template myproject/config.sh
+```
 
-**Same configuration as `deploy-to-production`**
+## Structure
 
-## Benefits
+```
+webkit/
+├── core/                    # Core utility functions
+│   ├── logging-utils.sh    # Logging and error handling
+│   ├── gcloud-utils.sh     # Google Cloud operations
+│   ├── domain-utils.sh     # Domain and DNS management
+│   └── python-utils.sh     # Python environment setup
+├── templates/              # Script templates
+│   ├── deploy.sh.template  # Deployment script template
+│   └── domain-check.sh.template # Domain verification template
+├── config/                 # Configuration templates
+│   └── config.sh.template  # Project configuration template
+├── webkit.sh              # Main loader script
+└── README.md              # This file
+```
 
-- **📖 Readable** - Clear, documented code instead of long strings
-- **🔧 Maintainable** - Easy to modify configuration
-- **🐛 Debuggable** - Better error handling and logging
-- **⚙️ Configurable** - Centralized configuration object
-- **📝 Documented** - Clear comments and step-by-step process
-- **🎯 Hyperspecific** - Script names clearly indicate their purpose
+## Core Utilities
 
-## Environment Variables
+### Logging Utilities (`core/logging-utils.sh`)
+- `log_info()`, `log_warn()`, `log_error()`, `log_debug()`
+- `setup_logging()` - Initialize logging for a script
+- `set_error_handling()` - Setup error handling and logging
+- `show_progress()` - Display progress bars
 
-**Required:**
-- `OPENAI_API_KEY` - OpenAI API key for molecular analysis
+### Google Cloud Utilities (`core/gcloud-utils.sh`)
+- `check_gcloud_auth()` - Verify authentication
+- `deploy_function()` - Deploy Cloud Functions
+- `check_cloud_function()` - Check function status
+- `get_function_url()` - Get deployed function URL
+- `validate_gcloud_env()` - Validate environment variables
 
-**Optional:**
-- `GOOGLE_CLOUD_PROJECT` - Google Cloud project ID (for URL display)
+### Domain Utilities (`core/domain-utils.sh`)
+- `check_domain_resolution()` - Test DNS resolution
+- `check_gcloud_dns_zone()` - Verify DNS zone exists
+- `check_domain_verification()` - Check domain verification status
+- `get_gcloud_nameservers()` - Get nameserver configuration
+- `check_domain_mappings()` - Check Cloud Run domain mappings
+- `test_url()` - Test URL accessibility
+
+### Python Utilities (`core/python-utils.sh`)
+- `check_pyenv()` - Verify pyenv installation
+- `install_python_version()` - Install specific Python version
+- `check_poetry()` - Verify poetry installation
+- `setup_python_env()` - Complete Python environment setup
+- `check_python_deps()` - Validate dependencies
+- `run_python_tests()` - Run Python tests
+
+## Usage Examples
+
+### Basic Script with Logging
+```bash
+#!/bin/bash
+source webkit/webkit.sh
+
+# Setup error handling
+set_error_handling "my-script.sh"
+
+# Load project config
+source config.sh
+
+log_info "Starting deployment for $PROJECT_NAME"
+# ... your script logic
+```
+
+### Domain Check Script
+```bash
+#!/bin/bash
+source webkit/webkit.sh
+source config.sh
+
+echo "🌐 Checking domain: $DOMAIN_NAME"
+check_domain_resolution "$DOMAIN_NAME"
+check_gcloud_dns_zone "$DNS_ZONE_NAME"
+check_domain_verification "$DOMAIN_NAME"
+```
+
+### Deployment Script
+```bash
+#!/bin/bash
+source webkit/webkit.sh
+source config.sh
+
+if check_gcloud_auth; then
+    deploy_function "$FUNCTION_NAME" "$REGION" "$SOURCE_DIR"
+else
+    log_error "Not authenticated"
+    exit 1
+fi
+```
+
+## Configuration
+
+Create a `config.sh` file in your project:
+
+```bash
+# Copy the template
+cp webkit/config/config.sh.template config.sh
+
+# Edit with your project details
+PROJECT_NAME="my-app"
+PROJECT_ID="my-gcp-project"
+REGION="us-central1"
+FUNCTION_NAME="my-function"
+DOMAIN_NAME="myapp.com"
+```
+
+## Templates
+
+### Deployment Template
+The `templates/deploy.sh.template` provides a complete deployment script with:
+- Authentication checks
+- Environment validation
+- Test execution
+- Function deployment
+- URL testing
+- Domain mapping instructions
+
+### Domain Check Template
+The `templates/domain-check.sh.template` provides comprehensive domain verification:
+- DNS zone status
+- Domain verification
+- Nameserver configuration
+- Propagation testing
+- Actionable next steps
+
+## Best Practices
+
+1. **Always source webkit.sh** at the start of your scripts
+2. **Use set_error_handling()** for proper error management
+3. **Load project config** from a separate config.sh file
+4. **Use log functions** instead of echo for consistent output
+5. **Validate environment** before critical operations
+6. **Test deployments** after completion
+
+## Integration with Projects
+
+### Simple Integration
+```bash
+# Clone webkit alongside your project
+git clone <webkit-repo> webkit
+
+# Source in your scripts
+source webkit/webkit.sh
+```
+
+### Git Submodule Integration
+```bash
+# Add as submodule
+git submodule add <webkit-repo> webkit
+
+# Update submodule
+git submodule update --remote webkit
+```
+
+## Contributing
+
+1. Add new utilities to `core/`
+2. Create templates in `templates/`
+3. Update documentation
+4. Test with multiple projects
+5. Keep utilities generic and reusable
+
+## Version History
+
+- **1.0.0** - Initial release with core utilities
+  - Logging system
+  - Google Cloud utilities
+  - Domain management
+  - Python environment setup
+  - Deployment and domain check templates
 
 ## License
-MIT
+
+MIT License - see LICENSE file for details.

@@ -1,12 +1,7 @@
 // tests/integration.test.js - Integration tests for component interactions  
 // These tests validate how different parts of the system work together (30-60 seconds)
 
-const request = require('supertest');
-const app = require('../server');
-const fs = require('fs');
-const path = require('path');
-
-// Mock external dependencies
+// Mock external dependencies BEFORE importing server
 jest.mock('openai', () => ({
   OpenAI: jest.fn().mockImplementation(() => ({
     chat: {
@@ -27,8 +22,46 @@ jest.mock('openai', () => ({
 }));
 
 jest.mock('child_process', () => ({
-  execSync: jest.fn().mockReturnValue('test output')
+  execSync: jest.fn().mockReturnValue('test output'),
+  spawn: jest.fn().mockImplementation((command, args) => {
+    const EventEmitter = require('events');
+    const mockProcess = new EventEmitter();
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Extract SMILES from args (assuming it's the second argument)
+    const smiles = args[0];
+    const sdfDir = args[2]; // --dir argument
+    
+    // Create a mock SDF file
+    const sdfContent = `${smiles}
+  RDKit          3D
+
+  3  2  0  0  0  0  0  0  0  0999 V2000
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+    0.0000    0.0000    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0
+  1  2  1  0  0  0  0
+  2  3  1  0  0  0  0
+M  END
+$$$$`;
+    
+    const sdfPath = path.join(sdfDir, `${smiles}.sdf`);
+    fs.writeFileSync(sdfPath, sdfContent);
+    
+    // Simulate successful SDF generation
+    setTimeout(() => {
+      mockProcess.emit('close', 0);
+    }, 10);
+    
+    return mockProcess;
+  })
 }));
+
+const request = require('supertest');
+const app = require('../server');
+const fs = require('fs');
+const path = require('path');
 
 describe('Integration Tests', () => {
   beforeEach(() => {
@@ -126,6 +159,7 @@ $$$$`;
         .get('/sdf_files/test.sdf')
         .expect(200);
 
+      expect(response.text).toBeDefined();
       expect(response.text).toContain('CCO');
       expect(response.text).toContain('$$$$');
     });
@@ -139,7 +173,7 @@ $$$$`;
         .expect(400);
 
       expect(response.body).toHaveProperty('error');
-      expect(response.body.error).toBe('No image data provided');
+      expect(response.body.error).toBe('Invalid input data');
     });
 
     test('POST /object-molecules should handle missing object description', async () => {
@@ -149,7 +183,7 @@ $$$$`;
         .expect(400);
 
       expect(response.body).toHaveProperty('error');
-      expect(response.body.error).toBe('No object description provided');
+      expect(response.body.error).toBe('Invalid input data');
     });
 
     test('POST /generate-sdfs should handle missing SMILES array', async () => {
@@ -159,7 +193,7 @@ $$$$`;
         .expect(400);
 
       expect(response.body).toHaveProperty('error');
-      expect(response.body.error).toBe('smiles array is required');
+      expect(response.body.error).toBe('Invalid input data');
     });
 
     test('POST /generate-sdfs should handle invalid SMILES', async () => {
