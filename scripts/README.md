@@ -5,7 +5,7 @@ These scripts replace the long command strings in `package.json` with clear, mai
 
 ## Scripts
 
-### `deploy.js` - Production Server Deployment
+### `deploy` - Production Server Deployment
 **Command:** `npm run deploy`
 
 **What it does:**
@@ -21,7 +21,7 @@ These scripts replace the long command strings in `package.json` with clear, mai
 - Memory: `1GB`
 - Timeout: `540s`
 
-### `ship.js` - Complete Workflow
+### `ship` - Complete Workflow
 **Command:** `npm run ship`
 
 **What it does:**
@@ -31,7 +31,7 @@ These scripts replace the long command strings in `package.json` with clear, mai
 4. ✅ Deploys to Google Cloud Functions
 5. ✅ Pushes to git repository (`git push`)
 
-**Same configuration as `deploy.js`**
+**Same configuration as `deploy`**
 
 ## Benefits
 
