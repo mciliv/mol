@@ -126,7 +126,7 @@ npm install swagger-jsdoc swagger-ui-express
 npm install express-healthcheck
 ```
 
-**Why**: Deployment monitoring, alerts
+**Why**: Google Cloud Functions monitoring, alerts
 **Implementation**: Health endpoint
 
 ## 🚀 **ADVANCED REQUIREMENTS**
@@ -273,6 +273,6 @@ For a **fully functional app**, you need **at minimum**:
 7. ✅ **Configuration** - Environment management
 8. ✅ **Logging** - Monitoring
 9. ✅ **Documentation** - API docs
-10. ✅ **Health Checks** - Deployment monitoring
+10. ✅ **Health Checks** - Google Cloud Functions monitoring
 
 **Bottom Line**: Your current app is a **prototype**. For production, you need **2-3 months** of additional development to implement the essential requirements listed above. 

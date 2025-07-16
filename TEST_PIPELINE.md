@@ -97,14 +97,8 @@ npm run test:fixtures    # Test fixture validation
 
 ### Deployment Commands
 ```bash
-# Deploy to Google Cloud (with full validation)
-npm run deploy:gcp
-
-# Quick deploy (with full validation)
-npm run deploy:now
-
-# Deploy to AWS (with full validation)
-npm run deploy:aws
+# Deploy to Google Cloud Functions (with full validation)
+npm run deploy
 ```
 
 ## Test File Structure

@@ -176,7 +176,7 @@ Your molecular analysis app currently uses:
 ### **Phase 1: MVP** (Current)
 - ✅ OpenAI API
 - ✅ Basic file storage
-- ✅ Simple deployment
+- ✅ Google Cloud Functions deployment
 
 ### **Phase 2: Growth** (0-1k users)
 - 🔄 Database (PostgreSQL)
@@ -194,7 +194,7 @@ Your molecular analysis app currently uses:
 - 🔄 Microservices
 - 🔄 Advanced search
 - 🔄 Enterprise auth
-- 🔄 Multi-region deployment
+- 🔄 Multi-region Google Cloud Functions
 
 ## 💰 **Cost Implications**
 

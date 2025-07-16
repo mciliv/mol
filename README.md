@@ -102,6 +102,7 @@ npm run dev
 - `npm run mobile` - Show mobile access URLs
 - `npm run cert` - Regenerate SSL certificates
 - `npm run tunnel` - Instructions for ngrok tunneling
+- `npm run deploy` - Deploy to Google Cloud Functions
 
 ### Features
 - 📷 Camera-based molecule analysis
@@ -115,6 +116,7 @@ npm run dev
 - **Backend**: Node.js, Express
 - **AI**: OpenAI GPT-4 Vision
 - **Chemistry**: SMILES notation, molecular analysis
+- **Deployment**: Google Cloud Functions
 
 ## API Endpoints
 
@@ -126,6 +128,19 @@ npm run dev
 OPENAI_API_KEY=your_openai_api_key_here
 NODE_ENV=development
 ```
+
+## Deployment
+
+### Prerequisites
+- Google Cloud CLI installed and authenticated
+- OpenAI API key set in environment
+
+### Deploy to Production
+```bash
+npm run deploy
+```
+
+
 
 ## License
 MIT
