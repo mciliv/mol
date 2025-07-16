@@ -190,7 +190,57 @@ The deployment uses `.gcloudignore` to include only essential files:
 - **Better security** - No sensitive development files in production
 - **Simpler structure** - Flat file organization, no copying needed
 
+# Deployment Scripts
 
+## Overview
+Top-level deployment scripts that orchestrate the entire workflow.
+
+## Scripts
+
+### `deploy-to-production` - Production Server Deployment
+**Command:** `npm run deploy`
+
+**What it does:**
+1. ✅ Validates environment variables
+2. ✅ Runs pre-deployment tests
+3. ✅ Deploys to Google Cloud Functions
+4. ✅ Shows deployment URL
+
+**Configuration:**
+- Function: `molecular-analysis`
+- Runtime: `nodejs20`
+- Region: `us-central1`
+- Memory: `1GB`
+- Timeout: `540s`
+
+### `ship-to-production-with-git` - Complete Workflow
+**Command:** `npm run ship`
+
+**What it does:**
+1. ✅ Stages all changes (`git add .`)
+2. ✅ Commits with timestamp (`git commit`)
+3. ✅ Runs pre-deployment tests
+4. ✅ Deploys to Google Cloud Functions
+5. ✅ Pushes to git repository (`git push`)
+
+**Same configuration as `deploy-to-production`**
+
+## Benefits
+
+- **📖 Readable** - Clear, documented code instead of long strings
+- **🔧 Maintainable** - Easy to modify configuration
+- **🐛 Debuggable** - Better error handling and logging
+- **⚙️ Configurable** - Centralized configuration object
+- **📝 Documented** - Clear comments and step-by-step process
+- **🎯 Hyperspecific** - Script names clearly indicate their purpose
+
+## Environment Variables
+
+**Required:**
+- `OPENAI_API_KEY` - OpenAI API key for molecular analysis
+
+**Optional:**
+- `GOOGLE_CLOUD_PROJECT` - Google Cloud project ID (for URL display)
 
 ## License
 MIT

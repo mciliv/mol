@@ -38,8 +38,8 @@
     "mobile": "echo 'Access on mobile:' && echo 'HTTPS: https://'$(npm run ip --silent)':3001' && echo 'HTTP: http://'$(npm run ip --silent)':8080'",
     "cert": "echo 'Generating fresh SSL certificates...' && rm -rf certs && node -e \"require('./server.js')\"",
     "tunnel": "echo 'Install ngrok: npm install -g ngrok' && echo 'Then run: ngrok http 8080'",
-    "deploy": "node scripts/deploy",
-    "ship": "node scripts/ship",
+    "deploy": "node deploy-to-production",
+    "ship": "node ship-to-production-with-git",
     "build": "npm run test:unit && echo 'Build complete - static files ready'"
   },
   "repository": {
