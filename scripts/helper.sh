@@ -2,7 +2,10 @@
 
 set -e
 
-PYVERSION=3.12.9
+# Load configuration
+source "$(dirname "$0")/config.sh"
+
+PYVERSION=$PYTHON_VERSION
 
 if ! command -v pyenv &> /dev/null; then
     curl https://pyenv.run | bash
