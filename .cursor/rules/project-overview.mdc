@@ -1,0 +1,43 @@
+# Molecular Analysis App - Project Overview
+
+## Project Structure
+This is a molecular visualization web app that analyzes objects (via camera, photos, or text) and generates 3D molecular structures using OpenAI Vision API.
+
+## Key Files
+- [index.js](mdc:index.js) - Google Cloud Functions entry point
+- [server.js](mdc:server.js) - Express server with API endpoints
+- [app.js](mdc:app.js) - Frontend JavaScript application
+- [index.html](mdc:index.html) - Main HTML interface
+- [style.css](mdc:style.css) - Application styles
+- [schemas.js](mdc:schemas.js) - Input validation schemas
+- [molecular-processor.js](mdc:molecular-processor.js) - SMILES processing logic
+- [AtomPredictor.js](mdc:AtomPredictor.js) - AI prediction integration
+- [sdf.py](mdc:sdf.py) - SDF file generation
+- [crystal.py](mdc:crystal.py) - Crystal structure analysis
+
+## Core Features
+- **Camera Analysis**: Real-time molecular analysis via camera
+- **Photo Upload**: Upload images for molecular analysis
+- **Text Input**: Type object names for molecular lookup
+- **3D Visualization**: Sphere-only representation with van der Waals radii (0.8 scale)
+- **SMILES Processing**: Convert chemical structures to 3D models
+- **AI Integration**: OpenAI Vision API for object recognition
+
+## API Endpoints
+- `POST /image-molecules` - Analyze uploaded images
+- `POST /object-molecules` - Analyze text descriptions
+- `POST /generate-sdfs` - Generate 3D structures from SMILES
+- `GET /` - Serve main application
+- `GET /sdf_files/*` - Serve generated SDF files
+
+## Deployment
+- **Single Command**: `npm run ship` - Complete workflow (commit, test, deploy, push)
+- **Deploy Only**: `npm run deploy` - Deploy without git changes
+- **Target**: Google Cloud Functions with clean file structure via `.gcloudignore`
+
+## UI Philosophy
+"Keep stupid simple" - minimal design, no extraneous elements, sphere-only molecular representation
+description:
+globs:
+alwaysApply: false
+---

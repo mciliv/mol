@@ -1,0 +1,59 @@
+# Error Messages - Standardized for Consistency
+
+## API Error Messages
+All error messages are defined in [server.js](mdc:server.js) and must be consistent across the application.
+
+### Image Analysis Errors
+```javascript
+// Missing image data
+return res.status(400).json({ error: "No image data provided" });
+
+// Invalid input data (schema validation)
+return res.status(400).json({ 
+  error: "Invalid input data", 
+  details: validation.error.issues 
+});
+```
+
+### Text Analysis Errors
+```javascript
+// Missing object description
+return res.status(400).json({ error: "No object description provided" });
+```
+
+### SDF Generation Errors
+```javascript
+// Missing SMILES array
+return res.status(400).json({ error: "smiles array is required" });
+```
+
+### Frontend Error Messages
+In [app.js](mdc:app.js), use `createClosableErrorMessage()` for user-facing errors:
+```javascript
+createClosableErrorMessage(`Error analyzing "${object}": ${err.message}`);
+createClosableErrorMessage(`Error: ${err.message}`);
+```
+
+### Python Processing Errors
+In [molecular-processor.js](mdc:molecular-processor.js):
+```javascript
+console.log(`SMILES generation failed for ${chemical}`);
+console.log(`Successfully generated SMILES structure: ${chemical} → ${sdfPath}`);
+```
+
+## Error Message Standards
+- **Be specific**: "No image data provided" not "Missing data"
+- **Be actionable**: Tell user what's missing or wrong
+- **Be consistent**: Use same wording across similar errors
+- **Include context**: Reference the specific field or operation that failed
+- **User-friendly**: Frontend errors should be understandable to non-technical users
+
+## Test Expectations
+All error messages are tested in [tests/integration.test.js](mdc:tests/integration.test.js):
+- `expect(response.body.error).toBe('No image data provided');`
+- `expect(response.body.error).toBe('No object description provided');`
+- `expect(response.body.error).toBe('smiles array is required');`
+description:
+globs:
+alwaysApply: false
+---

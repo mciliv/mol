@@ -1,0 +1,59 @@
+# Deployment Workflow - Single Command Automation
+
+## Deployment Commands
+
+### Complete Workflow: `npm run ship`
+**One command does everything:**
+```bash
+npm run ship
+```
+
+**What it does:**
+1. `git add .` - Stage all changes
+2. `git commit -m "timestamp"` - Commit with timestamp
+3. `npm run test:pre-deploy` - Run all tests
+4. `gcloud functions deploy` - Deploy to Google Cloud Functions
+5. `git push` - Push to repository
+
+### Deploy Only: `npm run deploy`
+**Deploy without git changes:**
+```bash
+npm run deploy
+```
+
+## Deployment Structure
+- **Clean deployment** via `.gcloudignore` whitelist approach
+- **Only essential files** uploaded (~200KB vs full project)
+- **No development files** in production
+- **Flat structure** - no copying needed
+
+## Essential Files Included
+- [index.js](mdc:index.js) - Cloud Function entry point
+- [server.js](mdc:server.js) - Express server
+- [app.js](mdc:app.js) - Frontend application
+- [index.html](mdc:index.html) - Main HTML page
+- [style.css](mdc:style.css) - Styles
+- [schemas.js](mdc:schemas.js) - Validation schemas
+- [molecular-processor.js](mdc:molecular-processor.js) - SMILES processing
+- [AtomPredictor.js](mdc:AtomPredictor.js) - AI integration
+- [sdf.py](mdc:sdf.py), [crystal.py](mdc:crystal.py) - Python processing
+- `*.svg` - Icons
+- [package.json](mdc:package.json) - Dependencies
+
+## Excluded Files
+- `tests/` - Test files
+- `scripts/` - Development scripts
+- `docs/` - Documentation
+- `node_modules/` - Dependencies (installed by Cloud Functions)
+- Development tools and configuration files
+
+## Benefits
+- **⚡ Faster deployments** - Smaller upload size
+- **🧹 Cleaner environment** - No development files
+- **💰 Reduced costs** - Less storage and processing
+- **🔒 Better security** - No sensitive files
+- **🎯 Simpler workflow** - Single command automation
+description:
+globs:
+alwaysApply: false
+---

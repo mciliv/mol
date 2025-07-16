@@ -1,0 +1,91 @@
+# AI Integration Standards - OpenAI Vision API
+
+## Pixel-Level Analysis Requirements
+**CRITICAL: Focus on EXACT pixel coordinates for image analysis**
+
+### Image Analysis Prompts
+```javascript
+// In [AtomPredictor.js](mdc:AtomPredictor.js)
+const focusText = `CRITICAL: Focus on the EXACT pixel at coordinates (${x}, ${y}) in the original image. 
+The user clicked on this specific point, not the general area. Here's a cropped view:`;
+
+// Add middle pixel context
+if (cropMiddleX !== null && cropMiddleY !== null && cropSize !== null) {
+  focusText += ` The red box in the cropped image marks the exact middle pixel (${cropMiddleX}, ${cropMiddleY}) of the ${cropSize}x${cropSize} crop region. This is the precise point the user clicked on. Analyze ONLY what's at this specific pixel location.`;
+}
+```
+
+## SMILES vs Molecular Formula Standards
+**CRITICAL: Use proper SMILES notation ONLY - never molecular formulas**
+
+### AI Instructions
+```javascript
+const chemicalInstructions = `CRITICAL: Use proper SMILES notation ONLY, never molecular formulas like C3N2O2H6.
+Examples:
+- Correct: "O" (water), "CCO" (ethanol), "C1=CC=CC=C1" (benzene)
+- Incorrect: "H2O", "C2H6O", "C6H6"`;
+```
+
+## Response Processing
+### Expected AI Response Format
+```javascript
+{
+  "object": "coffee",
+  "chemicals": [
+    {"name": "Caffeine", "smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"},
+    {"name": "Water", "smiles": "O"}
+  ]
+}
+```
+
+### Backward Compatibility
+```javascript
+// Extract SMILES for backward compatibility with existing tests
+const smiles = parsed.chemicals ? parsed.chemicals.map(chem => chem.smiles).filter(Boolean) : [];
+```
+
+## Error Handling Patterns
+```javascript
+// AI API calls in [AtomPredictor.js](mdc:AtomPredictor.js)
+try {
+  const response = await this.client.chat.completions.create({
+    model: "gpt-4o",
+    messages,
+    max_tokens: 1000,
+    temperature: 0.1
+  });
+  
+  const content = response.choices[0].message.content;
+  const parsed = this.parseAIResponse(content);
+  
+} catch (error) {
+  console.error("AI analysis error:", error);
+  throw new Error(`AI analysis failed: ${error.message}`);
+}
+```
+
+## Biological Analysis Standards
+- **Collagen fiber**: Return collagen component amino acids in SMILES
+- **Hair strand**: Return keratin component amino acids in SMILES  
+- **Skin tissue**: Return structural protein components
+- **Muscle tissue**: Return actin/myosin components
+
+## Fallback Behavior
+```javascript
+// Handle AI refusal to analyze people
+if (content.includes("unable to identify or analyze people")) {
+  return {
+    object: "Human body (generic composition)",
+    chemicals: [
+      {"name": "Water", "smiles": "O"},
+      {"name": "Polyethylene glycol", "smiles": "NCCNCCNCCN"},
+      {"name": "Leucine", "smiles": "CC(C)CC(N)C(=O)O"},
+      {"name": "Palmitic acid", "smiles": "CCCCCCCCCCCCCCCC(=O)O"}
+    ]
+  };
+}
+```
+description:
+globs:
+alwaysApply: false
+---
