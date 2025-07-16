@@ -3,6 +3,10 @@
 # Project Configuration
 # ====================
 
+# Project Information
+PROJECT_NAME="molecular-analysis"
+PROJECT_DESCRIPTION="Molecular analysis app with AI-powered chemical identification"
+
 # Domain Configuration
 DOMAIN_NAME="queb.space"
 DNS_ZONE_NAME="queb-space-zone"
@@ -20,4 +24,4 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Export for use in other scripts
-export DOMAIN_NAME DNS_ZONE_NAME REGION FUNCTION_NAME PROJECT_ID PYTHON_VERSION SCRIPT_DIR PROJECT_ROOT 
+export PROJECT_NAME PROJECT_DESCRIPTION DOMAIN_NAME DNS_ZONE_NAME REGION FUNCTION_NAME PROJECT_ID PYTHON_VERSION SCRIPT_DIR PROJECT_ROOT 
