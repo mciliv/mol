@@ -39,6 +39,7 @@
     "cert": "echo 'Generating fresh SSL certificates...' && rm -rf certs && node -e \"require('./server.js')\"",
     "tunnel": "echo 'Install ngrok: npm install -g ngrok' && echo 'Then run: ngrok http 8080'",
     "deploy": "npm run test:pre-deploy && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet",
+    "ship": "git add . && git commit -m \"$(date +'%Y-%m-%d %H:%M:%S') - Auto-commit before deployment\" && npm run test:pre-deploy && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet && git push",
     "build": "npm run test:unit && echo 'Build complete - static files ready'"
   },
   "repository": {

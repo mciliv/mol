@@ -102,7 +102,8 @@ npm run dev
 - `npm run mobile` - Show mobile access URLs
 - `npm run cert` - Regenerate SSL certificates
 - `npm run tunnel` - Instructions for ngrok tunneling
-- `npm run deploy` - Deploy to Google Cloud Functions
+- `npm run ship` - Complete workflow: commit, test, deploy, push
+- `npm run deploy` - Deploy to Google Cloud Functions (no git changes)
 
 ### Features
 - 📷 Camera-based molecule analysis
@@ -136,13 +137,23 @@ NODE_ENV=development
 - OpenAI API key set in environment
 
 ### Deploy to Production
+
+**Quick Deploy (with git commit & push):**
+```bash
+npm run ship
+```
+
+**Deploy Only (no git changes):**
 ```bash
 npm run deploy
 ```
 
-This command:
-1. Runs all tests to ensure code quality
-2. Deploys to Google Cloud Functions with only essential files
+The `ship` command:
+1. Stages all changes (`git add .`)
+2. Commits with timestamp (`git commit`)
+3. Runs all tests to ensure code quality
+4. Deploys to Google Cloud Functions
+5. Pushes changes to repository (`git push`)
 
 ### Deployment Structure
 
