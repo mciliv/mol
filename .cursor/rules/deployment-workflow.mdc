@@ -12,11 +12,11 @@ npm run ship
 1. `git add .` - Stage all changes
 2. `git commit -m "timestamp"` - Commit with timestamp
 3. `npm run test:pre-deploy` - Run all tests
-4. `gcloud functions deploy` - Deploy to Google Cloud Functions
-5. `git push` - Push to repository
+4. `gcloud functions deploy` - **Deploy to Google Cloud Functions (production server)**
+5. `git push` - **Push to git repository**
 
-### Deploy Only: `npm run deploy`
-**Deploy without git changes:**
+### Production Deploy Only: `npm run deploy`
+**Deploy to production server without git changes:**
 ```bash
 npm run deploy
 ```
@@ -48,11 +48,12 @@ npm run deploy
 - Development tools and configuration files
 
 ## Benefits
-- **⚡ Faster deployments** - Smaller upload size
+- **⚡ Faster production deployments** - Smaller upload size
 - **🧹 Cleaner environment** - No development files
 - **💰 Reduced costs** - Less storage and processing
 - **🔒 Better security** - No sensitive files
 - **🎯 Simpler workflow** - Single command automation
+- **📝 Clear terminology** - Distinguishes production server vs git repository
 description:
 globs:
 alwaysApply: false
