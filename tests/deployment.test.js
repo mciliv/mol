@@ -252,7 +252,7 @@ describe("Pre-Deployment Validation", () => {
       // Check that deployment scripts exist
       const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8"));
       
-      expect(packageJson.scripts["deploy:gcp"]).toBeDefined();
+      expect(packageJson.scripts["deploy"]).toBeDefined();
       expect(packageJson.scripts.start).toBeDefined();
       expect(packageJson.scripts.build).toBeDefined();
     });
