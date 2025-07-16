@@ -13,48 +13,31 @@
 .git
 .gitignore
 
-# Development files
+# Exclude everything by default
+*
+
+# Only include essential application files
+!index.js
+!server.js
+!app.js
+!index.html
+!style.css
+!schemas.js
+!molecular-processor.js
+!AtomPredictor.js
+!sdf.py
+!crystal.py
+!uniprot.py
+!usdz.py
+!camera.svg
+!water.svg
+!waves.svg
+!package.json
+!__init__.py
+
+# Allow sdf_files directory (but not its contents initially)
+!sdf_files/
+sdf_files/*
+
+# Node modules (will be installed by Cloud Functions)
 node_modules
-tests/
-scripts/
-certs/
-
-# Development scripts
-scripts.py
-kmeans.py
-jobs.html
-https-server.js
-lambda.js
-nodemon.json
-.vscode/
-.cursor/
-.cursorrules
-.copilot-codeGeneration-instructions.md
-mol.code-workspace
-DEBUGGING.md
-debug*
-nodemon.json
-https-server.js
-lambda.js
-jobs.html
-test_visualization.html
-
-# Documentation
-README.md
-PRODUCTION_REQUIREMENTS.md
-DEPENDENCIES_ROADMAP.md
-TEST_PIPELINE.md
-
-# Development tools
-.python-version
-poetry.lock
-pyproject.toml
-
-# Generated files
-sdf_files/
-*.log
-
-# Docker
-.dockerignore
-
-#!include:.gitignore
