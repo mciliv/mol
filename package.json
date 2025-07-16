@@ -38,8 +38,8 @@
     "mobile": "echo 'Access on mobile:' && echo 'HTTPS: https://'$(npm run ip --silent)':3001' && echo 'HTTP: http://'$(npm run ip --silent)':8080'",
     "cert": "echo 'Generating fresh SSL certificates...' && rm -rf certs && node -e \"require('./server.js')\"",
     "tunnel": "echo 'Install ngrok: npm install -g ngrok' && echo 'Then run: ngrok http 8080'",
-    "deploy": "npm run test:pre-deploy && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet",
-    "ship": "git add . && git commit -m \"$(date +'%Y-%m-%d %H:%M:%S') - Auto-commit before production deployment\" && npm run test:pre-deploy && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet && git push",
+    "deploy": "node scripts/deploy.js",
+    "ship": "node scripts/ship.js",
     "build": "npm run test:unit && echo 'Build complete - static files ready'"
   },
   "repository": {
