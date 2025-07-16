@@ -160,7 +160,15 @@ The deployment uses a clean `deploy/` directory containing only essential files:
 **Molecular Processing:**
 - `molecular-processor.js` - SMILES processing logic
 - `AtomPredictor.js` - AI prediction integration
-- `sdf.py`, `crystal.py`, `uniprot.py`, `usdz.py` - Python processing scripts
+- `sdf.py`, `crystal.py`, `uniprot.py`, `usdz.py` - Core Python processing modules
+
+**Excluded Development Scripts:**
+- `scripts.py` - Development script runner
+- `kmeans.py` - Data analysis script
+- `jobs.html` - Development interface
+- `https-server.js` - Development server
+- `lambda.js` - AWS Lambda handler
+- `nodemon.json` - Development configuration
 
 **Assets:**
 - SVG icons for camera, water, waves

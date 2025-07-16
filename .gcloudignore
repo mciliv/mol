@@ -18,6 +18,14 @@ node_modules
 tests/
 scripts/
 certs/
+
+# Development scripts
+scripts.py
+kmeans.py
+jobs.html
+https-server.js
+lambda.js
+nodemon.json
 .vscode/
 .cursor/
 .cursorrules
