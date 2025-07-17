@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const snapshots = document.querySelector(".snapshots-container");
   const msgBox = document.querySelector(".permission-message");
   const objectInput = document.getElementById("object-input");
+  const unleashBtn = document.getElementById("unleash-smiles-btn");
   const appContainer = document.querySelector(".app-container");
   const instructionText = document.querySelector(".instruction-text");
   const cameraMode = document.getElementById("camera-mode");
@@ -56,6 +57,39 @@ document.addEventListener("DOMContentLoaded", () => {
   objectInput.addEventListener("focus", clearModeSelection);
   
   updateInputMode();
+  
+  // Unleash SMILES button functionality
+  unleashBtn.addEventListener("click", async () => {
+    const object = objectInput.value.trim();
+    if (!object) {
+      alert("Please enter an object name first!");
+      return;
+    }
+
+    // Show loading state
+    unleashBtn.disabled = true;
+    unleashBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Unleashing...</span>';
+
+    try {
+      const res = await fetch("/unleash-smiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ object }),
+      });
+      
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const result = await res.json();
+
+      // Display the unleashed SMILES array
+      displayUnleashedSmiles(result, object);
+    } catch (err) {
+      createClosableErrorMessage(`Error unleashing SMILES for "${object}": ${err.message}`);
+    } finally {
+      // Reset button state
+      unleashBtn.disabled = false;
+      unleashBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>SMILES</span>';
+    }
+  });
   
   objectInput.addEventListener("keyup", async (e) => {
     if (e.key !== "Enter") return;
@@ -423,62 +457,145 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createClosableErrorMessage(message, container = snapshots) {
-    const errorContainer = document.createElement("div");
-    errorContainer.className = "error-message";
-    errorContainer.style.cssText = `
-      background: rgba(255, 107, 107, 0.1);
-      border: 1px solid rgba(255, 107, 107, 0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin: 8px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    const errorDiv = document.createElement("div");
+    errorDiv.style.cssText = `
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
       color: #ff6b6b;
-      font-size: 14px;
-      font-weight: 500;
+      padding: 20px;
+      margin: 20px;
+      border-radius: 8px;
+      text-align: center;
+      position: relative;
     `;
     
-    const errorText = document.createElement("span");
-    errorText.textContent = message;
-    errorContainer.appendChild(errorText);
+    errorDiv.innerHTML = `
+      <div style="font-weight: 600; margin-bottom: 8px;">⚠️ Error</div>
+      <div>${message}</div>
+      <button onclick="this.parentElement.remove(); updateScrollHandles();" 
+              style="position: absolute; top: 8px; right: 8px; background: none; border: none; color: #ff6b6b; font-size: 18px; cursor: pointer; padding: 4px;">×</button>
+    `;
     
-    const closeButton = document.createElement("button");
-    closeButton.textContent = "×";
-    closeButton.style.cssText = `
+    container.appendChild(errorDiv);
+    updateScrollHandles();
+  }
+
+  // Display unleashed SMILES array
+  function displayUnleashedSmiles(result, object) {
+    const container = document.createElement("div");
+    container.style.cssText = `
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px;
+      position: relative;
+    `;
+
+    const title = document.createElement("h3");
+    title.style.cssText = `
+      color: #667eea;
+      margin: 0 0 16px 0;
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    `;
+    title.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+      Unleashed SMILES for "${object}"
+    `;
+
+    const message = document.createElement("div");
+    message.style.cssText = `
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 16px;
+      font-size: 14px;
+    `;
+    message.textContent = result.message;
+
+    const smilesContainer = document.createElement("div");
+    smilesContainer.style.cssText = `
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    `;
+
+    if (result.smiles && result.smiles.length > 0) {
+      const smilesList = document.createElement("div");
+      smilesList.style.cssText = `
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      `;
+
+      result.smiles.forEach((smile, index) => {
+        const smileItem = document.createElement("div");
+        smileItem.style.cssText = `
+          background: rgba(102, 126, 234, 0.2);
+          border: 1px solid rgba(102, 126, 234, 0.4);
+          border-radius: 6px;
+          padding: 8px 12px;
+          font-family: 'Courier New', monospace;
+          font-size: 13px;
+          color: #fff;
+          font-weight: 600;
+        `;
+        smileItem.textContent = smile;
+        smilesList.appendChild(smileItem);
+      });
+
+      smilesContainer.appendChild(smilesList);
+    } else {
+      const noSmiles = document.createElement("div");
+      noSmiles.style.cssText = `
+        color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+      `;
+      noSmiles.textContent = "No SMILES found for this object";
+      smilesContainer.appendChild(noSmiles);
+    }
+
+    const closeBtn = document.createElement("button");
+    closeBtn.innerHTML = "×";
+    closeBtn.style.cssText = `
+      position: absolute;
+      top: 12px;
+      right: 12px;
       background: none;
       border: none;
-      color: #ff6b6b;
-      font-size: 18px;
-      font-weight: bold;
+      color: #667eea;
+      font-size: 20px;
       cursor: pointer;
-      padding: 0;
-      margin-left: 12px;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.2s ease;
+      padding: 4px;
+      border-radius: 4px;
+      transition: background 0.2s ease;
     `;
-    
-    closeButton.addEventListener('mouseenter', () => {
-      closeButton.style.background = 'rgba(255, 107, 107, 0.2)';
+    closeBtn.addEventListener("click", () => {
+      container.remove();
+      updateScrollHandles();
     });
-    
-    closeButton.addEventListener('mouseleave', () => {
-      closeButton.style.background = 'none';
+    closeBtn.addEventListener("mouseenter", () => {
+      closeBtn.style.background = "rgba(102, 126, 234, 0.2)";
     });
-    
-    closeButton.addEventListener('click', () => {
-      errorContainer.remove();
+    closeBtn.addEventListener("mouseleave", () => {
+      closeBtn.style.background = "none";
     });
-    
-    errorContainer.appendChild(closeButton);
-    container.appendChild(errorContainer);
-    
-    return errorContainer;
+
+    container.appendChild(title);
+    container.appendChild(message);
+    container.appendChild(smilesContainer);
+    container.appendChild(closeBtn);
+
+    snapshots.appendChild(container);
+    updateScrollHandles();
   }
   
   function createResultMessage(icon, objectName, smilesCount, useQuotes = false) {

@@ -276,6 +276,56 @@ app.post('/generate-sdfs', async (req, res) => {
   }
 });
 
+// Unleash the SMILES array - dedicated endpoint for pure SMILES
+app.post('/unleash-smiles', async (req, res) => {
+  try {
+    const { imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize, object } = req.body;
+    
+    let result;
+    
+    if (imageBase64) {
+      // Image analysis
+      result = await atomPredictor.analyzeImage(imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize);
+    } else if (object) {
+      // Text analysis
+      result = await atomPredictor.analyzeText(object);
+    } else {
+      return res.status(400).json({ error: "Either imageBase64 or object is required" });
+    }
+    
+    // Unleash the pure SMILES array!
+    const pureSmiles = result.smiles || [];
+    
+    res.json({
+      smiles: pureSmiles,
+      count: pureSmiles.length,
+      message: `Unleashed ${pureSmiles.length} SMILES strings!`
+    });
+  } catch (error) {
+    console.error("SMILES unleashing error:", error);
+    
+    let errorMessage = error.message;
+    let statusCode = 500;
+    
+    if (error.message.includes('network') || error.message.includes('fetch')) {
+      errorMessage = "Network error: Unable to connect to AI service.";
+      statusCode = 503;
+    } else if (error.message.includes('API key') || error.message.includes('authentication')) {
+      errorMessage = "Authentication error: Invalid or missing API key.";
+      statusCode = 401;
+    } else if (error.message.includes('rate limit') || error.message.includes('quota')) {
+      errorMessage = "Rate limit exceeded: Please try again later.";
+      statusCode = 429;
+    }
+    
+    res.status(statusCode).json({ 
+      error: errorMessage,
+      smiles: [],
+      count: 0
+    });
+  }
+});
+
 // Static routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
