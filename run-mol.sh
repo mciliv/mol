@@ -21,9 +21,17 @@ fi
 echo "🧪 Running tests..."
 npm test
 
+# Check if port is already in use
+if lsof -i :8080 > /dev/null 2>&1; then
+    echo "⚠️  Port 8080 is already in use"
+    echo "💡 Killing existing process..."
+    pkill -f "node.*server.js" 2>/dev/null || true
+    sleep 2
+fi
+
 # Start the server
-echo "🌐 Starting server on http://localhost:8080"
-echo "📱 Mobile access: http://$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1):8080"
+echo "🌐 Starting server..."
+echo "📱 The app will automatically find an available port if 8080 is busy"
 echo ""
 echo "Press Ctrl+C to stop"
 echo ""
