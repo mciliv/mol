@@ -5,38 +5,42 @@ const CHEMICAL_REPRESENTATIONS = {
   smiles: "Array of SMILES notation for constituent molecules (e.g., ['CCO', 'O'] for alcoholic beverage, ['C1=CC=CC=C1'] for benzene)"
 };
 
-// Schema for object identification with chemical names and SMILES
-const ObjectIdentificationSchema = z.object({
-  object: z.string().describe("The identified object or material"),
-  chemicals: z.array(z.object({
-    name: z.string().describe("Chemical name or common name"),
-    smiles: z.string().describe("SMILES notation for the molecule")
-  })).describe("Array of chemical constituents with names and SMILES notation")
-});
-
-// Schema for image-based molecular analysis
+// Schema for image molecule analysis
 const ImageMoleculeSchema = z.object({
-  imageBase64: z.string().describe("Base64 encoded image data"),
-  croppedImageBase64: z.string().optional().describe("Base64 encoded cropped region"),
-  x: z.number().optional().describe("X coordinate of click"),
-  y: z.number().optional().describe("Y coordinate of click")
+  imageBase64: z.string().min(1, "Image data is required"),
+  croppedImageBase64: z.string().optional(),
+  x: z.number().min(0).max(1000).optional(),
+  y: z.number().min(0).max(1000).optional(),
+  cropMiddleX: z.number().min(0).max(1000).optional(),
+  cropMiddleY: z.number().min(0).max(1000).optional(),
+  cropSize: z.number().min(10).max(500).optional()
 });
 
-// Schema for text-based molecular analysis
+// Schema for text molecule analysis
 const TextMoleculeSchema = z.object({
-  object: z.string().describe("Text description of object or material")
+  object: z.string().min(1, "Object description is required")
 });
 
-// Schema for generating SDF files
+// Schema for SDF generation
 const SdfGenerationSchema = z.object({
-  smiles: z.array(z.string()).describe("Array of SMILES notation to convert to SDF files"),
-  overwrite: z.boolean().optional().default(false).describe("Whether to overwrite existing SDF files")
+  smiles: z.array(z.string()).min(1, "At least one SMILES string is required"),
+  overwrite: z.boolean().optional()
+});
+
+// Schema for object identification response
+const ObjectIdentificationSchema = z.object({
+  object: z.string(),
+  chemicals: z.array(z.object({
+    name: z.string(),
+    smiles: z.string(),
+    amount: z.string().optional(),
+    reference: z.string().optional()
+  }))
 });
 
 module.exports = {
-  ObjectIdentificationSchema,
   ImageMoleculeSchema,
   TextMoleculeSchema,
   SdfGenerationSchema,
-  CHEMICAL_REPRESENTATIONS
+  ObjectIdentificationSchema
 };
