@@ -417,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
       opacity: 0.7;
       font-size: 14px;
     `;
-    loadingIndicator.textContent = "Processing with AI...";
+    loadingIndicator.textContent = "Processing";
     loadingColumn.appendChild(loadingIndicator);
     
     gldiv.appendChild(loadingColumn);

@@ -32,9 +32,7 @@ const ObjectIdentificationSchema = z.object({
   object: z.string(),
   chemicals: z.array(z.object({
     name: z.string(),
-    smiles: z.string(),
-    amount: z.string().optional(),
-    reference: z.string().optional()
+    smiles: z.string()
   }))
 });
 
