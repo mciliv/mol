@@ -293,13 +293,13 @@ app.post('/unleash-smiles', async (req, res) => {
       return res.status(400).json({ error: "Either imageBase64 or object is required" });
     }
     
-    // Unleash the pure SMILES array!
-    const pureSmiles = result.smiles || [];
+    // Unleash the chemicals dictionary!
+    const chemicals = result.chemicals || [];
     
     res.json({
-      smiles: pureSmiles,
-      count: pureSmiles.length,
-      message: `Unleashed ${pureSmiles.length} SMILES strings!`
+      chemicals: chemicals,
+      count: chemicals.length,
+      message: `Unleashed ${chemicals.length} chemical compounds!`
     });
   } catch (error) {
     console.error("SMILES unleashing error:", error);
@@ -320,7 +320,7 @@ app.post('/unleash-smiles', async (req, res) => {
     
     res.status(statusCode).json({ 
       error: errorMessage,
-      smiles: [],
+      chemicals: [],
       count: 0
     });
   }
