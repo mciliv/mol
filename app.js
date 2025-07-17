@@ -80,14 +80,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const result = await res.json();
 
-      // Display the unleashed SMILES array
+      // Display the unleashed chemicals dictionary
       displayUnleashedSmiles(result, object);
     } catch (err) {
-      createClosableErrorMessage(`Error unleashing SMILES for "${object}": ${err.message}`);
+      createClosableErrorMessage(`Error unleashing chemicals for "${object}": ${err.message}`);
     } finally {
       // Reset button state
       unleashBtn.disabled = false;
-      unleashBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>SMILES</span>';
+      unleashBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>Chemicals</span>';
     }
   });
   
@@ -506,7 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
       </svg>
-      Unleashed SMILES for "${object}"
+      Unleashed Chemicals for "${object}"
     `;
 
     const message = document.createElement("div");
@@ -518,49 +518,72 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     message.textContent = result.message;
 
-    const smilesContainer = document.createElement("div");
-    smilesContainer.style.cssText = `
+    const chemicalsContainer = document.createElement("div");
+    chemicalsContainer.style.cssText = `
       background: rgba(0, 0, 0, 0.3);
       border-radius: 8px;
       padding: 16px;
       margin-bottom: 16px;
     `;
 
-    if (result.smiles && result.smiles.length > 0) {
-      const smilesList = document.createElement("div");
-      smilesList.style.cssText = `
+    if (result.chemicals && result.chemicals.length > 0) {
+      const chemicalsList = document.createElement("div");
+      chemicalsList.style.cssText = `
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+        flex-direction: column;
+        gap: 12px;
       `;
 
-      result.smiles.forEach((smile, index) => {
-        const smileItem = document.createElement("div");
-        smileItem.style.cssText = `
-          background: rgba(102, 126, 234, 0.2);
-          border: 1px solid rgba(102, 126, 234, 0.4);
-          border-radius: 6px;
-          padding: 8px 12px;
-          font-family: 'Courier New', monospace;
-          font-size: 13px;
-          color: #fff;
-          font-weight: 600;
+      result.chemicals.forEach((chemical, index) => {
+        const chemicalItem = document.createElement("div");
+        chemicalItem.style.cssText = `
+          background: rgba(102, 126, 234, 0.15);
+          border: 1px solid rgba(102, 126, 234, 0.3);
+          border-radius: 8px;
+          padding: 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
         `;
-        smileItem.textContent = smile;
-        smilesList.appendChild(smileItem);
+
+        const nameDiv = document.createElement("div");
+        nameDiv.style.cssText = `
+          font-weight: 600;
+          color: #fff;
+          font-size: 14px;
+          flex: 1;
+        `;
+        nameDiv.textContent = chemical.name || `Chemical ${index + 1}`;
+
+        const smilesDiv = document.createElement("div");
+        smilesDiv.style.cssText = `
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          color: #667eea;
+          background: rgba(0, 0, 0, 0.3);
+          padding: 6px 10px;
+          border-radius: 4px;
+          border: 1px solid rgba(102, 126, 234, 0.2);
+        `;
+        smilesDiv.textContent = chemical.smiles || 'N/A';
+
+        chemicalItem.appendChild(nameDiv);
+        chemicalItem.appendChild(smilesDiv);
+        chemicalsList.appendChild(chemicalItem);
       });
 
-      smilesContainer.appendChild(smilesList);
+      chemicalsContainer.appendChild(chemicalsList);
     } else {
-      const noSmiles = document.createElement("div");
-      noSmiles.style.cssText = `
+      const noChemicals = document.createElement("div");
+      noChemicals.style.cssText = `
         color: rgba(255, 255, 255, 0.6);
         font-style: italic;
         text-align: center;
         padding: 20px;
       `;
-      noSmiles.textContent = "No SMILES found for this object";
-      smilesContainer.appendChild(noSmiles);
+      noChemicals.textContent = "No chemicals found for this object";
+      chemicalsContainer.appendChild(noChemicals);
     }
 
     const closeBtn = document.createElement("button");
@@ -591,7 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     container.appendChild(title);
     container.appendChild(message);
-    container.appendChild(smilesContainer);
+    container.appendChild(chemicalsContainer);
     container.appendChild(closeBtn);
 
     snapshots.appendChild(container);
