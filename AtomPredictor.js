@@ -240,13 +240,9 @@ Example responses:
       const content = response.choices[0].message.content;
       const parsed = this.parseAIResponse(content);
       
-      // Extract SMILES for backward compatibility
-      const smiles = parsed.chemicals ? parsed.chemicals.map(chem => chem.smiles).filter(Boolean) : [];
-      
       return {
         object: parsed.object || "Unknown object",
-        chemicals: parsed.chemicals || [],
-        smiles: smiles  // Add for backward compatibility with tests
+        chemicals: parsed.chemicals || []
       };
 
     } catch (error) {
@@ -272,13 +268,9 @@ Example responses:
       const content = response.choices[0].message.content;
       const parsed = this.parseAIResponse(content);
       
-      // Extract SMILES for backward compatibility
-      const smiles = parsed.chemicals ? parsed.chemicals.map(chem => chem.smiles).filter(Boolean) : [];
-      
       return {
         object: parsed.object || object,
-        chemicals: parsed.chemicals || [],
-        smiles: smiles  // Add for backward compatibility with tests
+        chemicals: parsed.chemicals || []
       };
 
     } catch (error) {

@@ -93,8 +93,12 @@ describe('Integration Tests', () => {
 
       expect(response.body).toHaveProperty('output');
       expect(response.body.output).toHaveProperty('object');
-      expect(response.body.output).toHaveProperty('smiles');
-      expect(Array.isArray(response.body.output.smiles)).toBe(true);
+      expect(response.body.output).toHaveProperty('chemicals');
+      expect(Array.isArray(response.body.output.chemicals)).toBe(true);
+      
+      // Extract SMILES from chemicals for testing
+      const smiles = response.body.output.chemicals.map(chem => chem.smiles).filter(Boolean);
+      expect(Array.isArray(smiles)).toBe(true);
     });
 
     test('POST /object-molecules should process text analysis', async () => {
@@ -105,7 +109,12 @@ describe('Integration Tests', () => {
 
       expect(response.body).toHaveProperty('output');
       expect(response.body.output).toHaveProperty('object');
-      expect(response.body.output).toHaveProperty('smiles');
+      expect(response.body.output).toHaveProperty('chemicals');
+      expect(Array.isArray(response.body.output.chemicals)).toBe(true);
+      
+      // Extract SMILES from chemicals for testing
+      const smiles = response.body.output.chemicals.map(chem => chem.smiles).filter(Boolean);
+      expect(Array.isArray(smiles)).toBe(true);
     });
 
     test('POST /generate-sdfs should process SMILES and generate SDF files', async () => {
@@ -225,7 +234,7 @@ $$$$`;
         })
         .expect(200);
 
-      const smiles = analysisResponse.body.output.smiles;
+      const smiles = analysisResponse.body.output.chemicals.map(chem => chem.smiles).filter(Boolean);
       expect(Array.isArray(smiles)).toBe(true);
       expect(smiles.length).toBeGreaterThan(0);
 
@@ -249,7 +258,7 @@ $$$$`;
         .send({ object: 'water bottle' })
         .expect(200);
 
-      const smiles = analysisResponse.body.output.smiles;
+      const smiles = analysisResponse.body.output.chemicals.map(chem => chem.smiles).filter(Boolean);
       expect(Array.isArray(smiles)).toBe(true);
 
       // Step 2: Generate SDF files
