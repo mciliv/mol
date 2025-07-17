@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Simple Mol Runner
-# ================
+# Simple local run script for Mol
+# ===============================
 
-echo "🚀 Starting Mol..."
+echo "🚀 Starting Mol locally..."
 
 # Check if Node.js is installed
 if ! command -v node &> /dev/null; then
@@ -17,7 +17,7 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Run tests
+# Run tests first
 echo "🧪 Running tests..."
 npm test
 

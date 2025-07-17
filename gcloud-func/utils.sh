@@ -116,6 +116,23 @@ check_function() {
     fi
 }
 
+get_function_url() {
+    local function_name="$1"
+    local region="$2"
+    local project_id="${3:-$(get_project)}"
+    
+    log_info "Getting function URL: $function_name in $region"
+    local url=$(gcloud functions describe "$function_name" --region="$region" --project="$project_id" --format="value(httpsTrigger.url)" 2>/dev/null)
+    if [ -n "$url" ]; then
+        log_info "✅ Function URL: $url"
+        echo "$url"
+        return 0
+    else
+        log_error "❌ Could not get function URL"
+        return 1
+    fi
+}
+
 deploy_function() {
     local function_name="$1"
     local region="$2"
@@ -124,8 +141,9 @@ deploy_function() {
     local runtime="${5:-nodejs20}"
     local memory="${6:-1GB}"
     local timeout="${7:-540s}"
+    local entry_point="${8:-main}"
     
-    log_info "🚀 Deploying $function_name to $region..."
+    log_info "🚀 Deploying $function_name to $region with entry point: $entry_point..."
     
     gcloud functions deploy "$function_name" \
         --region="$region" \
@@ -133,6 +151,7 @@ deploy_function() {
         --runtime="$runtime" \
         --memory="$memory" \
         --timeout="$timeout" \
+        --entry-point="$entry_point" \
         --trigger-http \
         --allow-unauthenticated \
         --project="$project_id"
