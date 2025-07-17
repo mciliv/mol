@@ -10,7 +10,7 @@
   },
   "name": "mol",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "function.js",
   "directories": {
     "test": "tests"
   },
