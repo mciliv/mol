@@ -12,11 +12,12 @@ class AtomPredictor {
 
 IMPORTANT RULES:
 1. Generate ONLY valid, concise SMILES notation
-2. Use simple, standard SMILES - avoid overly complex representations
-3. For polymers, use short repeat units (max 20-30 atoms)
-4. For minerals like talc, use simple representations like "O[Si]O" or "O[Si](O)O"
-5. For complex biomolecules, use representative fragments
-6. Keep SMILES strings under 100 characters when possible
+2. For complex molecules, use representative fragments or simplified forms
+3. For minerals like talc, use simple representations like "O[Si](O)O" or "O[Si]O"
+4. For polymers, use short repeat units (max 10-15 atoms)
+5. For large biomolecules, use key functional groups or representative structures
+6. Avoid generating extremely long SMILES strings (>200 characters)
+7. Focus on the most important/abundant chemical components
 
 Response format:
 {
@@ -29,18 +30,12 @@ Response format:
 
 Examples of good SMILES:
 - Water: "O"
-- Ethanol: "CCO" 
 - Glucose: "C(C(C(C(C(C=O)O)O)O)O)O"
-- Benzene: "C1=CC=CC=C1"
+- Caffeine: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"
 - Talc: "O[Si](O)O"
 - Cellulose: "C(C1C(C(C(C(O1)O)O)O)O)O"
 
-Examples of what to avoid:
-- Extremely long polymer chains
-- Overly complex mineral structures
-- Unrealistic molecular representations
-
-Analyze the object and provide the chemical composition in the specified JSON format.`;
+Analyze the object and provide the most relevant chemical components.`;
   }
 
   async analyzeImage(imageBase64, croppedImageBase64 = null, x = null, y = null, cropMiddleX = null, cropMiddleY = null, cropSize = null) {
