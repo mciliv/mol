@@ -27,7 +27,7 @@ check_auth || {
 
 # Deploy function
 if [ -d "$SOURCE_DIR" ]; then
-    deploy_function "$FUNCTION_NAME" "$REGION" "$SOURCE_DIR"
+    deploy_function "$FUNCTION_NAME" "$REGION" "$SOURCE_DIR" "$PROJECT_ID" "$RUNTIME" "$MEMORY" "$TIMEOUT" "$ENTRY_POINT"
 else
     log_error "Source directory not found: $SOURCE_DIR"
     exit 1
