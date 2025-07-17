@@ -44,8 +44,12 @@ describe("Separated Test Functionality", () => {
       
       expect(coffee).toBeDefined();
       expect(coffee.object).toBe("coffee");
-      expect(Array.isArray(coffee.smiles)).toBe(true);
-      expect(TestAssertions.arrayContainsValidSmiles(coffee.smiles)).toBe(true);
+      expect(Array.isArray(coffee.chemicals)).toBe(true);
+      
+      // Extract SMILES from chemicals for testing
+      const smiles = coffee.chemicals.map(chem => chem.smiles).filter(Boolean);
+      expect(Array.isArray(smiles)).toBe(true);
+      expect(TestAssertions.arrayContainsValidSmiles(smiles)).toBe(true);
     });
 
     it("should provide mock images", () => {
@@ -98,7 +102,10 @@ describe("Separated Test Functionality", () => {
       const validResponse = {
         output: {
           object: "coffee",
-          smiles: ["CN1C=NC2=C1C(=O)N(C(=O)N2C)C", "O"]
+          chemicals: [
+            {"name": "Caffeine", "smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"},
+            {"name": "Water", "smiles": "O"}
+          ]
         }
       };
       
@@ -108,7 +115,11 @@ describe("Separated Test Functionality", () => {
     it("should validate object molecules response", () => {
       const validResponse = {
         output: {
-          smiles: ["CCO", "O"]
+          object: "wine",
+          chemicals: [
+            {"name": "Ethanol", "smiles": "CCO"},
+            {"name": "Water", "smiles": "O"}
+          ]
         }
       };
       
@@ -119,7 +130,7 @@ describe("Separated Test Functionality", () => {
       const invalidResponse = {
         output: {
           object: "coffee"
-          // missing smiles array
+          // missing chemicals array
         }
       };
       
@@ -233,7 +244,10 @@ describe("Separated Test Functionality", () => {
       const mockResponse = {
         output: {
           object: "test object",
-          smiles: ["O", "CCO"]
+          chemicals: [
+            {"name": "Water", "smiles": "O"},
+            {"name": "Ethanol", "smiles": "CCO"}
+          ]
         }
       };
       
