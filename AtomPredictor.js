@@ -8,26 +8,26 @@ class AtomPredictor {
   }
 
   buildChemicalInstructions() {
-    return `You are a molecular analysis expert. Analyze the object and provide a comprehensive JSON response with all relevant chemical components.
+    return `You are a molecular analysis expert. Analyze the object and provide a JSON response with relevant chemical components.
 
-Generate as many truthful molecules as possible with estimated amounts and database references. Focus on accuracy and completeness.
+Generate truthful, concise SMILES strings for the main chemical constituents. Keep SMILES strings reasonable in length (typically under 100 characters).
 
 Response format:
 {
   "object": "Object name",
   "chemicals": [
-    {"name": "Chemical name", "smiles": "SMILES notation", "amount": "estimated percentage or concentration", "reference": "database or source"},
-    {"name": "Chemical name", "smiles": "SMILES notation", "amount": "estimated percentage or concentration", "reference": "database or source"}
+    {"name": "Chemical name", "smiles": "SMILES notation"},
+    {"name": "Chemical name", "smiles": "SMILES notation"}
   ]
 }
 
 Examples:
-- Water: "O" (typically 70-95% in biological samples)
-- Glucose: "C(C(C(C(C(C=O)O)O)O)O)O" (5-15% in fruits)
-- Caffeine: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C" (1-3% in coffee beans)
-- Lycopene: "CC1=C(C(=C(C=C1)C)C)C=C(C=C2C(=C(C(=C(C2=C)C)C)C)C)C" (0.1-0.5% in tomatoes)
+- Water: "O"
+- Glucose: "C(C(C(C(C(C=O)O)O)O)O)O"
+- Caffeine: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"
+- Lycopene: "CC1=C(C(=C(C=C1)C)C)C=C(C=C2C(=C(C(=C(C2=C)C)C)C)C)C"
 
-Use databases like PubChem, ChEBI, or scientific literature for accurate SMILES and concentration data. Include all major components, even trace amounts if significant.`;
+Focus on the most important chemical components. Use standard SMILES notation that can be parsed by chemical software.`;
   }
 
   async analyzeImage(imageBase64, croppedImageBase64 = null, x = null, y = null, cropMiddleX = null, cropMiddleY = null, cropSize = null) {
