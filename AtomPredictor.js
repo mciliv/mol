@@ -8,188 +8,39 @@ class AtomPredictor {
   }
 
   buildChemicalInstructions() {
-    const instructions = Object.entries(CHEMICAL_REPRESENTATIONS)
-      .map(([type, description]) => `${type}: ${description}`)
-      .join('\n');
-    
-    return `Analyze the image and identify the chemical composition of what you see. Return a JSON object with:
-- "object": brief description of the material or substance  
-- "chemicals": array of objects with "name" and "smiles" fields (include major chemical components)
+    return `You are a molecular analysis expert. Analyze the object and provide a JSON response with the chemical composition.
 
-IMPORTANT:
-- Focus on the material or substance visible in the image, not people or specific individuals
-- Be chemically specific and realistic. For common materials, include their major chemical constituents
-- CRITICAL: Use proper SMILES notation ONLY, never molecular formulas like C3N2O2H6 or trivial names.
-- SMILES examples: "CCO" for ethanol, "C(C(=O)O)N" for glycine, "C1=CC=CC=C1" for benzene
-- NEVER use molecular formulas like "C2H6O" or "C3N2O2H6" - these are not SMILES
-- WRONG: {"name": "Histidine", "smiles": "C3N2O2H6"} - this is a molecular formula
-- CORRECT: {"name": "Histidine", "smiles": "C1=C(NC=N1)CC(C(=O)O)N"} - this is proper SMILES
-- For mixtures (e.g., wine, seawater), list the most abundant and characteristic molecules.
-- For generic objects (e.g., "alcoholic beverage"), prefer to infer the likely type (e.g., wine, beer, spirits) and break down accordingly.
-- For materials like plastics, fibers, or biological tissues, include the characteristic polymer or macromolecular structures.
-- Focus on chemical analysis, not personal identification or analysis of individuals.
+IMPORTANT RULES:
+1. Generate ONLY valid, concise SMILES notation
+2. Use simple, standard SMILES - avoid overly complex representations
+3. For polymers, use short repeat units (max 20-30 atoms)
+4. For minerals like talc, use simple representations like "O[Si]O" or "O[Si](O)O"
+5. For complex biomolecules, use representative fragments
+6. Keep SMILES strings under 100 characters when possible
 
-Chemical types and their representations:
-${instructions}
-
-Example responses:
+Response format:
 {
-  "object": "Tap water",
+  "object": "Object name",
   "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Sodium ion", "smiles": "[Na+]"},
-    {"name": "Chloride ion", "smiles": "[Cl-]"},
-    {"name": "Calcium ion", "smiles": "[Ca+2]"},
-    {"name": "Magnesium ion", "smiles": "[Mg+2]"},
-    {"name": "Potassium ion", "smiles": "[K+]"},
-    {"name": "Bicarbonate ion", "smiles": "[HCO3-]"}
+    {"name": "Chemical name", "smiles": "SMILES notation"},
+    {"name": "Chemical name", "smiles": "SMILES notation"}
   ]
 }
 
-{
-  "object": "Mineral water",
-  "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Sodium ion", "smiles": "[Na+]"},
-    {"name": "Chloride ion", "smiles": "[Cl-]"},
-    {"name": "Calcium ion", "smiles": "[Ca+2]"},
-    {"name": "Magnesium ion", "smiles": "[Mg+2]"},
-    {"name": "Potassium ion", "smiles": "[K+]"},
-    {"name": "Bicarbonate ion", "smiles": "[HCO3-]"},
-    {"name": "Sulfate ion", "smiles": "[SO4-2]"},
-    {"name": "Iron(II) ion", "smiles": "[Fe+2]"},
-    {"name": "Zinc ion", "smiles": "[Zn+2]"}
-  ]
-}
+Examples of good SMILES:
+- Water: "O"
+- Ethanol: "CCO" 
+- Glucose: "C(C(C(C(C(C=O)O)O)O)O)O"
+- Benzene: "C1=CC=CC=C1"
+- Talc: "O[Si](O)O"
+- Cellulose: "C(C1C(C(C(C(O1)O)O)O)O)O"
 
-{
-  "object": "Seawater",
-  "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Sodium ion", "smiles": "[Na+]"},
-    {"name": "Chloride ion", "smiles": "[Cl-]"},
-    {"name": "Magnesium ion", "smiles": "[Mg+2]"},
-    {"name": "Sulfate ion", "smiles": "[SO4-2]"},
-    {"name": "Calcium ion", "smiles": "[Ca+2]"},
-    {"name": "Potassium ion", "smiles": "[K+]"},
-    {"name": "Bicarbonate ion", "smiles": "[HCO3-]"},
-    {"name": "Bromide ion", "smiles": "[Br-]"},
-    {"name": "Strontium ion", "smiles": "[Sr+2]"},
-    {"name": "Fluoride ion", "smiles": "[F-]"}
-  ]
-}
+Examples of what to avoid:
+- Extremely long polymer chains
+- Overly complex mineral structures
+- Unrealistic molecular representations
 
-{
-  "object": "Wine",
-  "chemicals": [
-    {"name": "Ethanol", "smiles": "CCO"},
-    {"name": "Water", "smiles": "O"},
-    {"name": "Tartaric acid", "smiles": "OC(C(O)C(O)=O)C(O)=O"},
-    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
-    {"name": "Fructose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
-    {"name": "Malic acid", "smiles": "C(C(=O)O)C(C(=O)O)O"},
-    {"name": "Citric acid", "smiles": "C(C(=O)O)C(O)(C(=O)O)O"},
-    {"name": "Resveratrol", "smiles": "C1=CC(=C(C=C1)O)O"},
-    {"name": "Phenol", "smiles": "C1=CC=C(C=C1)O"},
-    {"name": "Benzyl alcohol", "smiles": "C1=CC=C(C=C1)CO"},
-    {"name": "Benzoic acid", "smiles": "C1=CC=C(C=C1)C(=O)O"}
-  ]
-}
-
-{
-  "object": "Beer",
-  "chemicals": [
-    {"name": "Ethanol", "smiles": "CCO"},
-    {"name": "Water", "smiles": "O"},
-    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
-    {"name": "Fructose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
-    {"name": "Acetic acid", "smiles": "CC(=O)O"},
-    {"name": "Pyruvic acid", "smiles": "CC(=O)C(=O)O"},
-    {"name": "Phenol", "smiles": "C1=CC=C(C=C1)O"},
-    {"name": "Benzyl alcohol", "smiles": "C1=CC=C(C=C1)CO"},
-    {"name": "Benzoic acid", "smiles": "C1=CC=C(C=C1)C(=O)O"}
-  ]
-}
-
-{
-  "object": "Coffee",
-  "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Caffeine", "smiles": "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"},
-    {"name": "Chlorogenic acid", "smiles": "C1=CC(=C(C=C1)O)O"},
-    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
-    {"name": "Phenol", "smiles": "C1=CC=C(C=C1)O"},
-    {"name": "Benzyl alcohol", "smiles": "C1=CC=C(C=C1)CO"}
-  ]
-}
-
-{
-  "object": "Plastic bottle (PET)",
-  "chemicals": [
-    {"name": "PET repeat unit", "smiles": "O=C(C1=CC=CC=C1)OC2=CC=CC=C2C(=O)O"},
-    {"name": "Isobutyric acid", "smiles": "CC(C)C(=O)O"},
-    {"name": "Acetic acid", "smiles": "CC(=O)O"},
-    {"name": "Ethanol", "smiles": "CCO"}
-  ]
-}
-
-{
-  "object": "Human hand",
-  "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Leucine", "smiles": "CC(C)C(C(=O)O)N"},
-    {"name": "Glycine", "smiles": "C(C(=O)O)N"},
-    {"name": "Palmitic acid", "smiles": "CCCCCCCCCCCCCCCC(=O)O"},
-    {"name": "Lactic acid", "smiles": "C(C(=O)O)O"},
-    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"}
-  ]
-}
-
-{
-  "object": "Grape",
-  "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Glucose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
-    {"name": "Fructose", "smiles": "C(C(C(C(C(C=O)O)O)O)O)O"},
-    {"name": "Tartaric acid", "smiles": "OC(C(O)C(O)=O)C(O)=O"},
-    {"name": "Malic acid", "smiles": "C(C(=O)O)C(C(=O)O)O"},
-    {"name": "Resveratrol", "smiles": "C1=CC(=C(C=C1)O)O"}
-  ]
-}
-
-{
-  "object": "Collagen fiber",
-  "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Glycine", "smiles": "C(C(=O)O)N"},
-    {"name": "Proline", "smiles": "C1CC(NC1)C(=O)O"},
-    {"name": "Hydroxyproline", "smiles": "C1C(C(NC1)C(=O)O)O"},
-    {"name": "Alanine", "smiles": "CC(C(=O)O)N"},
-    {"name": "Collagen peptide segment", "smiles": "NC(C(=O)NC(C(=O)NC1CCC(N1)C(=O)O)C)C"}
-  ]
-}
-
-{
-  "object": "Plastic material",
-  "chemicals": [
-    {"name": "Polyethylene segment", "smiles": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"},
-    {"name": "Polypropylene segment", "smiles": "CC(C)CC(C)CC(C)CC(C)CC(C)CC(C)C"},
-    {"name": "PET polymer segment", "smiles": "O=C(C1=CC=C(C=C1)C(=O)OCCOC(=O)C2=CC=C(C=C2)C(=O)OCCOC(=O)C3=CC=C(C=C3)C(=O)O)O"}
-  ]
-}
-
-{
-  "object": "Hair strand (keratin)",
-  "chemicals": [
-    {"name": "Water", "smiles": "O"},
-    {"name": "Cysteine", "smiles": "C(C(C(=O)O)N)S"},
-    {"name": "Serine", "smiles": "C(C(C(=O)O)N)O"},
-    {"name": "Glycine", "smiles": "C(C(=O)O)N"},
-    {"name": "Alanine", "smiles": "CC(C(=O)O)N"},
-    {"name": "Keratin peptide segment", "smiles": "NC(C(=O)NC(C(=O)NC(C(=O)NC(C(=O)O)CS)CO)C)CS"}
-  ]
-}
-`;
+Analyze the object and provide the chemical composition in the specified JSON format.`;
   }
 
   async analyzeImage(imageBase64, croppedImageBase64 = null, x = null, y = null, cropMiddleX = null, cropMiddleY = null, cropSize = null) {
