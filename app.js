@@ -57,8 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   updateInputMode();
   
-  // Unleash SMILES button functionality
-  // The unleashBtn is removed, so this block is effectively removed.
+
   
   objectInput.addEventListener("keyup", async (e) => {
     if (e.key !== "Enter") return;
