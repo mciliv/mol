@@ -335,26 +335,31 @@ if (!isServerless && !isTestMode) {
     }
   };
   
-  startServer();
-  
-  // Handle port binding errors
-  httpServer.on('error', (error) => {
-    if (error.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use`);
-      console.log(`💡 Solutions:`);
-      console.log(`   1. Kill existing process: pkill -f "node.*server.js"`);
-      console.log(`   2. Use different port: PORT=8081 npm start`);
-      console.log(`   3. Check what's using the port: lsof -i :${PORT}`);
-      process.exit(1);
-    } else if (error.code === 'EACCES') {
-      console.error(`❌ Permission denied: Cannot bind to port ${PORT}`);
-      console.log(`💡 Try using a port > 1024 or run with sudo`);
-      process.exit(1);
-    } else {
-      console.error('❌ Server error:', error.message);
-      console.log(`💡 Check your network configuration and try again`);
-      process.exit(1);
+  startServer().then(() => {
+    // Handle port binding errors
+    if (httpServer) {
+      httpServer.on('error', (error) => {
+        if (error.code === 'EADDRINUSE') {
+          console.error(`❌ Port ${PORT} is already in use`);
+          console.log(`💡 Solutions:`);
+          console.log(`   1. Kill existing process: pkill -f "node.*server.js"`);
+          console.log(`   2. Use different port: PORT=8081 npm start`);
+          console.log(`   3. Check what's using the port: lsof -i :${PORT}`);
+          process.exit(1);
+        } else if (error.code === 'EACCES') {
+          console.error(`❌ Permission denied: Cannot bind to port ${PORT}`);
+          console.log(`💡 Try using a port > 1024 or run with sudo`);
+          process.exit(1);
+        } else {
+          console.error('❌ Server error:', error.message);
+          console.log(`💡 Check your network configuration and try again`);
+          process.exit(1);
+        }
+      });
     }
+  }).catch((error) => {
+    console.error(`❌ Failed to start server: ${error.message}`);
+    process.exit(1);
   });
 
   // Start HTTPS server for development
