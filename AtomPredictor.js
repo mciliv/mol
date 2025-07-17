@@ -8,34 +8,26 @@ class AtomPredictor {
   }
 
   buildChemicalInstructions() {
-    return `You are a molecular analysis expert. Analyze the object and provide a JSON response with the chemical composition.
+    return `You are a molecular analysis expert. Analyze the object and provide a comprehensive JSON response with all relevant chemical components.
 
-IMPORTANT RULES:
-1. Generate ONLY valid, concise SMILES notation
-2. For complex molecules, use representative fragments or simplified forms
-3. For minerals like talc, use simple representations like "O[Si](O)O" or "O[Si]O"
-4. For polymers, use short repeat units (max 10-15 atoms)
-5. For large biomolecules, use key functional groups or representative structures
-6. Avoid generating extremely long SMILES strings (>200 characters)
-7. Focus on the most important/abundant chemical components
+Generate as many truthful molecules as possible with estimated amounts and database references. Focus on accuracy and completeness.
 
 Response format:
 {
   "object": "Object name",
   "chemicals": [
-    {"name": "Chemical name", "smiles": "SMILES notation"},
-    {"name": "Chemical name", "smiles": "SMILES notation"}
+    {"name": "Chemical name", "smiles": "SMILES notation", "amount": "estimated percentage or concentration", "reference": "database or source"},
+    {"name": "Chemical name", "smiles": "SMILES notation", "amount": "estimated percentage or concentration", "reference": "database or source"}
   ]
 }
 
-Examples of good SMILES:
-- Water: "O"
-- Glucose: "C(C(C(C(C(C=O)O)O)O)O)O"
-- Caffeine: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"
-- Talc: "O[Si](O)O"
-- Cellulose: "C(C1C(C(C(C(O1)O)O)O)O)O"
+Examples:
+- Water: "O" (typically 70-95% in biological samples)
+- Glucose: "C(C(C(C(C(C=O)O)O)O)O)O" (5-15% in fruits)
+- Caffeine: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C" (1-3% in coffee beans)
+- Lycopene: "CC1=C(C(=C(C=C1)C)C)C=C(C=C2C(=C(C(=C(C2=C)C)C)C)C)C" (0.1-0.5% in tomatoes)
 
-Analyze the object and provide the most relevant chemical components.`;
+Use databases like PubChem, ChEBI, or scientific literature for accurate SMILES and concentration data. Include all major components, even trace amounts if significant.`;
   }
 
   async analyzeImage(imageBase64, croppedImageBase64 = null, x = null, y = null, cropMiddleX = null, cropMiddleY = null, cropSize = null) {
