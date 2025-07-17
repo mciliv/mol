@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const snapshots = document.querySelector(".snapshots-container");
   const msgBox = document.querySelector(".permission-message");
   const objectInput = document.getElementById("object-input");
-  const unleashBtn = document.getElementById("unleash-smiles-btn");
   const appContainer = document.querySelector(".app-container");
   const instructionText = document.querySelector(".instruction-text");
   const cameraMode = document.getElementById("camera-mode");
@@ -59,37 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateInputMode();
   
   // Unleash SMILES button functionality
-  unleashBtn.addEventListener("click", async () => {
-    const object = objectInput.value.trim();
-    if (!object) {
-      alert("Please enter an object name first!");
-      return;
-    }
-
-    // Show loading state
-    unleashBtn.disabled = true;
-    unleashBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Unleashing...</span>';
-
-    try {
-      const res = await fetch("/unleash-smiles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ object }),
-      });
-      
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const result = await res.json();
-
-      // Display the unleashed chemicals dictionary
-      displayUnleashedSmiles(result, object);
-    } catch (err) {
-      createClosableErrorMessage(`Error unleashing chemicals for "${object}": ${err.message}`);
-    } finally {
-      // Reset button state
-      unleashBtn.disabled = false;
-      unleashBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>Chemicals</span>';
-    }
-  });
+  // The unleashBtn is removed, so this block is effectively removed.
   
   objectInput.addEventListener("keyup", async (e) => {
     if (e.key !== "Enter") return;
@@ -477,147 +446,6 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     
     container.appendChild(errorDiv);
-    updateScrollHandles();
-  }
-
-  // Display unleashed SMILES array
-  function displayUnleashedSmiles(result, object) {
-    const container = document.createElement("div");
-    container.style.cssText = `
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      border: 2px solid rgba(102, 126, 234, 0.3);
-      border-radius: 12px;
-      padding: 24px;
-      margin: 20px;
-      position: relative;
-    `;
-
-    const title = document.createElement("h3");
-    title.style.cssText = `
-      color: #667eea;
-      margin: 0 0 16px 0;
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    `;
-    title.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-      </svg>
-      Unleashed Chemicals for "${object}"
-    `;
-
-    const message = document.createElement("div");
-    message.style.cssText = `
-      color: #667eea;
-      font-weight: 600;
-      margin-bottom: 16px;
-      font-size: 14px;
-    `;
-    message.textContent = result.message;
-
-    const chemicalsContainer = document.createElement("div");
-    chemicalsContainer.style.cssText = `
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 16px;
-    `;
-
-    if (result.chemicals && result.chemicals.length > 0) {
-      const chemicalsList = document.createElement("div");
-      chemicalsList.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      `;
-
-      result.chemicals.forEach((chemical, index) => {
-        const chemicalItem = document.createElement("div");
-        chemicalItem.style.cssText = `
-          background: rgba(102, 126, 234, 0.15);
-          border: 1px solid rgba(102, 126, 234, 0.3);
-          border-radius: 8px;
-          padding: 12px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 12px;
-        `;
-
-        const nameDiv = document.createElement("div");
-        nameDiv.style.cssText = `
-          font-weight: 600;
-          color: #fff;
-          font-size: 14px;
-          flex: 1;
-        `;
-        nameDiv.textContent = chemical.name || `Chemical ${index + 1}`;
-
-        const smilesDiv = document.createElement("div");
-        smilesDiv.style.cssText = `
-          font-family: 'Courier New', monospace;
-          font-size: 12px;
-          color: #667eea;
-          background: rgba(0, 0, 0, 0.3);
-          padding: 6px 10px;
-          border-radius: 4px;
-          border: 1px solid rgba(102, 126, 234, 0.2);
-        `;
-        smilesDiv.textContent = chemical.smiles || 'N/A';
-
-        chemicalItem.appendChild(nameDiv);
-        chemicalItem.appendChild(smilesDiv);
-        chemicalsList.appendChild(chemicalItem);
-      });
-
-      chemicalsContainer.appendChild(chemicalsList);
-    } else {
-      const noChemicals = document.createElement("div");
-      noChemicals.style.cssText = `
-        color: rgba(255, 255, 255, 0.6);
-        font-style: italic;
-        text-align: center;
-        padding: 20px;
-      `;
-      noChemicals.textContent = "No chemicals found for this object";
-      chemicalsContainer.appendChild(noChemicals);
-    }
-
-    const closeBtn = document.createElement("button");
-    closeBtn.innerHTML = "×";
-    closeBtn.style.cssText = `
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: none;
-      border: none;
-      color: #667eea;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 4px;
-      transition: background 0.2s ease;
-    `;
-    closeBtn.addEventListener("click", () => {
-      container.remove();
-      updateScrollHandles();
-    });
-    closeBtn.addEventListener("mouseenter", () => {
-      closeBtn.style.background = "rgba(102, 126, 234, 0.2)";
-    });
-    closeBtn.addEventListener("mouseleave", () => {
-      closeBtn.style.background = "none";
-    });
-
-    container.appendChild(title);
-    container.appendChild(message);
-    container.appendChild(chemicalsContainer);
-    container.appendChild(closeBtn);
-
-    snapshots.appendChild(container);
     updateScrollHandles();
   }
   
