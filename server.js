@@ -17,8 +17,36 @@ const {
 
 // ==================== CONFIGURATION ====================
 const app = express();
-const PORT = process.env.PORT || 8080;
+const DEFAULT_PORT = 8080;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
+
+// Function to find available port
+const findAvailablePort = async (startPort) => {
+  const net = require('net');
+  
+  const isPortAvailable = (port) => {
+    return new Promise((resolve) => {
+      const tester = net.createServer()
+        .once('error', () => resolve(false))
+        .once('listening', () => {
+          tester.once('close', () => resolve(true))
+            .close();
+        })
+        .listen(port);
+    });
+  };
+  
+  let port = startPort;
+  while (port < startPort + 100) { // Try up to 100 ports
+    if (await isPortAvailable(port)) {
+      return port;
+    }
+    port++;
+  }
+  throw new Error(`No available ports found between ${startPort} and ${startPort + 100}`);
+};
+
+const PORT = process.env.PORT || DEFAULT_PORT;
 
 // Initialize modules
 const atomPredictor = new AtomPredictor(process.env.OPENAI_API_KEY);
@@ -123,7 +151,29 @@ app.post("/image-molecules", async (req, res) => {
     res.json({ output: result });
   } catch (error) {
     console.error("Image analysis error:", error);
-    res.status(500).json({ error: error.message });
+    
+    // Provide more specific error messages
+    let errorMessage = error.message;
+    let statusCode = 500;
+    
+    if (error.message.includes('network') || error.message.includes('fetch')) {
+      errorMessage = "Network error: Unable to connect to AI service. Please check your internet connection.";
+      statusCode = 503;
+    } else if (error.message.includes('API key') || error.message.includes('authentication')) {
+      errorMessage = "Authentication error: Invalid or missing API key.";
+      statusCode = 401;
+    } else if (error.message.includes('rate limit') || error.message.includes('quota')) {
+      errorMessage = "Rate limit exceeded: Please try again later.";
+      statusCode = 429;
+    } else if (error.message.includes('timeout')) {
+      errorMessage = "Request timeout: The AI service is taking too long to respond.";
+      statusCode = 408;
+    }
+    
+    res.status(statusCode).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -149,7 +199,29 @@ app.post("/object-molecules", async (req, res) => {
     res.json({ output: result });
   } catch (error) {
     console.error("Text analysis error:", error);
-    res.status(500).json({ error: error.message });
+    
+    // Provide more specific error messages
+    let errorMessage = error.message;
+    let statusCode = 500;
+    
+    if (error.message.includes('network') || error.message.includes('fetch')) {
+      errorMessage = "Network error: Unable to connect to AI service. Please check your internet connection.";
+      statusCode = 503;
+    } else if (error.message.includes('API key') || error.message.includes('authentication')) {
+      errorMessage = "Authentication error: Invalid or missing API key.";
+      statusCode = 401;
+    } else if (error.message.includes('rate limit') || error.message.includes('quota')) {
+      errorMessage = "Rate limit exceeded: Please try again later.";
+      statusCode = 429;
+    } else if (error.message.includes('timeout')) {
+      errorMessage = "Request timeout: The AI service is taking too long to respond.";
+      statusCode = 408;
+    }
+    
+    res.status(statusCode).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -181,7 +253,26 @@ app.post('/generate-sdfs', async (req, res) => {
     });
   } catch (error) {
     console.error("SDF generation error:", error);
-    res.status(500).json({ error: error.message });
+    
+    // Provide more specific error messages
+    let errorMessage = error.message;
+    let statusCode = 500;
+    
+    if (error.message.includes('network') || error.message.includes('fetch')) {
+      errorMessage = "Network error: Unable to connect to molecular service. Please check your internet connection.";
+      statusCode = 503;
+    } else if (error.message.includes('file system') || error.message.includes('permission')) {
+      errorMessage = "File system error: Unable to create SDF files. Please check directory permissions.";
+      statusCode = 500;
+    } else if (error.message.includes('timeout')) {
+      errorMessage = "Request timeout: Molecular structure generation is taking too long.";
+      statusCode = 408;
+    }
+    
+    res.status(statusCode).json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -217,18 +308,51 @@ let httpsServerInstance;
 
 if (!isServerless && !isTestMode) {
   // Local development mode
-  httpServer = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`HTTP server running on http://0.0.0.0:${PORT}`);
-  });
+  const startServer = async () => {
+    try {
+      let actualPort = PORT;
+      
+      // If default port is in use, try to find an available port
+      if (PORT === DEFAULT_PORT) {
+        try {
+          actualPort = await findAvailablePort(PORT);
+          if (actualPort !== PORT) {
+            console.log(`⚠️  Port ${PORT} is in use, using port ${actualPort} instead`);
+          }
+        } catch (error) {
+          console.error(`❌ Could not find available port: ${error.message}`);
+          process.exit(1);
+        }
+      }
+      
+      httpServer = app.listen(actualPort, '0.0.0.0', () => {
+        console.log(`✅ HTTP server running on http://localhost:${actualPort}`);
+        console.log(`📱 Mobile access: http://$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1):${actualPort}`);
+      });
+    } catch (error) {
+      console.error(`❌ Failed to start server: ${error.message}`);
+      process.exit(1);
+    }
+  };
+  
+  startServer();
   
   // Handle port binding errors
   httpServer.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
-      console.error(`Port ${PORT} is already in use`);
-              console.log(`Try: pkill -f "node.*server.js" or use a different port`);
+      console.error(`❌ Port ${PORT} is already in use`);
+      console.log(`💡 Solutions:`);
+      console.log(`   1. Kill existing process: pkill -f "node.*server.js"`);
+      console.log(`   2. Use different port: PORT=8081 npm start`);
+      console.log(`   3. Check what's using the port: lsof -i :${PORT}`);
+      process.exit(1);
+    } else if (error.code === 'EACCES') {
+      console.error(`❌ Permission denied: Cannot bind to port ${PORT}`);
+      console.log(`💡 Try using a port > 1024 or run with sudo`);
       process.exit(1);
     } else {
-      console.error('Server error:', error);
+      console.error('❌ Server error:', error.message);
+      console.log(`💡 Check your network configuration and try again`);
       process.exit(1);
     }
   });
@@ -290,6 +414,18 @@ if (!isServerless && !isTestMode) {
   process.on('SIGINT', () => gracefulShutdown('SIGINT'));
   process.on('SIGUSR2', () => gracefulShutdown('SIGUSR2')); // Nodemon uses this
 }
+
+// Global error handlers
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  console.log('💡 This usually indicates a network or API error. Check your internet connection and API keys.');
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error.message);
+  console.log('💡 Application crashed. Check the error details above.');
+  process.exit(1);
+});
 
 // Always export the app for Cloud Functions
 module.exports = app;
