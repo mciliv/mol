@@ -1107,15 +1107,17 @@ input[type="checkbox"]:checked + .mode-label {
   transform: translateY(0);
 }
 
-.photo-icon,
+.upload-label img,
 .upload-text {
   color: rgba(255, 255, 255, 0.9);
   transition: color 0.3s ease;
+  filter: brightness(0.9);
 }
 
-.upload-label:hover .photo-icon,
+.upload-label:hover img,
 .upload-label:hover .upload-text {
   color: #ffffff;
+  filter: brightness(1);
 }
 
 .upload-text text {
