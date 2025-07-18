@@ -14,6 +14,57 @@ A molecular analysis app with AI-powered chemical identification, deployed using
 ./deploy-mol.sh
 ```
 
+## Commands
+
+### Development
+```bash
+npm start          # Start server
+npm run dev        # Run tests + start with nodemon
+npm run dev:unsafe # Start with nodemon (no tests)
+npm run debug      # Start with Node.js inspector
+```
+
+### Testing
+```bash
+npm test           # Run unit + integration tests
+npm run test:watch # Run tests in watch mode
+npm run test:debug # Run tests with debugger
+npm run test:unit  # Run unit tests only
+npm run test:integration # Run integration tests only
+npm run test:system # Run system tests only
+npm run test:all   # Run all test suites
+npm run test:pre-deploy # Run all tests + pytest
+npm run pytest     # Run Python tests
+npm run pytest:debug # Run Python tests with debugger
+```
+
+### Deployment
+```bash
+npm run deploy:gcp # Deploy to Google Cloud Functions
+npm run deploy:now # Deploy with env vars
+npm run deploy     # Deploy using ship script
+npm run deploy:watch # Auto-deploy on changes
+npm run pre-deploy # Check commit + run tests
+```
+
+### Utilities
+```bash
+npm run format     # Format code with prettier
+npm run ip         # Get local IP address
+npm run mobile     # Show mobile access URLs
+npm run cert       # Generate SSL certificates
+npm run tunnel     # Show ngrok tunnel instructions
+npm run build      # Run tests + build static files
+```
+
+### Git & Domain
+```bash
+npm run check-commit # Check git commit status
+npm run commit-all   # Auto-commit all changes
+npm run domain:status # Check domain status
+npm run domain:setup  # Show domain setup commands
+```
+
 ## What the 4 Webkit Versions Were Doing
 
 Previously, there were 4 versions of webkit that were essentially duplicates:
