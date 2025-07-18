@@ -1,5 +1,5 @@
 // server.js - Clean modular architecture
-  process.env.NODE_ENV ||= 'development';
+process.env.NODE_ENV ||= "development";
 
 // ==================== IMPORTS ====================
 const express = require("express");
@@ -22,28 +22,31 @@ const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
 
 // Function to find available port
 const findAvailablePort = async (startPort) => {
-  const net = require('net');
-  
+  const net = require("net");
+
   const isPortAvailable = (port) => {
     return new Promise((resolve) => {
-      const tester = net.createServer()
-        .once('error', () => resolve(false))
-        .once('listening', () => {
-          tester.once('close', () => resolve(true))
-            .close();
+      const tester = net
+        .createServer()
+        .once("error", () => resolve(false))
+        .once("listening", () => {
+          tester.once("close", () => resolve(true)).close();
         })
         .listen(port);
     });
   };
-  
+
   let port = startPort;
-  while (port < startPort + 100) { // Try up to 100 ports
+  while (port < startPort + 100) {
+    // Try up to 100 ports
     if (await isPortAvailable(port)) {
       return port;
     }
     port++;
   }
-  throw new Error(`No available ports found between ${startPort} and ${startPort + 100}`);
+  throw new Error(
+    `No available ports found between ${startPort} and ${startPort + 100}`,
+  );
 };
 
 const PORT = process.env.PORT || DEFAULT_PORT;
@@ -54,7 +57,7 @@ const molecularProcessor = new MolecularProcessor();
 
 // ==================== MIDDLEWARE ====================
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
 
 // ==================== DEVELOPMENT MIDDLEWARE ====================
 // Live reload disabled - using external tools if needed
@@ -65,11 +68,11 @@ if (false && process.env.NODE_ENV === "development") {
 
   const isPortAvailable = (port) => {
     return new Promise((resolve) => {
-      const tester = net.createServer()
-        .once('error', () => resolve(false))
-        .once('listening', () => {
-          tester.once('close', () => resolve(true))
-            .close();
+      const tester = net
+        .createServer()
+        .once("error", () => resolve(false))
+        .once("listening", () => {
+          tester.once("close", () => resolve(true)).close();
         })
         .listen(port);
     });
@@ -90,18 +93,18 @@ if (false && process.env.NODE_ENV === "development") {
       }
 
       const liveReloadServer = livereload.createServer({
-        exts: ['html', 'css', 'js'],
-        ignore: ['node_modules/**', 'sdf_files/**', '*.log'],
-        port: port
+        exts: ["html", "css", "js"],
+        ignore: ["node_modules/**", "sdf_files/**", "*.log"],
+        port: port,
       });
-      
+
       // Add error handler for unexpected errors
-      liveReloadServer.server.on('error', (err) => {
+      liveReloadServer.server.on("error", (err) => {
         console.error("LiveReload server error:", err.message);
       });
 
       // Only proceed if server starts successfully
-      liveReloadServer.server.once('listening', () => {
+      liveReloadServer.server.once("listening", () => {
         liveReloadServer.watch(__dirname);
         app.use(connectLivereload());
 
@@ -110,13 +113,12 @@ if (false && process.env.NODE_ENV === "development") {
             liveReloadServer.refresh("/");
           }, 100);
         });
-        
+
         console.log(`LiveReload server started on port ${port}`);
       });
-      
     } catch (err) {
       console.log("LiveReload server failed to start:", err.message);
-              console.log("Continuing without LiveReload...");
+      console.log("Continuing without LiveReload...");
     }
   };
 
@@ -125,7 +127,7 @@ if (false && process.env.NODE_ENV === "development") {
 }
 
 app.use(express.static(__dirname));
-app.use('/sdf_files', express.static(path.join(__dirname, 'sdf_files')));
+app.use("/sdf_files", express.static(path.join(__dirname, "sdf_files")));
 
 // ==================== ROUTES ====================
 
@@ -135,44 +137,68 @@ app.post("/image-molecules", async (req, res) => {
     // Validate input schema
     const validation = ImageMoleculeSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ 
-        error: "Invalid input data", 
-        details: validation.error.issues 
+      return res.status(400).json({
+        error: "Invalid input data",
+        details: validation.error.issues,
       });
     }
 
-    const { imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize } = req.body;
-    
+    const {
+      imageBase64,
+      croppedImageBase64,
+      x,
+      y,
+      cropMiddleX,
+      cropMiddleY,
+      cropSize,
+    } = req.body;
+
     if (!imageBase64) {
       return res.status(400).json({ error: "No image data provided" });
     }
 
-    const result = await atomPredictor.analyzeImage(imageBase64, croppedImageBase64, x, y, cropMiddleX, cropMiddleY, cropSize);
+    const result = await atomPredictor.analyzeImage(
+      imageBase64,
+      croppedImageBase64,
+      x,
+      y,
+      cropMiddleX,
+      cropMiddleY,
+      cropSize,
+    );
     res.json({ output: result });
   } catch (error) {
     console.error("Image analysis error:", error);
-    
+
     // Provide more specific error messages
     let errorMessage = error.message;
     let statusCode = 500;
-    
-    if (error.message.includes('network') || error.message.includes('fetch')) {
-      errorMessage = "Network error: Unable to connect to AI service. Please check your internet connection.";
+
+    if (error.message.includes("network") || error.message.includes("fetch")) {
+      errorMessage =
+        "Network error: Unable to connect to AI service. Please check your internet connection.";
       statusCode = 503;
-    } else if (error.message.includes('API key') || error.message.includes('authentication')) {
+    } else if (
+      error.message.includes("API key") ||
+      error.message.includes("authentication")
+    ) {
       errorMessage = "Authentication error: Invalid or missing API key.";
       statusCode = 401;
-    } else if (error.message.includes('rate limit') || error.message.includes('quota')) {
+    } else if (
+      error.message.includes("rate limit") ||
+      error.message.includes("quota")
+    ) {
       errorMessage = "Rate limit exceeded: Please try again later.";
       statusCode = 429;
-    } else if (error.message.includes('timeout')) {
-      errorMessage = "Request timeout: The AI service is taking too long to respond.";
+    } else if (error.message.includes("timeout")) {
+      errorMessage =
+        "Request timeout: The AI service is taking too long to respond.";
       statusCode = 408;
     }
-    
-    res.status(statusCode).json({ 
+
+    res.status(statusCode).json({
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 });
@@ -183,14 +209,14 @@ app.post("/object-molecules", async (req, res) => {
     // Validate input schema
     const validation = TextMoleculeSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ 
-        error: "Invalid input data", 
-        details: validation.error.issues 
+      return res.status(400).json({
+        error: "Invalid input data",
+        details: validation.error.issues,
       });
     }
 
     const { object } = req.body;
-    
+
     if (!object) {
       return res.status(400).json({ error: "No object description provided" });
     }
@@ -199,79 +225,93 @@ app.post("/object-molecules", async (req, res) => {
     res.json({ output: result });
   } catch (error) {
     console.error("Text analysis error:", error);
-    
+
     // Provide more specific error messages
     let errorMessage = error.message;
     let statusCode = 500;
-    
-    if (error.message.includes('network') || error.message.includes('fetch')) {
-      errorMessage = "Network error: Unable to connect to AI service. Please check your internet connection.";
+
+    if (error.message.includes("network") || error.message.includes("fetch")) {
+      errorMessage =
+        "Network error: Unable to connect to AI service. Please check your internet connection.";
       statusCode = 503;
-    } else if (error.message.includes('API key') || error.message.includes('authentication')) {
+    } else if (
+      error.message.includes("API key") ||
+      error.message.includes("authentication")
+    ) {
       errorMessage = "Authentication error: Invalid or missing API key.";
       statusCode = 401;
-    } else if (error.message.includes('rate limit') || error.message.includes('quota')) {
+    } else if (
+      error.message.includes("rate limit") ||
+      error.message.includes("quota")
+    ) {
       errorMessage = "Rate limit exceeded: Please try again later.";
       statusCode = 429;
-    } else if (error.message.includes('timeout')) {
-      errorMessage = "Request timeout: The AI service is taking too long to respond.";
+    } else if (error.message.includes("timeout")) {
+      errorMessage =
+        "Request timeout: The AI service is taking too long to respond.";
       statusCode = 408;
     }
-    
-    res.status(statusCode).json({ 
+
+    res.status(statusCode).json({
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 });
 
 // SDF generation route
-app.post('/generate-sdfs', async (req, res) => {
+app.post("/generate-sdfs", async (req, res) => {
   try {
     // Validate input schema
     const validation = SdfGenerationSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ 
-        error: "Invalid input data", 
-        details: validation.error.issues 
+      return res.status(400).json({
+        error: "Invalid input data",
+        details: validation.error.issues,
       });
     }
 
     const { smiles, overwrite = false } = req.body;
-    
+
     if (!smiles || !Array.isArray(smiles)) {
       return res.status(400).json({ error: "smiles array is required" });
     }
 
     const result = await molecularProcessor.processSmiles(smiles, overwrite);
-    
+
     res.json({
       sdfPaths: result.sdfPaths,
       errors: result.errors,
       skipped: result.skipped,
-      message: `Generated ${result.sdfPaths.length} 3D structures from ${smiles.length} SMILES`
+      message: `Generated ${result.sdfPaths.length} 3D structures from ${smiles.length} SMILES`,
     });
   } catch (error) {
     console.error("SDF generation error:", error);
-    
+
     // Provide more specific error messages
     let errorMessage = error.message;
     let statusCode = 500;
-    
-    if (error.message.includes('network') || error.message.includes('fetch')) {
-      errorMessage = "Network error: Unable to connect to molecular service. Please check your internet connection.";
+
+    if (error.message.includes("network") || error.message.includes("fetch")) {
+      errorMessage =
+        "Network error: Unable to connect to molecular service. Please check your internet connection.";
       statusCode = 503;
-    } else if (error.message.includes('file system') || error.message.includes('permission')) {
-      errorMessage = "File system error: Unable to create SDF files. Please check directory permissions.";
+    } else if (
+      error.message.includes("file system") ||
+      error.message.includes("permission")
+    ) {
+      errorMessage =
+        "File system error: Unable to create SDF files. Please check directory permissions.";
       statusCode = 500;
-    } else if (error.message.includes('timeout')) {
-      errorMessage = "Request timeout: Molecular structure generation is taking too long.";
+    } else if (error.message.includes("timeout")) {
+      errorMessage =
+        "Request timeout: Molecular structure generation is taking too long.";
       statusCode = 408;
     }
-    
-    res.status(statusCode).json({ 
+
+    res.status(statusCode).json({
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 });
@@ -284,22 +324,28 @@ app.get("/", (req, res) => {
 // Request logging middleware
 app.use((req, res, next) => {
   // Skip logging Chrome DevTools discovery requests
-  if (!req.url.includes('.well-known/appspecific/com.chrome.devtools')) {
+  if (!req.url.includes(".well-known/appspecific/com.chrome.devtools")) {
     console.log(`Incoming request: ${req.method} ${req.url}`);
   }
-  
+
   // Handle Chrome DevTools discovery request
-  if (req.url === '/.well-known/appspecific/com.chrome.devtools.json') {
-    return res.status(404).json({ error: 'Not found' });
+  if (req.url === "/.well-known/appspecific/com.chrome.devtools.json") {
+    return res.status(404).json({ error: "Not found" });
   }
-  
+
   next();
 });
 
 // ==================== SERVER STARTUP ====================
-const isCloudFunction = process.env.FUNCTION_NAME || process.env.FUNCTION_TARGET || process.env.K_SERVICE || process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT;
+const isCloudFunction =
+  process.env.FUNCTION_NAME ||
+  process.env.FUNCTION_TARGET ||
+  process.env.K_SERVICE ||
+  process.env.GOOGLE_CLOUD_PROJECT ||
+  process.env.GCP_PROJECT;
 const isNetlify = process.env.NETLIFY;
-const isTestMode = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID;
+const isTestMode =
+  process.env.NODE_ENV === "test" || process.env.JEST_WORKER_ID;
 const isServerless = isCloudFunction || isNetlify;
 
 // Store server instances for cleanup
@@ -311,57 +357,65 @@ if (!isServerless && !isTestMode) {
   const startServer = async () => {
     try {
       let actualPort = PORT;
-      
+
       // If default port is in use, try to find an available port
       if (PORT === DEFAULT_PORT) {
         try {
           actualPort = await findAvailablePort(PORT);
           if (actualPort !== PORT) {
-            console.log(`⚠️  Port ${PORT} is in use, using port ${actualPort} instead`);
+            console.log(
+              `⚠️  Port ${PORT} is in use, using port ${actualPort} instead`,
+            );
           }
         } catch (error) {
           console.error(`❌ Could not find available port: ${error.message}`);
           process.exit(1);
         }
       }
-      
-      httpServer = app.listen(actualPort, '0.0.0.0', () => {
+
+      httpServer = app.listen(actualPort, "0.0.0.0", () => {
         console.log(`✅ HTTP server running on http://localhost:${actualPort}`);
-        console.log(`📱 Mobile access: http://$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1):${actualPort}`);
+        console.log(
+          `📱 Mobile access: http://$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1):${actualPort}`,
+        );
       });
     } catch (error) {
       console.error(`❌ Failed to start server: ${error.message}`);
       process.exit(1);
     }
   };
-  
-  startServer().then(() => {
-    // Handle port binding errors
-    httpServer.on('error', (error) => {
-      if (error.code === 'EADDRINUSE') {
-        console.error(`❌ Port ${PORT} is already in use`);
-        console.log(`💡 Solutions:`);
-        console.log(`   1. Kill existing process: pkill -f "node.*server.js"`);
-        console.log(`   2. Use different port: PORT=8081 npm start`);
-        console.log(`   3. Check what's using the port: lsof -i :${PORT}`);
-        process.exit(1);
-      } else if (error.code === 'EACCES') {
-        console.error(`❌ Permission denied: Cannot bind to port ${PORT}`);
-        console.log(`💡 Try using a port > 1024 or run with sudo`);
-        process.exit(1);
-      } else {
-        console.error('❌ Server error:', error.message);
-        console.log(`💡 Check your network configuration and try again`);
-        process.exit(1);
-      }
+
+  startServer()
+    .then(() => {
+      // Handle port binding errors
+      httpServer.on("error", (error) => {
+        if (error.code === "EADDRINUSE") {
+          console.error(`❌ Port ${PORT} is already in use`);
+          console.log(`💡 Solutions:`);
+          console.log(
+            `   1. Kill existing process: pkill -f "node.*server.js"`,
+          );
+          console.log(`   2. Use different port: PORT=8081 npm start`);
+          console.log(`   3. Check what's using the port: lsof -i :${PORT}`);
+          process.exit(1);
+        } else if (error.code === "EACCES") {
+          console.error(`❌ Permission denied: Cannot bind to port ${PORT}`);
+          console.log(`💡 Try using a port > 1024 or run with sudo`);
+          process.exit(1);
+        } else {
+          console.error("❌ Server error:", error.message);
+          console.log(`💡 Check your network configuration and try again`);
+          process.exit(1);
+        }
+      });
+    })
+    .catch((error) => {
+      console.error(`❌ Failed to start server: ${error.message}`);
+      process.exit(1);
     });
-  }).catch((error) => {
-    console.error(`❌ Failed to start server: ${error.message}`);
-    process.exit(1);
-  });
 
   // Start HTTPS server for development
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== "production") {
     const httpsServer = new HttpsServer(app, HTTPS_PORT);
     httpsServerInstance = httpsServer.start();
   }
@@ -370,11 +424,13 @@ if (!isServerless && !isTestMode) {
   if (isCloudFunction) {
     console.log(`Running in Cloud Functions mode`);
   } else if (isNetlify) {
-          console.log(`Running in Netlify mode`);
+    console.log(`Running in Netlify mode`);
   }
-  
-  if (process.env.NODE_ENV === 'production' && !process.env.OPENAI_API_KEY) {
-    console.error('OPENAI_API_KEY environment variable is required for production');
+
+  if (process.env.NODE_ENV === "production" && !process.env.OPENAI_API_KEY) {
+    console.error(
+      "OPENAI_API_KEY environment variable is required for production",
+    );
     process.exit(1);
   }
 }
@@ -383,7 +439,7 @@ if (!isServerless && !isTestMode) {
 if (!isServerless && !isTestMode) {
   const gracefulShutdown = (signal) => {
     console.log(`\n${signal} received: closing HTTP/HTTPS servers gracefully`);
-    
+
     const closeServer = (server, name) => {
       return new Promise((resolve) => {
         if (server) {
@@ -396,37 +452,39 @@ if (!isServerless && !isTestMode) {
         }
       });
     };
-    
+
     Promise.all([
-      closeServer(httpServer, 'HTTP'),
-      closeServer(httpsServerInstance, 'HTTPS')
+      closeServer(httpServer, "HTTP"),
+      closeServer(httpsServerInstance, "HTTPS"),
     ]).then(() => {
-      console.log('Shutdown complete');
+      console.log("Shutdown complete");
       process.exit(0);
     });
-    
+
     // Force exit after 5 seconds
     setTimeout(() => {
-      console.error('Forced shutdown after timeout');
+      console.error("Forced shutdown after timeout");
       process.exit(1);
     }, 5000);
   };
-  
+
   // Listen for termination signals
-  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-  process.on('SIGUSR2', () => gracefulShutdown('SIGUSR2')); // Nodemon uses this
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+  process.on("SIGUSR2", () => gracefulShutdown("SIGUSR2")); // Nodemon uses this
 }
 
 // Global error handlers
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  console.log('💡 This usually indicates a network or API error. Check your internet connection and API keys.');
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+  console.log(
+    "💡 This usually indicates a network or API error. Check your internet connection and API keys.",
+  );
 });
 
-process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error.message);
-  console.log('💡 Application crashed. Check the error details above.');
+process.on("uncaughtException", (error) => {
+  console.error("❌ Uncaught Exception:", error.message);
+  console.log("💡 Application crashed. Check the error details above.");
   process.exit(1);
 });
 

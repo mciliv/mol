@@ -99,27 +99,29 @@ describe("generateSDFs", () => {
     });
     document = dom.window.document;
     dom.window.getSmilesList = async () => "C1=CC=CC=C1\nC1CCCCC1".split("\n");
-    
+
     // Mock the generateSDFs function since it doesn't exist in the separated architecture
     generateSDFs = jest.fn().mockImplementation(async (smilesList) => {
       // Mock the creation of viewer elements
-      const viewerContainer = document.getElementById("viewer-container") || document.createElement("div");
+      const viewerContainer =
+        document.getElementById("viewer-container") ||
+        document.createElement("div");
       viewerContainer.id = "viewer-container";
       if (!document.getElementById("viewer-container")) {
         document.body.appendChild(viewerContainer);
       }
-      
+
       // Clear existing viewers
-      viewerContainer.innerHTML = '';
-      
+      viewerContainer.innerHTML = "";
+
       try {
         // Mock fetching SDF paths
-        const response = await fetch('/generate-sdfs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ smiles: smilesList })
+        const response = await fetch("/generate-sdfs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ smiles: smilesList }),
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           // Create mock viewer elements for each SDF
@@ -134,7 +136,7 @@ describe("generateSDFs", () => {
         // Error case - no viewers created
       }
     });
-    
+
     dom.window.generateSDFs = generateSDFs;
     fetchMock.resetMocks();
   });

@@ -19,7 +19,7 @@ class MolecularProcessor {
     const results = {
       sdfPaths: [],
       errors: [],
-      skipped: []
+      skipped: [],
     };
 
     for (const smiles of smilesArray) {
@@ -54,36 +54,45 @@ class MolecularProcessor {
       const sdfPath = await this.generateSmilesSDF(smiles);
       if (sdfPath) return sdfPath;
     } catch (error) {
-              console.log(`SMILES generation failed for ${smiles}`);
+      console.log(`SMILES generation failed for ${smiles}`);
       throw error;
     }
 
     return null;
   }
 
-
-
   async generateSmilesSDF(chemical) {
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn("python", ["sdf.py", chemical, "--dir", this.sdfDir]);
-      
-      let output = '';
-      pythonProcess.stdout.on('data', data => {
+      const pythonProcess = spawn("python", [
+        "sdf.py",
+        chemical,
+        "--dir",
+        this.sdfDir,
+      ]);
+
+      let output = "";
+      pythonProcess.stdout.on("data", (data) => {
         output += data.toString();
       });
-      
-      pythonProcess.stderr.on('data', data => {
+
+      pythonProcess.stderr.on("data", (data) => {
         console.error(`Python Error: ${data.toString()}`);
       });
 
-      pythonProcess.on('close', code => {
+      pythonProcess.on("close", (code) => {
         if (code === 0) {
           const sdfPath = this.findExistingSdfFile(chemical);
           if (sdfPath) {
-            console.log(`Successfully generated SMILES structure: ${chemical} → ${sdfPath}`);
+            console.log(
+              `Successfully generated SMILES structure: ${chemical} → ${sdfPath}`,
+            );
             resolve(sdfPath);
           } else {
-            reject(new Error(`SMILES succeeded but couldn't find SDF file for ${chemical}`));
+            reject(
+              new Error(
+                `SMILES succeeded but couldn't find SDF file for ${chemical}`,
+              ),
+            );
           }
         } else {
           reject(new Error(`SMILES generation failed for ${chemical}`));
@@ -92,25 +101,21 @@ class MolecularProcessor {
     });
   }
 
-
-
   findExistingSdfFile(smiles) {
     const possibleFilenames = [
       `${smiles}.sdf`,
-      `${smiles.replace(/[^a-zA-Z0-9]/g, '_')}.sdf`,
+      `${smiles.replace(/[^a-zA-Z0-9]/g, "_")}.sdf`,
     ];
-    
+
     for (const filename of possibleFilenames) {
       const fullPath = path.join(this.sdfDir, filename);
       if (fs.existsSync(fullPath)) {
         return `/sdf_files/${filename}`;
       }
     }
-    
+
     return null;
   }
-
-
 }
 
-module.exports = MolecularProcessor; 
+module.exports = MolecularProcessor;

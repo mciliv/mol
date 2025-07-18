@@ -1,7 +1,7 @@
 // tests/utils.js - Test utilities and helper functions
-const fs = require('fs');
-const path = require('path');
-const { TEST_CONFIG, TEST_ENDPOINTS, TEST_FIXTURES } = require('./config');
+const fs = require("fs");
+const path = require("path");
+const { TEST_CONFIG, TEST_ENDPOINTS, TEST_FIXTURES } = require("./config");
 
 // ==================== TEST UTILITIES ====================
 
@@ -10,7 +10,7 @@ const { TEST_CONFIG, TEST_ENDPOINTS, TEST_FIXTURES } = require('./config');
  * @param {number} ms - milliseconds to sleep
  */
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -22,19 +22,19 @@ function generateTestData() {
       const smiles = TEST_FIXTURES.molecules.simple;
       return smiles[Math.floor(Math.random() * smiles.length)];
     },
-    
+
     randomObject: () => {
       const objects = TEST_FIXTURES.objects.common;
       return objects[Math.floor(Math.random() * objects.length)];
     },
-    
+
     randomId: () => {
       return Math.random().toString(36).substr(2, 9);
     },
-    
+
     timestamp: () => {
       return new Date().toISOString();
-    }
+    },
   };
 }
 
@@ -47,50 +47,50 @@ class MockHttpClient {
     this.responses = new Map();
     this.requests = [];
   }
-  
+
   // Mock a response for a specific endpoint
   mockResponse(endpoint, response, status = 200) {
     this.responses.set(endpoint, { response, status });
   }
-  
+
   // Clear all mocked responses
   clearMocks() {
     this.responses.clear();
     this.requests = [];
   }
-  
+
   // Get request history
   getRequests() {
     return [...this.requests];
   }
-  
+
   // Mock fetch implementation
   async fetch(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     const request = {
       url,
       endpoint,
-      method: options.method || 'GET',
+      method: options.method || "GET",
       body: options.body,
       headers: options.headers,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     this.requests.push(request);
-    
+
     // Check if we have a mocked response
     if (this.responses.has(endpoint)) {
       const mock = this.responses.get(endpoint);
       await sleep(TEST_CONFIG.mock.openai.delay);
-      
+
       return {
         ok: mock.status >= 200 && mock.status < 300,
         status: mock.status,
         json: async () => mock.response,
-        text: async () => JSON.stringify(mock.response)
+        text: async () => JSON.stringify(mock.response),
       };
     }
-    
+
     // If no mock, throw error
     throw new Error(`No mock response configured for ${endpoint}`);
   }
@@ -104,20 +104,20 @@ class TestFileManager {
     this.tempFiles = [];
     this.testDir = TEST_CONFIG.directories.temp;
   }
-  
+
   // Create a temporary test file
   createTempFile(filename, content) {
     // Ensure test directory exists
     if (!fs.existsSync(this.testDir)) {
       fs.mkdirSync(this.testDir, { recursive: true });
     }
-    
+
     const filepath = path.join(this.testDir, filename);
     fs.writeFileSync(filepath, content);
     this.tempFiles.push(filepath);
     return filepath;
   }
-  
+
   // Create a test SDF file
   createTestSdf(smiles, filename) {
     const sdfContent = `
@@ -134,21 +134,24 @@ true
 
 $$$$
 `;
-    return this.createTempFile(filename || `${smiles.replace(/[^a-zA-Z0-9]/g, '_')}.sdf`, sdfContent);
+    return this.createTempFile(
+      filename || `${smiles.replace(/[^a-zA-Z0-9]/g, "_")}.sdf`,
+      sdfContent,
+    );
   }
-  
+
   // Create a test image file
   createTestImage(imageData, filename) {
-    const buffer = Buffer.from(imageData, 'base64');
+    const buffer = Buffer.from(imageData, "base64");
     const filepath = path.join(this.testDir, filename);
     fs.writeFileSync(filepath, buffer);
     this.tempFiles.push(filepath);
     return filepath;
   }
-  
+
   // Clean up all temporary files
   cleanup() {
-    this.tempFiles.forEach(filepath => {
+    this.tempFiles.forEach((filepath) => {
       if (fs.existsSync(filepath)) {
         fs.unlinkSync(filepath);
       }
@@ -163,48 +166,52 @@ $$$$
 class TestAssertions {
   static isValidSmiles(smiles) {
     // Basic SMILES validation
-    if (typeof smiles !== 'string' || smiles.length === 0) {
+    if (typeof smiles !== "string" || smiles.length === 0) {
       return false;
     }
-    
+
     // SMILES should not contain spaces or certain invalid strings
-    if (smiles.includes(' ') || smiles === 'invalid') {
+    if (smiles.includes(" ") || smiles === "invalid") {
       return false;
     }
-    
+
     // Basic SMILES character validation
     return /^[A-Za-z0-9\[\]()=#+\-\.@:\/\\%]+$/.test(smiles);
   }
-  
+
   static isValidSdfPath(path) {
-    return typeof path === 'string' && 
-           path.endsWith('.sdf') && 
-           (path.startsWith('/') || path.startsWith('http'));
+    return (
+      typeof path === "string" &&
+      path.endsWith(".sdf") &&
+      (path.startsWith("/") || path.startsWith("http"))
+    );
   }
-  
+
   static hasValidTestResponse(response) {
-    return response && 
-           response.output && 
-           response.output._test &&
-           response.output._test.timestamp;
+    return (
+      response &&
+      response.output &&
+      response.output._test &&
+      response.output._test.timestamp
+    );
   }
-  
+
   static arrayContainsValidSmiles(array) {
-    return Array.isArray(array) && 
-           array.length > 0 && 
-           array.every(smiles => this.isValidSmiles(smiles));
+    return (
+      Array.isArray(array) &&
+      array.length > 0 &&
+      array.every((smiles) => this.isValidSmiles(smiles))
+    );
   }
-  
+
   static responseMatchesFixture(response, fixture) {
     if (!response || !response.output) return false;
-    
+
     const { smiles } = response.output;
     const expectedSmiles = fixture.smiles;
-    
+
     // Check if response contains expected SMILES
-    return expectedSmiles.some(expected => 
-      smiles.includes(expected)
-    );
+    return expectedSmiles.some((expected) => smiles.includes(expected));
   }
 }
 
@@ -215,38 +222,38 @@ class TestDataBuilder {
   constructor() {
     this.data = {};
   }
-  
+
   withObject(object) {
     this.data.object = object;
     return this;
   }
-  
+
   withSmiles(smiles) {
     this.data.smiles = Array.isArray(smiles) ? smiles : [smiles];
     return this;
   }
-  
+
   withImage(imageBase64) {
     this.data.imageBase64 = imageBase64;
     return this;
   }
-  
+
   withCroppedImage(croppedImageBase64) {
     this.data.croppedImageBase64 = croppedImageBase64;
     return this;
   }
-  
+
   withCoordinates(x, y) {
     this.data.x = x;
     this.data.y = y;
     return this;
   }
-  
+
   withTestObject(testObject) {
     this.data.testObject = testObject;
     return this;
   }
-  
+
   build() {
     return { ...this.data };
   }
@@ -258,7 +265,7 @@ class TestDataBuilder {
 class TestServerUtils {
   static async waitForServer(port, timeout = 5000) {
     const start = Date.now();
-    
+
     while (Date.now() - start < timeout) {
       try {
         const response = await fetch(`http://localhost:${port}/test/health`);
@@ -268,29 +275,29 @@ class TestServerUtils {
       } catch (error) {
         // Server not ready yet
       }
-      
+
       await sleep(100);
     }
-    
+
     return false;
   }
-  
+
   static async resetTestEnvironment(port = TEST_CONFIG.server.port) {
     try {
       const response = await fetch(`http://localhost:${port}/test/utils/reset`);
       return response.ok;
     } catch (error) {
-      console.error('Failed to reset test environment:', error);
+      console.error("Failed to reset test environment:", error);
       return false;
     }
   }
-  
+
   static async getTestFixtures(port = TEST_CONFIG.server.port) {
     try {
       const response = await fetch(`http://localhost:${port}/test/fixtures`);
       return response.ok ? await response.json() : null;
     } catch (error) {
-      console.error('Failed to get test fixtures:', error);
+      console.error("Failed to get test fixtures:", error);
       return null;
     }
   }
@@ -304,37 +311,37 @@ class TestReporter {
     this.results = [];
     this.startTime = Date.now();
   }
-  
+
   logTest(testName, status, duration, details = {}) {
     const result = {
       testName,
       status,
       duration,
       details,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     this.results.push(result);
     console.log(`[TEST] ${testName}: ${status} (${duration}ms)`);
   }
-  
+
   generateReport() {
     const endTime = Date.now();
     const totalDuration = endTime - this.startTime;
-    
-    const passed = this.results.filter(r => r.status === 'PASSED').length;
-    const failed = this.results.filter(r => r.status === 'FAILED').length;
+
+    const passed = this.results.filter((r) => r.status === "PASSED").length;
+    const failed = this.results.filter((r) => r.status === "FAILED").length;
     const total = this.results.length;
-    
+
     return {
       summary: {
         total,
         passed,
         failed,
         duration: totalDuration,
-        passRate: total > 0 ? ((passed / total) * 100).toFixed(1) : '0'
+        passRate: total > 0 ? ((passed / total) * 100).toFixed(1) : "0",
       },
-      results: this.results
+      results: this.results,
     };
   }
 }
@@ -348,5 +355,5 @@ module.exports = {
   TestAssertions,
   TestDataBuilder,
   TestServerUtils,
-  TestReporter
-}; 
+  TestReporter,
+};

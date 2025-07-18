@@ -8,14 +8,14 @@ jest.mock("openai", () => {
         parse: jest.fn().mockResolvedValue({
           output_parsed: {
             object: "test object",
-            smiles: ["O", "CCO"]
-          }
-        })
-      }
-    }))
+            smiles: ["O", "CCO"],
+          },
+        }),
+      },
+    })),
   };
 });
 
 // Set test environment variables
-process.env.NODE_ENV = 'test';
-process.env.OPENAI_API_KEY = 'test-key'; 
+process.env.NODE_ENV = "test";
+process.env.OPENAI_API_KEY = "test-key";
