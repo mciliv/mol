@@ -20,7 +20,45 @@ deploy           # Run tests + deploy to GCP
 format           # Format code
 ```
 
-See `help.txt` for all commands or run `./run help`
+### All Commands
+
+```bash
+# Development
+dev, start       # Run tests + start with nodemon
+server           # Start server directly
+debug            # Start with Node.js inspector
+unsafe           # Start with nodemon (no tests)
+
+# Testing
+test             # Run all test suites
+unit             # Run unit tests only
+integration      # Run integration tests only
+system           # Run system tests only
+watch            # Run tests in watch mode
+pytest           # Run Python tests
+pytest:debug     # Run Python tests with debugger
+fixtures         # Run fixture tests
+
+# Deployment
+deploy           # Run tests + deploy to GCP
+deploy:now       # Deploy with env vars
+ship             # Deploy using ship script
+auto-deploy      # Auto-deploy on changes
+
+# Utilities
+format           # Format code with prettier
+ip               # Get local IP address
+mobile           # Show mobile access URLs
+cert             # Generate SSL certificates
+tunnel           # Show ngrok tunnel instructions
+build            # Run tests + build static files
+
+# Git & Domain
+check-commit     # Check git commit status
+commit           # Auto-commit all changes
+domain:status    # Check domain status
+domain:setup     # Show domain setup commands
+```
 
 ## What the 4 Webkit Versions Were Doing
 
@@ -36,18 +74,21 @@ These were consolidated into the new **flat `gcloud-func/` structure** for simpl
 ## Usage
 
 ### Basic Deployment
+
 ```bash
 # Deploy function only
 ./gcloud-func/deploy.sh
 ```
 
 ### Full Deployment with Domain
+
 ```bash
 # Deploy with domain, SSL, and monitoring
 ./deploy-mol.sh
 ```
 
 ### Check Status
+
 ```bash
 # Check function status
 source gcloud-func/utils.sh
@@ -56,6 +97,7 @@ check_function "$FUNCTION_NAME" "$REGION"
 ```
 
 ### Monitor Function
+
 ```bash
 # Check logs and metrics
 source gcloud-func/monitor.sh

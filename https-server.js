@@ -15,19 +15,19 @@ class HttpsServer {
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
       for (const iface of interfaces[name]) {
-        if (iface.family === 'IPv4' && !iface.internal) {
+        if (iface.family === "IPv4" && !iface.internal) {
           return iface.address;
         }
       }
     }
-    return '127.0.0.1';
+    return "127.0.0.1";
   }
 
   generateSelfSignedCert() {
-    const certDir = path.join(__dirname, 'certs');
-    const keyPath = path.join(certDir, 'key.pem');
-    const certPath = path.join(certDir, 'cert.pem');
-    const configPath = path.join(certDir, 'openssl.conf');
+    const certDir = path.join(__dirname, "certs");
+    const keyPath = path.join(certDir, "key.pem");
+    const certPath = path.join(certDir, "cert.pem");
+    const configPath = path.join(certDir, "openssl.conf");
 
     if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
       console.log("✅ Using existing SSL certificates");
@@ -36,7 +36,9 @@ class HttpsServer {
 
     if (!fs.existsSync(certDir)) fs.mkdirSync(certDir, { recursive: true });
 
-    console.log("🔐 Generating self-signed SSL certificates for development...");
+    console.log(
+      "🔐 Generating self-signed SSL certificates for development...",
+    );
 
     try {
       const configContent = `[req]
@@ -67,8 +69,11 @@ IP.4 = ::1
 
       fs.writeFileSync(configPath, configContent);
 
-      execSync(`openssl genrsa -out ${keyPath} 2048`, { stdio: 'inherit' });
-      execSync(`openssl req -new -x509 -key ${keyPath} -out ${certPath} -days 365 -config ${configPath}`, { stdio: 'inherit' });
+      execSync(`openssl genrsa -out ${keyPath} 2048`, { stdio: "inherit" });
+      execSync(
+        `openssl req -new -x509 -key ${keyPath} -out ${certPath} -days 365 -config ${configPath}`,
+        { stdio: "inherit" },
+      );
 
       fs.unlinkSync(configPath);
 
@@ -84,8 +89,10 @@ IP.4 = ::1
     const credentials = this.generateSelfSignedCert();
     if (credentials) {
       const server = https.createServer(credentials, this.app);
-      server.listen(this.port, '0.0.0.0', () => {
-        console.log(`🔒 HTTPS server running on https://${this.localIP}:${this.port}`);
+      server.listen(this.port, "0.0.0.0", () => {
+        console.log(
+          `🔒 HTTPS server running on https://${this.localIP}:${this.port}`,
+        );
       });
       return server;
     } else {
@@ -95,4 +102,4 @@ IP.4 = ::1
   }
 }
 
-module.exports = HttpsServer; 
+module.exports = HttpsServer;

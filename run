@@ -3,7 +3,7 @@
 case "$1" in
   # Development
   "dev"|"start")
-    jest --testPathPattern=unit.test.js --verbose --silent && nodemon server.js
+    npx jest --testPathPattern=unit.test.js --verbose --silent && nodemon server.js
     ;;
   "server")
     node server.js
@@ -17,19 +17,19 @@ case "$1" in
   
   # Testing
   "test")
-    jest --testPathPattern=unit.test.js --verbose --silent && jest --testPathPattern=integration.test.js --verbose && jest --testPathPattern=system.test.js --verbose --detectOpenHandles
+    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles
     ;;
   "unit")
-    jest --testPathPattern=unit.test.js --verbose --silent
+    npx jest --testPathPattern=unit.test.js --verbose --silent
     ;;
   "integration")
-    jest --testPathPattern=integration.test.js --verbose
+    npx jest --testPathPattern=integration.test.js --verbose
     ;;
   "system")
-    jest --testPathPattern=system.test.js --verbose --detectOpenHandles
+    npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles
     ;;
   "watch")
-    jest --watch
+    npx jest --watch
     ;;
   "pytest")
     python -m pytest tests/ -v
@@ -38,15 +38,15 @@ case "$1" in
     python -m debugpy --listen 5678 --wait-for-client -m pytest tests/ -v -s
     ;;
   "fixtures")
-    jest --testPathPattern=tests/fixtures
+    npx jest --testPathPattern=tests/fixtures
     ;;
   
   # Deployment
   "deploy")
-    jest --testPathPattern=unit.test.js --verbose --silent && jest --testPathPattern=integration.test.js --verbose && jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .
+    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .
     ;;
   "deploy:now")
-    jest --testPathPattern=unit.test.js --verbose --silent && jest --testPathPattern=integration.test.js --verbose && jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
+    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
     ;;
   "ship")
     node ship
@@ -57,7 +57,7 @@ case "$1" in
   
   # Utilities
   "format")
-    prettier --write .
+    npx prettier --write .
     ;;
   "ip")
     ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1
@@ -72,7 +72,7 @@ case "$1" in
     echo 'Install ngrok: npm install -g ngrok' && echo 'Then run: ngrok http 8080'
     ;;
   "build")
-    jest --testPathPattern=unit.test.js --verbose --silent && echo 'Build complete - static files ready'
+    npx jest --testPathPattern=unit.test.js --verbose --silent && echo 'Build complete - static files ready'
     ;;
   
   # Git & Domain
@@ -91,7 +91,9 @@ case "$1" in
   
   # Help
   "help"|"-h"|"--help"|"")
-    cat help.txt
+    echo "Usage: ./run <command>"
+    echo ""
+    echo "See README.md for all available commands"
     ;;
   
   *)

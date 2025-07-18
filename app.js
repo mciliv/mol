@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateInputMode() {
     // Show/hide camera based on checkbox state
     cameraContainer.style.display = cameraMode.checked ? "flex" : "none";
-    
+
     // Show/hide photo options based on checkbox state
     photoOptions.style.display = photoMode.checked ? "flex" : "none";
   }
@@ -43,22 +43,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event listeners for checkbox changes
   cameraMode.addEventListener("change", updateInputMode);
   photoMode.addEventListener("change", updateInputMode);
-  
+
   // Auto-switch based on user interaction
   video.addEventListener("click", switchToCameraMode);
   video.addEventListener("touchstart", switchToCameraMode);
-  
+
   photoUpload.addEventListener("change", switchToPhotoMode);
   photoUrl.addEventListener("focus", switchToPhotoMode);
   urlAnalyze.addEventListener("click", switchToPhotoMode);
-  
+
   // Text input interaction clears mode selection
   objectInput.addEventListener("focus", clearModeSelection);
-  
-  updateInputMode();
-  
 
-  
+  updateInputMode();
+
   objectInput.addEventListener("keyup", async (e) => {
     if (e.key !== "Enter") return;
     const object = objectInput.value.trim();
@@ -73,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ object }),
       });
-      
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { output } = await res.json();
 
@@ -95,8 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
       return;
     }
 
@@ -112,95 +110,98 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlAnalyzeHandler = () => {
     const url = photoUrl.value.trim();
     if (!url) {
-      alert('Please enter an image URL');
+      alert("Please enter an image URL");
       return;
     }
-    
+
     try {
       new URL(url);
     } catch {
-      alert('Please enter a valid URL');
+      alert("Please enter a valid URL");
       return;
     }
-    
+
     analyzeImageFromUrl(url);
   };
 
   photoUpload.addEventListener("change", photoUploadHandler);
 
   async function displayUploadedImage(file) {
-    const photoOptions = document.getElementById('photo-options');
-    
-    photoOptions.innerHTML = '';
-    
-    const imageContainer = document.createElement('div');
-    imageContainer.className = 'uploaded-image-container';
-    
-    const img = document.createElement('img');
-    
+    const photoOptions = document.getElementById("photo-options");
+
+    photoOptions.innerHTML = "";
+
+    const imageContainer = document.createElement("div");
+    imageContainer.className = "uploaded-image-container";
+
+    const img = document.createElement("img");
+
     // Only show crosshair on mobile devices
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
     let crosshair;
     if (isMobile) {
-      crosshair = document.createElement('div');
-      crosshair.className = 'crosshair';
-      const beforeLine = document.createElement('div');
-      beforeLine.className = 'crosshair-line vertical';
-      const afterLine = document.createElement('div');
-      afterLine.className = 'crosshair-line horizontal';
+      crosshair = document.createElement("div");
+      crosshair.className = "crosshair";
+      const beforeLine = document.createElement("div");
+      beforeLine.className = "crosshair-line vertical";
+      const afterLine = document.createElement("div");
+      afterLine.className = "crosshair-line horizontal";
       crosshair.appendChild(beforeLine);
       crosshair.appendChild(afterLine);
     }
-    
-    const instructionText = document.createElement('div');
-    instructionText.className = 'instruction-text';
+
+    const instructionText = document.createElement("div");
+    instructionText.className = "instruction-text";
     instructionText.textContent = isMobile
-      ? 'Center object in circle & tap, or type name above'
-      : 'Click on object or type name above';
-    
-    const closeButton = document.createElement('button');
-    closeButton.textContent = '×';
-    closeButton.className = 'close-button';
-    
-    closeButton.addEventListener('click', () => {
-      const template = document.getElementById('photo-upload-template');
+      ? "Center object in circle & tap, or type name above"
+      : "Click on object or type name above";
+
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "×";
+    closeButton.className = "close-button";
+
+    closeButton.addEventListener("click", () => {
+      const template = document.getElementById("photo-upload-template");
       const clone = template.content.cloneNode(true);
-      photoOptions.innerHTML = '';
+      photoOptions.innerHTML = "";
       photoOptions.appendChild(clone);
-      
-      const newPhotoUpload = document.getElementById('photo-upload');
-      const newPhotoUrl = document.getElementById('photo-url');
-      const newUrlAnalyze = document.getElementById('url-analyze');
-      
-      newPhotoUpload.addEventListener('change', photoUploadHandler);
-      newPhotoUrl.addEventListener('keyup', photoUrlHandler);
-      newUrlAnalyze.addEventListener('click', urlAnalyzeHandler);
+
+      const newPhotoUpload = document.getElementById("photo-upload");
+      const newPhotoUrl = document.getElementById("photo-url");
+      const newUrlAnalyze = document.getElementById("url-analyze");
+
+      newPhotoUpload.addEventListener("change", photoUploadHandler);
+      newPhotoUrl.addEventListener("keyup", photoUrlHandler);
+      newUrlAnalyze.addEventListener("click", urlAnalyzeHandler);
     });
-    
+
     const reader = new FileReader();
     reader.onload = (e) => {
       img.src = e.target.result;
-      img.dataset.base64 = e.target.result.split(',')[1];
-      
-      imageContainer.addEventListener('click', async (evt) => {
+      img.dataset.base64 = e.target.result.split(",")[1];
+
+      imageContainer.addEventListener("click", async (evt) => {
         switchToPhotoMode();
         await handleImageClick(evt, img);
       });
-      
-      imageContainer.addEventListener('touchstart', (e) => {
+
+      imageContainer.addEventListener("touchstart", (e) => {
         e.preventDefault();
         switchToPhotoMode();
         handleImageClick(e.touches[0], img);
       });
     };
-    
+
     reader.readAsDataURL(file);
-    
+
     imageContainer.appendChild(img);
     if (isMobile && crosshair) imageContainer.appendChild(crosshair);
     imageContainer.appendChild(instructionText);
     imageContainer.appendChild(closeButton);
-    
+
     photoOptions.appendChild(imageContainer);
   }
 
@@ -210,55 +211,68 @@ document.addEventListener("DOMContentLoaded", () => {
     const rect = img.getBoundingClientRect();
     const clickX = evt.clientX - rect.left;
     const clickY = evt.clientY - rect.top;
-    
+
     const relativeX = clickX / rect.width;
     const relativeY = clickY / rect.height;
-    
+
     const imageBase64 = img.dataset.base64;
-    
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
     const tempImg = new Image();
     tempImg.onload = () => {
       canvas.width = tempImg.width;
       canvas.height = tempImg.height;
       ctx.drawImage(tempImg, 0, 0);
-      
+
       const cropSize = Math.min(tempImg.width, tempImg.height) * 0.1;
       const cropX = Math.max(0, relativeX * tempImg.width - cropSize / 2);
       const cropY = Math.max(0, relativeY * tempImg.height - cropSize / 2);
-      
-      const cropCanvas = document.createElement('canvas');
+
+      const cropCanvas = document.createElement("canvas");
       cropCanvas.width = cropSize;
       cropCanvas.height = cropSize;
-      const cropCtx = cropCanvas.getContext('2d');
+      const cropCtx = cropCanvas.getContext("2d");
       cropCtx.imageSmoothingEnabled = false;
-      
+
       cropCtx.drawImage(
-        canvas, 
-        cropX, cropY, cropSize, cropSize,
-        0, 0, cropSize, cropSize
+        canvas,
+        cropX,
+        cropY,
+        cropSize,
+        cropSize,
+        0,
+        0,
+        cropSize,
+        cropSize,
       );
-      
+
       // Calculate the exact middle pixel of the cropped image
       const middleX = Math.floor(cropSize / 2);
       const middleY = Math.floor(cropSize / 2);
-      
+
       // Draw a visible red square centered on the middle pixel
       // Scale the box size to be visible on screen (about 10% of crop size)
       const boxSize = Math.max(8, Math.floor(cropSize * 0.1));
       cropCtx.save();
-      cropCtx.strokeStyle = '#ff0000';
+      cropCtx.strokeStyle = "#ff0000";
       cropCtx.lineWidth = Math.max(2, Math.floor(cropSize * 0.02)); // Thicker line for visibility
-      cropCtx.strokeRect(middleX - boxSize/2, middleY - boxSize/2, boxSize, boxSize);
+      cropCtx.strokeRect(
+        middleX - boxSize / 2,
+        middleY - boxSize / 2,
+        boxSize,
+        boxSize,
+      );
       cropCtx.restore();
-      
-      const croppedBase64 = cropCanvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-      
+
+      const croppedBase64 = cropCanvas
+        .toDataURL("image/jpeg", 0.9)
+        .split(",")[1];
+
       // Show immediate loading feedback
       const loadingColumn = createLoadingColumn("Analyzing...", croppedBase64);
-      
+
       fetch("/image-molecules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -272,26 +286,33 @@ document.addEventListener("DOMContentLoaded", () => {
           cropSize: cropSize,
         }),
       })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(({ output }) => {
-        // Remove loading column
-        loadingColumn.remove();
-        updateScrollHandles();
-        
-        const objectName = output.object || "Uploaded image";
-        processAnalysisResult(output, snapshots, "Photo", objectName, false, croppedBase64);
-      })
-      .catch(err => {
-        // Remove loading column on error
-        loadingColumn.remove();
-        updateScrollHandles();
-        createClosableErrorMessage(`Error: ${err.message}`);
-      });
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(({ output }) => {
+          // Remove loading column
+          loadingColumn.remove();
+          updateScrollHandles();
+
+          const objectName = output.object || "Uploaded image";
+          processAnalysisResult(
+            output,
+            snapshots,
+            "Photo",
+            objectName,
+            false,
+            croppedBase64,
+          );
+        })
+        .catch((err) => {
+          // Remove loading column on error
+          loadingColumn.remove();
+          updateScrollHandles();
+          createClosableErrorMessage(`Error: ${err.message}`);
+        });
     };
-    
+
     tempImg.src = `data:image/jpeg;base64,${imageBase64}`;
   }
 
@@ -299,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       // Fetch and convert image to base64
       const imageBase64 = await urlToBase64(url);
-      
+
       // Create a blob from the base64 data to display the image
       const byteCharacters = atob(imageBase64);
       const byteNumbers = new Array(byteCharacters.length);
@@ -307,17 +328,18 @@ document.addEventListener("DOMContentLoaded", () => {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
       }
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'image/jpeg' });
-      const file = new File([blob], 'url-image.jpg', { type: 'image/jpeg' });
-      
+      const blob = new Blob([byteArray], { type: "image/jpeg" });
+      const file = new File([blob], "url-image.jpg", { type: "image/jpeg" });
+
       // Display the image for interactive clicking
       displayUploadedImage(file);
-      
-      // Clear URL input
-      photoUrl.value = '';
 
+      // Clear URL input
+      photoUrl.value = "";
     } catch (err) {
-      createClosableErrorMessage(`Error loading image from URL: ${err.message}`);
+      createClosableErrorMessage(
+        `Error loading image from URL: ${err.message}`,
+      );
     }
   }
 
@@ -328,7 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
-        const result = reader.result.split(',')[1]; // Remove data:image/...;base64, prefix
+        const result = reader.result.split(",")[1]; // Remove data:image/...;base64, prefix
         resolve(result);
       };
       reader.onerror = reject;
@@ -339,30 +361,34 @@ document.addEventListener("DOMContentLoaded", () => {
   async function urlToBase64(url) {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous'; // Try to enable CORS
-      
+      img.crossOrigin = "anonymous"; // Try to enable CORS
+
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
         canvas.width = img.width;
         canvas.height = img.height;
-        
+
         ctx.drawImage(img, 0, 0);
-        
+
         try {
-          const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-          const base64 = dataURL.split(',')[1];
+          const dataURL = canvas.toDataURL("image/jpeg", 0.9);
+          const base64 = dataURL.split(",")[1];
           resolve(base64);
         } catch (err) {
-          reject(new Error('Failed to convert image to base64'));
+          reject(new Error("Failed to convert image to base64"));
         }
       };
-      
+
       img.onerror = () => {
-        reject(new Error('Failed to load image from URL. Check if URL is valid and accessible.'));
+        reject(
+          new Error(
+            "Failed to load image from URL. Check if URL is valid and accessible.",
+          ),
+        );
       };
-      
+
       img.src = url;
     });
   }
@@ -376,35 +402,35 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createLoadingColumn(loadingText, croppedImageData = null) {
-    const gldiv = document.getElementById('gldiv');
-    
+    const gldiv = document.getElementById("gldiv");
+
     const loadingColumn = document.createElement("div");
     loadingColumn.className = "object-column loading-column";
-    
+
     const titleContainer = document.createElement("div");
     titleContainer.className = "object-title";
-    
+
     const titleText = document.createElement("span");
     titleText.textContent = loadingText;
     titleContainer.appendChild(titleText);
-    
+
     loadingColumn.appendChild(titleContainer);
-    
+
     // Add cropped image if available
     if (croppedImageData) {
       const croppedImageContainer = document.createElement("div");
       croppedImageContainer.className = "cropped-image-container";
-      
+
       const croppedImage = document.createElement("img");
       croppedImage.src = `data:image/jpeg;base64,${croppedImageData}`;
       croppedImage.alt = "Cropped region";
       croppedImage.className = "cropped-image";
       croppedImage.style.border = "1px solid #ff0000";
-      
+
       croppedImageContainer.appendChild(croppedImage);
       loadingColumn.appendChild(croppedImageContainer);
     }
-    
+
     // Add loading indicator
     const loadingIndicator = document.createElement("div");
     loadingIndicator.className = "loading-indicator";
@@ -418,9 +444,9 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     loadingIndicator.textContent = "Processing";
     loadingColumn.appendChild(loadingIndicator);
-    
+
     gldiv.appendChild(loadingColumn);
-    
+
     return loadingColumn;
   }
 
@@ -436,39 +462,55 @@ document.addEventListener("DOMContentLoaded", () => {
       text-align: center;
       position: relative;
     `;
-    
+
     errorDiv.innerHTML = `
       <div style="font-weight: 600; margin-bottom: 8px;">⚠️ Error</div>
       <div>${message}</div>
       <button onclick="this.parentElement.remove(); updateScrollHandles();" 
               style="position: absolute; top: 8px; right: 8px; background: none; border: none; color: #ff6b6b; font-size: 18px; cursor: pointer; padding: 4px;">×</button>
     `;
-    
+
     container.appendChild(errorDiv);
     updateScrollHandles();
   }
-  
-  function createResultMessage(icon, objectName, smilesCount, useQuotes = false) {
+
+  function createResultMessage(
+    icon,
+    objectName,
+    smilesCount,
+    useQuotes = false,
+  ) {
     const name = useQuotes ? `"${objectName}"` : objectName;
-    const plural = smilesCount !== 1 ? 's' : '';
+    const plural = smilesCount !== 1 ? "s" : "";
     return `${icon} ${name} → ${smilesCount} molecule${plural} found`;
   }
 
-  function processAnalysisResult(output, container, icon, objectName, useQuotes = false, croppedImageData = null) {
+  function processAnalysisResult(
+    output,
+    container,
+    icon,
+    objectName,
+    useQuotes = false,
+    croppedImageData = null,
+  ) {
     // Handle new chemicals structure with names and SMILES
     const chemicals = output.chemicals || [];
-    
+
     // Check if we have a description response
-    if (chemicals.length === 1 && chemicals[0].smiles && chemicals[0].smiles.startsWith('DESCRIPTION: ')) {
-      const description = chemicals[0].smiles.replace('DESCRIPTION: ', '');
+    if (
+      chemicals.length === 1 &&
+      chemicals[0].smiles &&
+      chemicals[0].smiles.startsWith("DESCRIPTION: ")
+    ) {
+      const description = chemicals[0].smiles.replace("DESCRIPTION: ", "");
       // For description responses, just show the description in the object column header
       generateSDFs([], objectName, description, null, croppedImageData);
       return;
     }
-    
+
     // Extract SMILES array from chemicals
-    const smiles = chemicals.map(chem => chem.smiles).filter(Boolean);
-    
+    const smiles = chemicals.map((chem) => chem.smiles).filter(Boolean);
+
     // For molecule responses, generate SDFs and show in object column
     if (smiles.length > 0) {
       generateSDFs(smiles, objectName, null, chemicals, croppedImageData);
@@ -482,121 +524,131 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const isSecureContext = window.isSecureContext || location.protocol === 'https:';
-  if (!isSecureContext && !location.hostname.includes('localhost')) {
+  const isSecureContext =
+    window.isSecureContext || location.protocol === "https:";
+  if (!isSecureContext && !location.hostname.includes("localhost")) {
     msgBox.hidden = false;
-    msgBox.textContent = "Camera requires HTTPS on mobile devices. Please use HTTPS or localhost.";
+    msgBox.textContent =
+      "Camera requires HTTPS on mobile devices. Please use HTTPS or localhost.";
     return;
   }
 
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent,
+    );
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   let facingMode = isMobile ? "environment" : "user";
   let currentStream = null;
 
-  const simpleConstraints = () => ({ 
-    video: { 
+  const simpleConstraints = () => ({
+    video: {
       facingMode,
       width: { ideal: 1280 },
-      height: { ideal: 720 }
-    } 
+      height: { ideal: 720 },
+    },
   });
-  const basicConstraints = () => ({ 
+  const basicConstraints = () => ({
     video: {
       width: { ideal: 1280 },
-      height: { ideal: 720 }
-    } 
+      height: { ideal: 720 },
+    },
   });
-  const safariConstraints = () => ({ 
+  const safariConstraints = () => ({
     video: {
       facingMode,
       width: { min: 640, ideal: 1280, max: 1920 },
-      height: { min: 480, ideal: 720, max: 1080 }
-    } 
+      height: { min: 480, ideal: 720, max: 1080 },
+    },
   });
 
   async function startCamera() {
-    currentStream?.getTracks().forEach(t => t.stop());
+    currentStream?.getTracks().forEach((t) => t.stop());
 
     try {
       let stream;
-      
+
       // Safari-specific handling
       if (isSafari || isIOS) {
         try {
-          stream = await navigator.mediaDevices.getUserMedia(safariConstraints());
+          stream =
+            await navigator.mediaDevices.getUserMedia(safariConstraints());
         } catch (err) {
           console.log("Safari constraints failed, trying basic:", err);
-          stream = await navigator.mediaDevices.getUserMedia(basicConstraints());
+          stream =
+            await navigator.mediaDevices.getUserMedia(basicConstraints());
         }
       } else {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia(simpleConstraints());
-      } catch (err) {
-        stream = await navigator.mediaDevices.getUserMedia(basicConstraints());
+        try {
+          stream =
+            await navigator.mediaDevices.getUserMedia(simpleConstraints());
+        } catch (err) {
+          stream =
+            await navigator.mediaDevices.getUserMedia(basicConstraints());
         }
       }
-      
+
       currentStream = stream;
       video.srcObject = stream;
-      
+
       // Safari-specific video attributes
-      video.setAttribute('playsinline', 'true');
-      video.setAttribute('webkit-playsinline', 'true');
-      video.setAttribute('x-webkit-airplay', 'allow');
-      
+      video.setAttribute("playsinline", "true");
+      video.setAttribute("webkit-playsinline", "true");
+      video.setAttribute("x-webkit-airplay", "allow");
+
       await video.play();
       msgBox.hidden = true;
-      
+
       // Add mobile targeting reticle if on mobile, remove if on desktop
       if (isMobile) {
         addMobileTargetingReticle();
       } else {
         removeMobileTargetingReticle();
       }
-      
     } catch (err) {
       console.error("Camera error:", err);
       msgBox.hidden = false;
-      
+
       // Better error messages for Safari
-      if (err.name === 'NotAllowedError') {
-        msgBox.textContent = "Camera access denied. Please allow camera access in Safari settings.";
-      } else if (err.name === 'NotFoundError') {
+      if (err.name === "NotAllowedError") {
+        msgBox.textContent =
+          "Camera access denied. Please allow camera access in Safari settings.";
+      } else if (err.name === "NotFoundError") {
         msgBox.textContent = "No camera found on this device.";
-      } else if (isSafari && err.name === 'NotSupportedError') {
-        msgBox.textContent = "Camera not supported in Safari. Try using Chrome or Firefox.";
+      } else if (isSafari && err.name === "NotSupportedError") {
+        msgBox.textContent =
+          "Camera not supported in Safari. Try using Chrome or Firefox.";
       } else {
-              msgBox.textContent = `Camera error: ${err.message}`;
+        msgBox.textContent = `Camera error: ${err.message}`;
       }
     }
   }
 
   function addMobileTargetingReticle() {
     // Remove existing reticle if any
-    const existingReticle = document.querySelector('.mobile-reticle');
+    const existingReticle = document.querySelector(".mobile-reticle");
     if (existingReticle) {
       existingReticle.remove();
     }
 
-    const reticle = document.createElement('div');
-    reticle.className = 'mobile-reticle';
-    const template = document.getElementById('mobile-reticle-template');
+    const reticle = document.createElement("div");
+    reticle.className = "mobile-reticle";
+    const template = document.getElementById("mobile-reticle-template");
     const clone = template.content.cloneNode(true);
     reticle.appendChild(clone);
-    
+
     // Append to video element instead of camera container for proper positioning
     video.appendChild(reticle);
-    
+
     // Add pulsing animation to draw attention
     setTimeout(() => {
-      reticle.style.animation = 'reticlePulse 2s ease-in-out infinite';
+      reticle.style.animation = "reticlePulse 2s ease-in-out infinite";
     }, 1000);
   }
 
   function removeMobileTargetingReticle() {
-    const existingReticle = document.querySelector('.mobile-reticle');
+    const existingReticle = document.querySelector(".mobile-reticle");
     if (existingReticle) {
       existingReticle.remove();
     }
@@ -608,10 +660,12 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Found video devices:", videoDevices.length);
 
     if (videoDevices.length > 1) {
-      const switchCameraContainer = document.querySelector('.switch-camera-container');
-      const switchCameraBtn = document.getElementById('switch-camera-btn');
+      const switchCameraContainer = document.querySelector(
+        ".switch-camera-container",
+      );
+      const switchCameraBtn = document.getElementById("switch-camera-btn");
       if (switchCameraContainer && switchCameraBtn) {
-        switchCameraContainer.style.display = 'block';
+        switchCameraContainer.style.display = "block";
         switchCameraBtn.onclick = () => {
           facingMode = facingMode === "user" ? "environment" : "user";
           startCamera();
@@ -629,29 +683,33 @@ document.addEventListener("DOMContentLoaded", () => {
     switchToCameraMode();
     handleInteraction(e.touches[0]);
   });
-  
+
   // Safari-specific touch handling
   if (isSafari || isIOS) {
     video.addEventListener("touchend", (e) => {
       e.preventDefault();
     });
-    
+
     // Prevent zoom on double tap
     let lastTouchEnd = 0;
-    video.addEventListener("touchend", (e) => {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-      }
-      lastTouchEnd = now;
-    }, false);
+    video.addEventListener(
+      "touchend",
+      (e) => {
+        const now = new Date().getTime();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      },
+      false,
+    );
   }
 
   async function handleInteraction(evt) {
     if (!cameraMode.checked) {
       return;
     }
-    
+
     // On mobile, check if tap is within reticle area
     if (isMobile) {
       const rect = video.getBoundingClientRect();
@@ -659,19 +717,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const centerY = rect.top + rect.height / 2;
       const tapX = evt.clientX;
       const tapY = evt.clientY;
-      
+
       // Larger reticle area for easier targeting (100px diameter circle)
       const reticleRadius = 50;
       const distanceFromCenter = Math.sqrt(
-        Math.pow(tapX - centerX, 2) + Math.pow(tapY - centerY, 2)
+        Math.pow(tapX - centerX, 2) + Math.pow(tapY - centerY, 2),
       );
-      
+
       if (distanceFromCenter > reticleRadius) {
         showReticleFeedback();
         return;
       }
     }
-    
+
     // Show red crop outline at click/tap position
     showCropOutline(evt);
 
@@ -694,21 +752,36 @@ document.addEventListener("DOMContentLoaded", () => {
     crop.width = crop.height = 100;
     const cropCtx = crop.getContext("2d");
     cropCtx.imageSmoothingEnabled = false;
-    cropCtx.drawImage(canvas, actualX - 50, actualY - 50, 100, 100, 0, 0, 100, 100);
-    
+    cropCtx.drawImage(
+      canvas,
+      actualX - 50,
+      actualY - 50,
+      100,
+      100,
+      0,
+      0,
+      100,
+      100,
+    );
+
     // Calculate the exact middle pixel of the cropped image
     const middleX = Math.floor(100 / 2);
     const middleY = Math.floor(100 / 2);
-    
+
     // Draw a visible red square centered on the middle pixel
     // Scale the box size to be visible on screen (about 10% of crop size)
     const boxSize = Math.max(8, Math.floor(100 * 0.1)); // 10px for 100px crop
     cropCtx.save();
-    cropCtx.strokeStyle = '#ff0000';
+    cropCtx.strokeStyle = "#ff0000";
     cropCtx.lineWidth = Math.max(2, Math.floor(100 * 0.02)); // Thicker line for visibility
-    cropCtx.strokeRect(middleX - boxSize/2, middleY - boxSize/2, boxSize, boxSize);
+    cropCtx.strokeRect(
+      middleX - boxSize / 2,
+      middleY - boxSize / 2,
+      boxSize,
+      boxSize,
+    );
     cropCtx.restore();
-    
+
     const croppedBase64 = crop.toDataURL("image/jpeg", 0.9).split(",")[1];
 
     // Show immediate loading feedback
@@ -732,16 +805,22 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const { output } = await res.json();
-      
+
       // Remove loading column
       loadingColumn.remove();
       updateScrollHandles();
-      
-      const objectName = output.object || "Unknown object";
-      processAnalysisResult(output, snapshots, "Camera", objectName, false, croppedBase64);
 
+      const objectName = output.object || "Unknown object";
+      processAnalysisResult(
+        output,
+        snapshots,
+        "Camera",
+        objectName,
+        false,
+        croppedBase64,
+      );
     } catch (err) {
-      console.error('API call failed:', err);
+      console.error("API call failed:", err);
       // Remove loading column on error
       loadingColumn.remove();
       updateScrollHandles();
@@ -750,11 +829,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showReticleFeedback() {
-    const reticle = document.querySelector('.mobile-reticle');
+    const reticle = document.querySelector(".mobile-reticle");
     if (reticle) {
-      reticle.style.animation = 'reticlePulse 0.5s ease';
+      reticle.style.animation = "reticlePulse 0.5s ease";
       setTimeout(() => {
-        reticle.style.animation = '';
+        reticle.style.animation = "";
       }, 500);
     }
   }
@@ -762,90 +841,110 @@ document.addEventListener("DOMContentLoaded", () => {
   function showCropOutline(evt) {
     const rect = video.getBoundingClientRect();
     const cropSize = 100;
-    const outline = document.createElement('div');
-    outline.className = 'crop-outline';
-    outline.style.position = 'fixed'; // Use fixed positioning for accurate placement
-    outline.style.width = cropSize + 'px';
-    outline.style.height = cropSize + 'px';
-    outline.style.border = '2.5px solid #ff0000';
-    outline.style.boxSizing = 'border-box';
-    outline.style.pointerEvents = 'none';
+    const outline = document.createElement("div");
+    outline.className = "crop-outline";
+    outline.style.position = "fixed"; // Use fixed positioning for accurate placement
+    outline.style.width = cropSize + "px";
+    outline.style.height = cropSize + "px";
+    outline.style.border = "2.5px solid #ff0000";
+    outline.style.boxSizing = "border-box";
+    outline.style.pointerEvents = "none";
     outline.style.zIndex = 20;
-    outline.style.left = (evt.clientX - cropSize/2) + 'px'; // Center on cursor X
-    outline.style.top = (evt.clientY - cropSize/2) + 'px';  // Center on cursor Y
-    outline.style.borderRadius = '0';
-    outline.style.background = 'none';
-    outline.style.transition = 'opacity 0.2s';
-    outline.style.opacity = '1';
+    outline.style.left = evt.clientX - cropSize / 2 + "px"; // Center on cursor X
+    outline.style.top = evt.clientY - cropSize / 2 + "px"; // Center on cursor Y
+    outline.style.borderRadius = "0";
+    outline.style.background = "none";
+    outline.style.transition = "opacity 0.2s";
+    outline.style.opacity = "1";
     document.body.appendChild(outline); // Append to body for fixed positioning
     setTimeout(() => {
-      outline.style.opacity = '0';
+      outline.style.opacity = "0";
       setTimeout(() => outline.remove(), 200);
     }, 500);
   }
 
   function getMoleculeName(chemical) {
     const moleculeNames = {
-      'O': 'Water',
-      'CCO': 'Ethanol',
-      'CC(=O)O': 'Acetic Acid',
-      'C': 'Methane',
-      'CO': 'Methanol',
-      'C(CO)N': 'Ethanolamine',
-      'C(C(=O)O)N': 'Glycine',
-      'C(CC(=O)O)N': 'GABA',
-      'C(CC(=O)O)C(=O)O': 'Succinic Acid',
-      'C(C(=O)O)O': 'Glycolic Acid',
-      'C1=CC=CC=C1': 'Benzene',
-      'CC1=CC=CC=C1': 'Toluene',
-      'C1=CC=C(C=C1)O': 'Phenol',
-      'C1=CC=C(C=C1)N': 'Aniline',
-      'CCCCCCCC=O': 'Octanal',
-      'CCC(C)C(=O)OC(C)C': 'Isopropyl Isovalerate',
-      'CCCOC(=O)N1CCCC1C(=O)OCCC': 'Polyurethane Monomer',
-      'C1CCOC1': 'Tetrahydrofuran',
-      'NCCCN': 'Propanediamine',
-      'CN1C=NC2=C1C(=O)N(C(=O)N2C)C': 'Caffeine',
-      'CC(=O)OC1=CC=CC=C1C(=O)O': 'Aspirin',
-      'C1NC(=O)N(C)C2=CC=CC=C12': 'N-Methylbenzimidazolone',
-      'NC1=NC(=NC(=N1)Cl)Cl': 'Cyanuric Chloride',
-      'C[C@H](NC(=O)[C@@H](N)Cc1c[nH]c2ccc(Cl)cc12)C(=O)O': 'Chlorotryptophan Derivative',
-      'O=C(Nc1ccc(cc1)C(=O)O)C(F)(F)F': 'Trifluoroacetyl-p-aminobenzoic Acid',
-      'C(C(C(=O)NC(C(=O)O)C(C)O)O)O': 'Threonine Derivative',
-      'CaCO3': 'Calcite (Calcium Carbonate)',
-      'CaCO₃': 'Calcite (Calcium Carbonate)',
-      'SiO2': 'Quartz (Silicon Dioxide)',
-      'SiO₂': 'Quartz (Silicon Dioxide)',
-      'Al2O3': 'Corundum (Aluminum Oxide)',
-      'Al₂O₃': 'Corundum (Aluminum Oxide)',
-      'FeS2': 'Pyrite (Iron Disulfide)',
-      'FeS₂': 'Pyrite (Iron Disulfide)',
-      'NaCl': 'Halite (Sodium Chloride)',
-      'quartz': 'Quartz (Silicon Dioxide)',
-      'calcite': 'Calcite (Calcium Carbonate)',
-      'corundum': 'Corundum (Aluminum Oxide)',
-      'pyrite': 'Pyrite (Iron Disulfide)',
-      'halite': 'Halite (Sodium Chloride)',
-      'salt': 'Halite (Sodium Chloride)'
+      O: "Water",
+      CCO: "Ethanol",
+      "CC(=O)O": "Acetic Acid",
+      C: "Methane",
+      CO: "Methanol",
+      "C(CO)N": "Ethanolamine",
+      "C(C(=O)O)N": "Glycine",
+      "C(CC(=O)O)N": "GABA",
+      "C(CC(=O)O)C(=O)O": "Succinic Acid",
+      "C(C(=O)O)O": "Glycolic Acid",
+      "C1=CC=CC=C1": "Benzene",
+      "CC1=CC=CC=C1": "Toluene",
+      "C1=CC=C(C=C1)O": "Phenol",
+      "C1=CC=C(C=C1)N": "Aniline",
+      "CCCCCCCC=O": "Octanal",
+      "CCC(C)C(=O)OC(C)C": "Isopropyl Isovalerate",
+      "CCCOC(=O)N1CCCC1C(=O)OCCC": "Polyurethane Monomer",
+      C1CCOC1: "Tetrahydrofuran",
+      NCCCN: "Propanediamine",
+      "CN1C=NC2=C1C(=O)N(C(=O)N2C)C": "Caffeine",
+      "CC(=O)OC1=CC=CC=C1C(=O)O": "Aspirin",
+      "C1NC(=O)N(C)C2=CC=CC=C12": "N-Methylbenzimidazolone",
+      "NC1=NC(=NC(=N1)Cl)Cl": "Cyanuric Chloride",
+      "C[C@H](NC(=O)[C@@H](N)Cc1c[nH]c2ccc(Cl)cc12)C(=O)O":
+        "Chlorotryptophan Derivative",
+      "O=C(Nc1ccc(cc1)C(=O)O)C(F)(F)F": "Trifluoroacetyl-p-aminobenzoic Acid",
+      "C(C(C(=O)NC(C(=O)O)C(C)O)O)O": "Threonine Derivative",
+      CaCO3: "Calcite (Calcium Carbonate)",
+      "CaCO₃": "Calcite (Calcium Carbonate)",
+      SiO2: "Quartz (Silicon Dioxide)",
+      "SiO₂": "Quartz (Silicon Dioxide)",
+      Al2O3: "Corundum (Aluminum Oxide)",
+      "Al₂O₃": "Corundum (Aluminum Oxide)",
+      FeS2: "Pyrite (Iron Disulfide)",
+      "FeS₂": "Pyrite (Iron Disulfide)",
+      NaCl: "Halite (Sodium Chloride)",
+      quartz: "Quartz (Silicon Dioxide)",
+      calcite: "Calcite (Calcium Carbonate)",
+      corundum: "Corundum (Aluminum Oxide)",
+      pyrite: "Pyrite (Iron Disulfide)",
+      halite: "Halite (Sodium Chloride)",
+      salt: "Halite (Sodium Chloride)",
     };
-    
-    return moleculeNames[chemical] || `Structure (${chemical.substring(0, 20)}${chemical.length > 20 ? '...' : ''})`;
+
+    return (
+      moleculeNames[chemical] ||
+      `Structure (${chemical.substring(0, 20)}${chemical.length > 20 ? "..." : ""})`
+    );
   }
 
-  async function generateSDFs(smiles, objectName, description = null, chemicals = null, croppedImageData = null) {
+  async function generateSDFs(
+    smiles,
+    objectName,
+    description = null,
+    chemicals = null,
+    croppedImageData = null,
+  ) {
     // Handle description responses
     if (description) {
-      createObjectColumn(objectName, [], [], null, null, [], description, chemicals, croppedImageData);
+      createObjectColumn(
+        objectName,
+        [],
+        [],
+        null,
+        null,
+        [],
+        description,
+        chemicals,
+        croppedImageData,
+      );
       return;
     }
-    
+
     if (!smiles || smiles.length === 0) return;
-    
+
     try {
-      const response = await fetch('/generate-sdfs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ smiles, overwrite: false })
+      const response = await fetch("/generate-sdfs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ smiles, overwrite: false }),
       });
 
       if (!response.ok) {
@@ -853,36 +952,67 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const data = await response.json();
-      
+
       const summary = {
         total: smiles.length,
         visualizable: data.sdfPaths ? data.sdfPaths.length : 0,
         skipped: data.skipped ? data.skipped.length : 0,
-        errors: data.errors ? data.errors.length : 0
+        errors: data.errors ? data.errors.length : 0,
       };
-      
-      createObjectColumn(objectName, data.sdfPaths || [], smiles, null, summary, data.skipped || [], null, chemicals, croppedImageData);
-      
+
+      createObjectColumn(
+        objectName,
+        data.sdfPaths || [],
+        smiles,
+        null,
+        summary,
+        data.skipped || [],
+        null,
+        chemicals,
+        croppedImageData,
+      );
     } catch (error) {
       console.error("SDF generation error:", error);
-      createObjectColumn(objectName, [], smiles, 'Working on 3D structures...', null, [], null, chemicals, croppedImageData);
+      createObjectColumn(
+        objectName,
+        [],
+        smiles,
+        "Working on 3D structures...",
+        null,
+        [],
+        null,
+        chemicals,
+        croppedImageData,
+      );
     }
   }
 
-  async function createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, summary = null, skippedChemicals = [], description = null, chemicals = null, croppedImageData = null) {
-    const gldiv = document.getElementById('gldiv');
-    
+  async function createObjectColumn(
+    objectName,
+    sdfFiles,
+    smiles = [],
+    errorMessage = null,
+    summary = null,
+    skippedChemicals = [],
+    description = null,
+    chemicals = null,
+    croppedImageData = null,
+  ) {
+    const gldiv = document.getElementById("gldiv");
+
     const objectColumn = document.createElement("div");
     objectColumn.className = "object-column";
-    
+
     const titleContainer = document.createElement("div");
     titleContainer.className = "object-title";
-    
+
     const titleText = document.createElement("span");
     // Show description in header if available, otherwise show object name
-    titleText.textContent = description ? `${objectName}: ${description}` : objectName;
+    titleText.textContent = description
+      ? `${objectName}: ${description}`
+      : objectName;
     titleContainer.appendChild(titleText);
-    
+
     const closeButton = document.createElement("button");
     closeButton.className = "column-close";
     closeButton.textContent = "×";
@@ -891,80 +1021,84 @@ document.addEventListener("DOMContentLoaded", () => {
       updateScrollHandles();
     };
     titleContainer.appendChild(closeButton);
-    
+
     objectColumn.appendChild(titleContainer);
-    
+
     // Add cropped image if available
     if (croppedImageData) {
       const croppedImageContainer = document.createElement("div");
       croppedImageContainer.className = "cropped-image-container";
-      
+
       const croppedImage = document.createElement("img");
       croppedImage.src = `data:image/jpeg;base64,${croppedImageData}`;
       croppedImage.alt = "Cropped region";
       croppedImage.className = "cropped-image";
       croppedImage.style.border = "1px solid #ff0000";
-      
+
       croppedImageContainer.appendChild(croppedImage);
       objectColumn.appendChild(croppedImageContainer);
     }
-    
+
     if (summary) {
-      const template = document.getElementById('chemical-summary-template');
+      const template = document.getElementById("chemical-summary-template");
       const clone = template.content.cloneNode(true);
-      const summaryDiv = clone.querySelector('.chemical-summary');
-      
-      summaryDiv.querySelector('.summary-total').textContent = summary.total;
-      summaryDiv.querySelector('.summary-visualizable').textContent = summary.visualizable;
-      
+      const summaryDiv = clone.querySelector(".chemical-summary");
+
+      summaryDiv.querySelector(".summary-total").textContent = summary.total;
+      summaryDiv.querySelector(".summary-visualizable").textContent =
+        summary.visualizable;
+
       if (summary.skipped > 0) {
-        const skippedDiv = summaryDiv.querySelector('.summary-skipped');
-        skippedDiv.style.display = 'block';
-        skippedDiv.querySelector('.summary-skipped-count').textContent = summary.skipped;
+        const skippedDiv = summaryDiv.querySelector(".summary-skipped");
+        skippedDiv.style.display = "block";
+        skippedDiv.querySelector(".summary-skipped-count").textContent =
+          summary.skipped;
       }
-      
+
       if (summary.errors > 0) {
-        const errorsDiv = summaryDiv.querySelector('.summary-errors');
-        errorsDiv.style.display = 'block';
-        errorsDiv.querySelector('.summary-errors-count').textContent = summary.errors;
+        const errorsDiv = summaryDiv.querySelector(".summary-errors");
+        errorsDiv.style.display = "block";
+        errorsDiv.querySelector(".summary-errors-count").textContent =
+          summary.errors;
       }
-      
+
       objectColumn.appendChild(summaryDiv);
     }
-    
+
     if (skippedChemicals.length > 0) {
-      const template = document.getElementById('skipped-chemicals-template');
+      const template = document.getElementById("skipped-chemicals-template");
       const clone = template.content.cloneNode(true);
-      const skippedDiv = clone.querySelector('.skipped-chemicals');
-      
-      skippedDiv.querySelector('.skipped-list').textContent = skippedChemicals.join(', ');
-      
+      const skippedDiv = clone.querySelector(".skipped-chemicals");
+
+      skippedDiv.querySelector(".skipped-list").textContent =
+        skippedChemicals.join(", ");
+
       objectColumn.appendChild(skippedDiv);
     }
-    
+
     if (errorMessage) {
       const errorDiv = document.createElement("div");
       errorDiv.textContent = errorMessage;
-      errorDiv.style.color = '#ffffff';
-      errorDiv.style.textAlign = 'center';
-      errorDiv.style.padding = '20px';
+      errorDiv.style.color = "#ffffff";
+      errorDiv.style.textAlign = "center";
+      errorDiv.style.padding = "20px";
       objectColumn.appendChild(errorDiv);
     } else {
       const viewers = [];
       for (let i = 0; i < sdfFiles.length; i++) {
         const sdfFile = sdfFiles[i];
-        const moleculeSmiles = smiles[i] || '';
-        
+        const moleculeSmiles = smiles[i] || "";
+
         const moleculeContainer = document.createElement("div");
         moleculeContainer.className = "molecule-container";
-        
+
         const container = document.createElement("div");
         container.className = "mol-viewer-container";
         moleculeContainer.appendChild(container);
-        
+
         const moleculeName = document.createElement("div");
         moleculeName.className = "molecule-name";
-        
+
         // Use chemical name from data if available, otherwise fall back to lookup
         let displayName;
         if (chemicals && chemicals[i] && chemicals[i].name) {
@@ -972,7 +1106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           displayName = getMoleculeName(moleculeSmiles);
         }
-        
+
         // Create clickable Wikipedia link
         const wikipediaLink = document.createElement("a");
         wikipediaLink.textContent = displayName;
@@ -986,31 +1120,34 @@ document.addEventListener("DOMContentLoaded", () => {
           opacity: 0.8;
           transition: opacity 0.2s ease;
         `;
-        
-        wikipediaLink.addEventListener('mouseenter', () => {
-          wikipediaLink.style.opacity = '1';
-          wikipediaLink.style.textDecoration = 'underline';
+
+        wikipediaLink.addEventListener("mouseenter", () => {
+          wikipediaLink.style.opacity = "1";
+          wikipediaLink.style.textDecoration = "underline";
         });
-        
-        wikipediaLink.addEventListener('mouseleave', () => {
-          wikipediaLink.style.opacity = '0.8';
-          wikipediaLink.style.textDecoration = 'none';
+
+        wikipediaLink.addEventListener("mouseleave", () => {
+          wikipediaLink.style.opacity = "0.8";
+          wikipediaLink.style.textDecoration = "none";
         });
-        
+
         moleculeName.appendChild(wikipediaLink);
         moleculeContainer.appendChild(moleculeName);
-        
+
         objectColumn.appendChild(moleculeContainer);
-        
+
         const viewer = await render(sdfFile, container);
         if (viewer) viewers.push(viewer);
       }
-      
-      viewers.forEach(viewer => { viewer.resize(); viewer.render(); });
+
+      viewers.forEach((viewer) => {
+        viewer.resize();
+        viewer.render();
+      });
     }
-    
+
     gldiv.appendChild(objectColumn);
-    
+
     // Update scroll handles after adding new column
     updateScrollHandles();
   }
@@ -1018,47 +1155,50 @@ document.addEventListener("DOMContentLoaded", () => {
   async function render(sdfFile, container) {
     try {
       console.log(`Attempting to fetch SDF file: ${sdfFile}`);
-      const urlParts = sdfFile.split('/');
+      const urlParts = sdfFile.split("/");
       const filename = urlParts.pop();
       const encodedFilename = encodeURIComponent(filename);
-      const encodedPath = urlParts.join('/') + '/' + encodedFilename;
-      
+      const encodedPath = urlParts.join("/") + "/" + encodedFilename;
+
       console.log(`URL-encoded path: ${encodedPath}`);
       const response = await fetch(encodedPath);
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
-      
+
       const sdfData = await response.text();
-      
+
       if (!sdfData.trim()) {
         throw new Error(`Empty SDF data`);
       }
       if (!sdfData.includes("$$$$")) {
         throw new Error(`Invalid SDF format`);
       }
-      
+
       const viewer = $3Dmol.createViewer(container);
       viewer.addModel(sdfData, "sdf");
-      
-      viewer.setBackgroundColor('#000000');
-      
-      viewer.setStyle({}, { 
-        sphere: { 
-          scale: 0.8
-        }
-      });
-      
+
+      viewer.setBackgroundColor("#000000");
+
+      viewer.setStyle(
+        {},
+        {
+          sphere: {
+            scale: 0.8,
+          },
+        },
+      );
+
       viewer.zoomTo();
       viewer.render();
-      
+
       return viewer;
     } catch (error) {
       console.error(`Failed to load molecule:`, error);
-              container.textContent = `Error loading molecule: ${error.message}`;
-      container.style.color = 'red';
-      container.style.textAlign = 'center';
-      container.style.padding = '20px';
+      container.textContent = `Error loading molecule: ${error.message}`;
+      container.style.color = "red";
+      container.style.textAlign = "center";
+      container.style.padding = "20px";
       return null;
     }
   }
@@ -1067,7 +1207,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await startCamera();
       await setupSwitchCamera();
-      
+
       // Ensure reticle is only shown on mobile
       if (!isMobile) {
         removeMobileTargetingReticle();
@@ -1076,105 +1216,105 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Camera setup failed:", err);
     }
   })();
-  
+
   // Add keyboard navigation for 3D viewer scrolling
-  document.addEventListener('keydown', (e) => {
-    const gldiv = document.getElementById('gldiv');
+  document.addEventListener("keydown", (e) => {
+    const gldiv = document.getElementById("gldiv");
     if (!gldiv) return;
-    
+
     const scrollAmount = 450; // Width of one column + gap
-    
-    switch(e.key) {
-      case 'ArrowLeft':
+
+    switch (e.key) {
+      case "ArrowLeft":
         e.preventDefault();
         gldiv.scrollLeft -= scrollAmount;
         updateScrollHandles();
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         e.preventDefault();
         gldiv.scrollLeft += scrollAmount;
         updateScrollHandles();
         break;
-      case 'Home':
+      case "Home":
         e.preventDefault();
         gldiv.scrollLeft = 0;
         updateScrollHandles();
         break;
-      case 'End':
+      case "End":
         e.preventDefault();
         gldiv.scrollLeft = gldiv.scrollWidth;
         updateScrollHandles();
         break;
     }
   });
-  
+
   // Create scroll handle buttons
   function createScrollHandles() {
-    const gldiv = document.getElementById('gldiv');
+    const gldiv = document.getElementById("gldiv");
     if (!gldiv) return;
-    
+
     // Create left scroll button
-    const leftHandle = document.createElement('button');
-    leftHandle.className = 'scroll-handle scroll-handle-left';
-    leftHandle.textContent = '◀';
-    leftHandle.setAttribute('aria-label', 'Scroll left');
-    leftHandle.setAttribute('title', 'Scroll left (or press Left arrow)');
-    leftHandle.id = 'scroll-left-btn';
-    
+    const leftHandle = document.createElement("button");
+    leftHandle.className = "scroll-handle scroll-handle-left";
+    leftHandle.textContent = "◀";
+    leftHandle.setAttribute("aria-label", "Scroll left");
+    leftHandle.setAttribute("title", "Scroll left (or press Left arrow)");
+    leftHandle.id = "scroll-left-btn";
+
     // Create right scroll button
-    const rightHandle = document.createElement('button');
-    rightHandle.className = 'scroll-handle scroll-handle-right';
-    rightHandle.textContent = '▶';
-    rightHandle.setAttribute('aria-label', 'Scroll right');
-    rightHandle.setAttribute('title', 'Scroll right (or press Right arrow)');
-    rightHandle.id = 'scroll-right-btn';
-    
+    const rightHandle = document.createElement("button");
+    rightHandle.className = "scroll-handle scroll-handle-right";
+    rightHandle.textContent = "▶";
+    rightHandle.setAttribute("aria-label", "Scroll right");
+    rightHandle.setAttribute("title", "Scroll right (or press Right arrow)");
+    rightHandle.id = "scroll-right-btn";
+
     // Add click handlers with throttling
     let clickThrottle = false;
-    leftHandle.addEventListener('click', (e) => {
+    leftHandle.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (clickThrottle) return;
       clickThrottle = true;
-      setTimeout(() => clickThrottle = false, 100);
-      
+      setTimeout(() => (clickThrottle = false), 100);
+
       const scrollAmount = 450;
       gldiv.scrollLeft -= scrollAmount;
       updateScrollHandles();
     });
-    
-    rightHandle.addEventListener('click', (e) => {
+
+    rightHandle.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (clickThrottle) return;
       clickThrottle = true;
-      setTimeout(() => clickThrottle = false, 100);
-      
+      setTimeout(() => (clickThrottle = false), 100);
+
       const scrollAmount = 450;
       gldiv.scrollLeft += scrollAmount;
       updateScrollHandles();
     });
-    
+
     // Add keyboard support
-    leftHandle.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+    leftHandle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         leftHandle.click();
       }
     });
-    
-    rightHandle.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+
+    rightHandle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         rightHandle.click();
       }
     });
-    
+
     // Append to gldiv
     gldiv.appendChild(leftHandle);
     gldiv.appendChild(rightHandle);
   }
-  
+
   // Update scroll handle visibility
   let updateScrollHandlesTimeout;
   function updateScrollHandles() {
@@ -1184,80 +1324,87 @@ document.addEventListener("DOMContentLoaded", () => {
       updateScrollHandlesInternal();
     }, 10);
   }
-  
+
   function updateScrollHandlesInternal() {
-    const gldiv = document.getElementById('gldiv');
+    const gldiv = document.getElementById("gldiv");
     if (!gldiv) return;
-    
-    const leftHandle = document.getElementById('scroll-left-btn');
-    const rightHandle = document.getElementById('scroll-right-btn');
+
+    const leftHandle = document.getElementById("scroll-left-btn");
+    const rightHandle = document.getElementById("scroll-right-btn");
     if (!leftHandle || !rightHandle) return;
-    
+
     // Avoid unnecessary updates if scroll position hasn't changed
     const currentScrollLeft = gldiv.scrollLeft;
     const currentScrollWidth = gldiv.scrollWidth;
     const currentClientWidth = gldiv.clientWidth;
-    
-    if (updateScrollHandlesInternal.lastScrollLeft === currentScrollLeft && 
-        updateScrollHandlesInternal.lastScrollWidth === currentScrollWidth && 
-        updateScrollHandlesInternal.lastClientWidth === currentClientWidth) {
+
+    if (
+      updateScrollHandlesInternal.lastScrollLeft === currentScrollLeft &&
+      updateScrollHandlesInternal.lastScrollWidth === currentScrollWidth &&
+      updateScrollHandlesInternal.lastClientWidth === currentClientWidth
+    ) {
       return;
     }
-    
+
     updateScrollHandlesInternal.lastScrollLeft = currentScrollLeft;
     updateScrollHandlesInternal.lastScrollWidth = currentScrollWidth;
     updateScrollHandlesInternal.lastClientWidth = currentClientWidth;
-    
+
     const canScrollLeft = gldiv.scrollLeft > 0;
-    const canScrollRight = gldiv.scrollLeft < (gldiv.scrollWidth - gldiv.clientWidth);
-    
+    const canScrollRight =
+      gldiv.scrollLeft < gldiv.scrollWidth - gldiv.clientWidth;
+
     // Only show handles if content overflows
     const hasOverflow = gldiv.scrollWidth > gldiv.clientWidth;
-    
+
     const shouldShowLeft = hasOverflow && canScrollLeft;
     const shouldShowRight = hasOverflow && canScrollRight;
-    
+
     // Only update if visibility state actually changes
-    if (shouldShowLeft !== leftHandle.classList.contains('show')) {
+    if (shouldShowLeft !== leftHandle.classList.contains("show")) {
       if (shouldShowLeft) {
-        leftHandle.classList.add('show');
-        leftHandle.setAttribute('tabindex', '0');
+        leftHandle.classList.add("show");
+        leftHandle.setAttribute("tabindex", "0");
       } else {
-        leftHandle.classList.remove('show');
-        leftHandle.setAttribute('tabindex', '-1');
+        leftHandle.classList.remove("show");
+        leftHandle.setAttribute("tabindex", "-1");
       }
     }
-    
-    if (shouldShowRight !== rightHandle.classList.contains('show')) {
+
+    if (shouldShowRight !== rightHandle.classList.contains("show")) {
       if (shouldShowRight) {
-        rightHandle.classList.add('show');
-        rightHandle.setAttribute('tabindex', '0');
+        rightHandle.classList.add("show");
+        rightHandle.setAttribute("tabindex", "0");
       } else {
-        rightHandle.classList.remove('show');
-        rightHandle.setAttribute('tabindex', '-1');
+        rightHandle.classList.remove("show");
+        rightHandle.setAttribute("tabindex", "-1");
       }
     }
   }
-  
+
   // Create scroll handles after DOM is ready
   createScrollHandles();
-  
+
   // Update scroll handles on scroll (throttled)
   let scrollTimeout;
-  document.addEventListener('scroll', (e) => {
-    if (e.target.id === 'gldiv') {
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(updateScrollHandles, 16); // ~60fps
-    }
-  }, true);
-  
+  document.addEventListener(
+    "scroll",
+    (e) => {
+      if (e.target.id === "gldiv") {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(updateScrollHandles, 16); // ~60fps
+      }
+    },
+    true,
+  );
+
   // Update scroll handles on window resize (throttled)
   let resizeTimeout;
-  window.addEventListener('resize', () => {
+  window.addEventListener("resize", () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(updateScrollHandles, 100); // Throttle resize events
   });
-  
+
   // Initial update
   updateScrollHandles();
 });

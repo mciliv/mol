@@ -15,7 +15,8 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: #000000;
   color: #ffffff;
   overflow-x: hidden;
@@ -166,7 +167,7 @@ input[type="checkbox"]:checked + .mode-label {
 
 .crosshair::before,
 .crosshair::after {
-  content: '';
+  content: "";
   position: absolute;
   background: rgba(255, 255, 255, 0.5);
 }
@@ -382,8 +383,6 @@ input[type="checkbox"]:checked + .mode-label {
   z-index: 200;
 }
 
-
-
 .switch-camera-btn:hover {
   background: rgba(118, 75, 162, 0.9);
   transform: translateX(-50%) scale(1.05);
@@ -538,17 +537,17 @@ input[type="checkbox"]:checked + .mode-label {
     padding: 8px 16px;
     margin: 8px;
   }
-  
+
   /* Improve mobile scrolling */
   #gldiv {
     padding: 16px;
     gap: 16px;
   }
-  
+
   .object-column {
     min-width: 320px;
   }
-  
+
   .mol-viewer-container {
     width: 320px;
     height: 240px;
@@ -572,25 +571,28 @@ input[type="checkbox"]:checked + .mode-label {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes reticlePulse {
-  0% { 
+  0% {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
-  50% { 
+  50% {
     transform: translate(-50%, -50%) scale(1.2);
     opacity: 0.7;
   }
-  100% { 
+  100% {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
   }
 }
-
 
 /* ==================== RESULT CARDS ==================== */
 /* Removed all card styling - keeping UI simple */
@@ -858,7 +860,9 @@ input[type="checkbox"]:checked + .mode-label {
   z-index: 10;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -871,12 +875,22 @@ input[type="checkbox"]:checked + .mode-label {
 
 .scroll-handle-left {
   left: 0;
-  background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 70%,
+    transparent 100%
+  );
 }
 
 .scroll-handle-right {
   right: 0;
-  background: linear-gradient(270deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
+  background: linear-gradient(
+    270deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 70%,
+    transparent 100%
+  );
 }
 
 .scroll-handle:hover {
@@ -885,11 +899,21 @@ input[type="checkbox"]:checked + .mode-label {
 }
 
 .scroll-handle-left:hover {
-  background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.6) 70%,
+    transparent 100%
+  );
 }
 
 .scroll-handle-right:hover {
-  background: linear-gradient(270deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%);
+  background: linear-gradient(
+    270deg,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.6) 70%,
+    transparent 100%
+  );
 }
 
 /* Show scroll handles when needed */
@@ -958,7 +982,7 @@ input[type="checkbox"]:checked + .mode-label {
 
 .uploaded-image-container .crosshair::before,
 .uploaded-image-container .crosshair::after {
-  content: '';
+  content: "";
   position: absolute;
   background: rgba(255, 255, 255, 0.5);
 }
@@ -1083,7 +1107,8 @@ input[type="checkbox"]:checked + .mode-label {
   transform: translateY(0);
 }
 
-.photo-icon, .upload-text {
+.photo-icon,
+.upload-text {
   color: rgba(255, 255, 255, 0.9);
   transition: color 0.3s ease;
 }
@@ -1180,5 +1205,3 @@ input[type="checkbox"]:checked + .mode-label {
   transition: opacity 0.2s;
   opacity: 1;
 }
-
-
