@@ -1,3 +1,73 @@
+---
+alwaysApply: false
+---
+
+# Development Workflow Patterns
+
+## Git Workflow
+- **Always commit after acceptance** of changes
+- Use descriptive commit messages
+- Commit frequently to maintain clean history
+- Test changes before committing
+- Use meaningful branch names for features
+
+## After Accepting Changes
+- **Automatic Git Commit**: After accepting any changes, immediately commit to git
+- **Push to Remote**: Push commits to remote repository to keep it in sync
+- **Test Functionality**: Verify the changes work as expected
+- **Check Status**: Use `git status` to see if there are remaining uncommitted changes
+- **Continue Development**: Proceed with next feature or improvement
+
+## Post-Acceptance Commands
+```bash
+# After accepting changes, run these commands:
+git add .
+git commit -m "Brief description of changes made"
+git push origin main
+git status  # Check if there are remaining changes
+```
+
+## Testing Patterns
+- Run unit tests before committing: `npm test`
+- Ensure integration tests pass: `npm run test:integration`
+- Test camera functionality on both mobile and desktop
+- Verify SMILES validation and SDF generation
+- Test AI integration with various input types
+
+## Code Quality
+- Use modern JavaScript (ES6+, async/await)
+- Implement proper error handling for all async operations
+- Avoid console.log spam - use proper logging
+- Remove emojis from code for professional appearance
+- Follow consistent naming conventions
+
+## Debugging
+- Use VS Code's auto-attach debugging feature
+- Implement proper error logging for troubleshooting
+- Use nodemon for development with live reload
+- Handle Chrome DevTools discovery requests gracefully
+- Implement proper SSL certificate handling for HTTPS
+
+## Deployment Considerations
+- Use Google Cloud Functions for serverless deployment
+- Set environment variables via `gcloud functions deploy --set-env-vars`
+- Use custom domains with Cloud Functions
+- Implement proper error handling for production
+- Use minimal dependencies for fast cold starts
+
+## File Organization
+- Keep SDF files in dedicated `sdf_files/` directory
+- Maintain clean separation between frontend and backend
+- Use consistent file naming conventions
+- Organize static assets in root for simple serving
+- Keep configuration in environment files
+
+## Performance Optimization
+- Implement proper memory management for 3D viewers
+- Use efficient image processing and compression
+- Implement caching for generated SDF files
+- Optimize bundle size for fast loading
+- Use proper cleanup for streams and viewers
 # Development Workflow Patterns
 
 ## Git Workflow
