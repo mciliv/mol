@@ -1,0 +1,102 @@
+#!/bin/bash
+
+case "$1" in
+  # Development
+  "dev"|"start")
+    jest --testPathPattern=unit.test.js --verbose --silent && nodemon server.js
+    ;;
+  "server")
+    node server.js
+    ;;
+  "debug")
+    node --inspect server.js
+    ;;
+  "unsafe")
+    nodemon server.js
+    ;;
+  
+  # Testing
+  "test")
+    jest --testPathPattern=unit.test.js --verbose --silent && jest --testPathPattern=integration.test.js --verbose && jest --testPathPattern=system.test.js --verbose --detectOpenHandles
+    ;;
+  "unit")
+    jest --testPathPattern=unit.test.js --verbose --silent
+    ;;
+  "integration")
+    jest --testPathPattern=integration.test.js --verbose
+    ;;
+  "system")
+    jest --testPathPattern=system.test.js --verbose --detectOpenHandles
+    ;;
+  "watch")
+    jest --watch
+    ;;
+  "pytest")
+    python -m pytest tests/ -v
+    ;;
+  "pytest:debug")
+    python -m debugpy --listen 5678 --wait-for-client -m pytest tests/ -v -s
+    ;;
+  "fixtures")
+    jest --testPathPattern=tests/fixtures
+    ;;
+  
+  # Deployment
+  "deploy")
+    jest --testPathPattern=unit.test.js --verbose --silent && jest --testPathPattern=integration.test.js --verbose && jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .
+    ;;
+  "deploy:now")
+    jest --testPathPattern=unit.test.js --verbose --silent && jest --testPathPattern=integration.test.js --verbose && jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
+    ;;
+  "ship")
+    node ship
+    ;;
+  "auto-deploy")
+    node scripts/auto-deploy.js
+    ;;
+  
+  # Utilities
+  "format")
+    prettier --write .
+    ;;
+  "ip")
+    ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1
+    ;;
+  "mobile")
+    echo 'Access on mobile:' && echo 'HTTPS: https://'$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1)':3001' && echo 'HTTP: http://'$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1)':8080'
+    ;;
+  "cert")
+    echo 'Generating fresh SSL certificates...' && rm -rf certs && node -e "require('./server.js')"
+    ;;
+  "tunnel")
+    echo 'Install ngrok: npm install -g ngrok' && echo 'Then run: ngrok http 8080'
+    ;;
+  "build")
+    jest --testPathPattern=unit.test.js --verbose --silent && echo 'Build complete - static files ready'
+    ;;
+  
+  # Git & Domain
+  "check-commit")
+    ./scripts/check-commit.sh
+    ;;
+  "commit")
+    git add . && git commit -m 'Auto-commit: $(date)'
+    ;;
+  "domain:status")
+    ./scripts/check-domain-status.sh
+    ;;
+  "domain:setup")
+    echo 'Run after domain verification:' && echo 'gcloud beta run domain-mappings create --service=molecular-analysis --domain=queb.space --region=us-central1' && echo 'gcloud beta run domain-mappings create --service=molecular-analysis --domain=www.queb.space --region=us-central1'
+    ;;
+  
+  # Help
+  "help"|"-h"|"--help"|"")
+    cat help.txt
+    ;;
+  
+  *)
+    echo "Unknown command: $1"
+    echo "Run './run help' for available commands"
+    exit 1
+    ;;
+esac 
