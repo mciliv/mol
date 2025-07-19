@@ -98,6 +98,38 @@ function setupEventListeners() {
     // Account actions
     document.getElementById('signout-btn').addEventListener('click', handleSignOut);
     document.getElementById('delete-account-btn').addEventListener('click', handleDeleteAccount);
+    
+    // Password manager autofill triggers
+    setupPasswordManagerTriggers();
+}
+
+// Setup password manager autofill triggers
+function setupPasswordManagerTriggers() {
+    const signinEmail = document.getElementById('signin-email');
+    const registerEmail = document.getElementById('register-email');
+    
+    // Trigger password autofill when email is entered
+    signinEmail.addEventListener('input', function() {
+        if (this.value.includes('@')) {
+            // Small delay to let password manager detect the email
+            setTimeout(() => {
+                const passwordField = document.getElementById('signin-password');
+                passwordField.focus();
+                passwordField.blur();
+            }, 100);
+        }
+    });
+    
+    registerEmail.addEventListener('input', function() {
+        if (this.value.includes('@')) {
+            // Small delay to let password manager detect the email
+            setTimeout(() => {
+                const passwordField = document.getElementById('register-password');
+                passwordField.focus();
+                passwordField.blur();
+            }, 100);
+        }
+    });
 }
 
 // Handle sign in
