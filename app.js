@@ -2008,4 +2008,39 @@ document.addEventListener("DOMContentLoaded", () => {
   updateScrollHandles();
   
   } // End of initializeCameraAndApp function
+
+  // CAMERA PERMISSIONS: Safari-specific improvements
+  window.requestCameraPermission = async function() {
+    try {
+      console.log('🎥 Requesting camera permission...');
+      
+      // Request permission explicitly
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      
+      // Stop the stream immediately after getting permission
+      stream.getTracks().forEach(track => track.stop());
+      
+      console.log('✅ Camera permission granted');
+      return true;
+    } catch (error) {
+      console.error('❌ Camera permission denied:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        alert('Please allow camera access in Safari:\n1. Click Safari menu → Settings → Websites → Camera\n2. Set this site to "Allow"');
+      }
+      
+      return false;
+    }
+  };
+
+  // Auto-request camera permission on load (for Safari)
+  if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+    console.log('🍎 Safari detected - requesting camera permission early');
+    setTimeout(() => {
+      window.requestCameraPermission();
+    }, 1000);
+  }
+
 });
