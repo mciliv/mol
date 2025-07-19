@@ -2009,4 +2009,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
+  // HTTPS BLUR FIX: Force clear all payment states on HTTPS
+  if (location.protocol === 'https:') {
+    console.log('🔒 HTTPS detected - clearing payment blur states');
+    setTimeout(() => {
+      const mainInterface = document.getElementById('main-app-interface');
+      const paymentPopdown = document.getElementById('payment-popdown');
+      
+      if (mainInterface) {
+        mainInterface.classList.remove('payment-required');
+        mainInterface.style.filter = 'none';
+        mainInterface.style.opacity = '1';
+        mainInterface.style.pointerEvents = 'auto';
+        mainInterface.style.visibility = 'visible';
+        mainInterface.style.display = 'block';
+      }
+      
+      if (paymentPopdown) {
+        paymentPopdown.style.display = 'none';
+      }
+      
+      console.log('✅ HTTPS blur states cleared');
+    }, 500);
+  }
+
 });
