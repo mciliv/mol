@@ -67,15 +67,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show payment popdown (blocking access to app)
   function showPaymentPopdown() {
     const popdown = document.getElementById('payment-popdown');
-    const backdrop = document.getElementById('app-backdrop');
+    const mainInterface = document.getElementById('main-app-interface');
     
+    // Show popdown and fade main interface
     popdown.style.display = 'block';
-    backdrop.style.display = 'block';
+    mainInterface.classList.add('payment-required');
     
     // Trigger animation
     setTimeout(() => {
       popdown.classList.add('show');
-      backdrop.classList.add('show');
     }, 10);
     
     // Initialize payment setup
@@ -85,14 +85,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hide payment popdown
   function hidePaymentPopdown() {
     const popdown = document.getElementById('payment-popdown');
-    const backdrop = document.getElementById('app-backdrop');
+    const mainInterface = document.getElementById('main-app-interface');
     
+    // Hide popdown and restore main interface
     popdown.classList.remove('show');
-    backdrop.classList.remove('show');
+    mainInterface.classList.remove('payment-required');
     
     setTimeout(() => {
       popdown.style.display = 'none';
-      backdrop.style.display = 'none';
     }, 400);
   }
   
