@@ -176,7 +176,89 @@ header h1 {
   flex-shrink: 0;
 }
 
-/* Setup Form */
+/* Express Payment Section */
+.express-payment {
+  margin-bottom: 24px;
+  display: none;
+}
+
+.express-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.payment-request-btn {
+  margin-bottom: 16px;
+}
+
+.paypal-container {
+  margin-bottom: 16px;
+}
+
+.or-divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0;
+  display: none;
+}
+
+.or-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.or-divider span {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 0 16px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+/* Autofill Detection */
+.autofill-detector {
+  position: absolute !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.autofill-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.3s ease;
+}
+
+.autofill-note svg {
+  color: #00ff88;
+  flex-shrink: 0;
+}
+
+/* Payment Request Button Styling */
+#payment-request-button {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+#payment-request-button .StripeElement {
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+}
+
+/* Enhanced form styling */
 .setup-form {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
@@ -184,6 +266,7 @@ header h1 {
   padding: 32px 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 32px;
+  position: relative;
 }
 
 .form-group {
