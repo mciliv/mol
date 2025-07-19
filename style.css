@@ -1420,3 +1420,263 @@ input[type="checkbox"]:checked + .mode-label {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
 }
+
+/* Account Setup Overlay */
+.account-setup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  z-index: 10000;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.account-setup-overlay .setup-container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.setup-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.setup-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.setup-header .subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Price display */
+.account-setup-overlay .price-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.account-setup-overlay .price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #00d4ff;
+}
+
+.account-setup-overlay .per {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.account-setup-overlay .security-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 32px 0;
+}
+
+.account-setup-overlay .security-note svg {
+  color: #00ff88;
+  flex-shrink: 0;
+}
+
+/* Express payment section */
+.account-setup-overlay .express-payment {
+  margin-bottom: 24px;
+  display: none;
+}
+
+.account-setup-overlay .express-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Setup form */
+.account-setup-overlay .setup-form {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 32px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.account-setup-overlay .form-group {
+  margin-bottom: 24px;
+}
+
+.account-setup-overlay .form-group.optional {
+  margin-bottom: 32px;
+}
+
+.account-setup-overlay .form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
+}
+
+.account-setup-overlay .card-element {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.account-setup-overlay .card-element:focus-within {
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.account-setup-overlay #user-name {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 16px;
+  color: #ffffff;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.account-setup-overlay #user-name:focus {
+  outline: none;
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.account-setup-overlay #user-name::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.account-setup-overlay .error-message {
+  color: #ff6b6b;
+  font-size: 14px;
+  margin-top: 8px;
+  display: none;
+}
+
+/* Setup button */
+.account-setup-overlay .setup-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+}
+
+.account-setup-overlay .setup-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+}
+
+.account-setup-overlay .setup-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Features */
+.account-setup-overlay .features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account-setup-overlay .feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.account-setup-overlay .feature svg {
+  color: #00ff88;
+  flex-shrink: 0;
+}
+
+/* Success state */
+.account-setup-overlay .setup-success {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.account-setup-overlay .success-animation {
+  margin-bottom: 24px;
+}
+
+.account-setup-overlay .success-animation svg {
+  color: #00ff88;
+  animation: successPulse 2s ease-in-out infinite;
+}
+
+.account-setup-overlay .setup-success h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.account-setup-overlay .setup-success p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 32px 0;
+  font-size: 16px;
+}
+
+/* Mobile optimizations for overlay */
+@media (max-width: 480px) {
+  .account-setup-overlay .setup-container {
+    padding: 24px 16px;
+  }
+  
+  .setup-header h1 {
+    font-size: 24px;
+  }
+  
+  .account-setup-overlay .setup-form {
+    padding: 24px 20px;
+  }
+  
+  .account-setup-overlay .price {
+    font-size: 28px;
+  }
+}

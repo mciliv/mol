@@ -13,6 +13,391 @@ document.addEventListener("DOMContentLoaded", () => {
   const photoUrl = document.getElementById("photo-url");
   const urlAnalyze = document.getElementById("url-analyze");
 
+  // ==================== ACCOUNT SETUP INTEGRATION ====================
+  
+  let stripe;
+  let cardElement;
+  let paymentRequest;
+  let setupInProgress = false;
+  
+  // Check for existing payment setup first
+  async function checkInitialPaymentSetup() {
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    const cardInfo = localStorage.getItem('molCardInfo');
+    
+    if (!deviceToken || !cardInfo) {
+      // No payment setup - show overlay
+      showAccountSetupOverlay();
+      return false;
+    }
+    
+    try {
+      // Quick validation with server
+      const response = await fetch('/validate-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_token: deviceToken })
+      });
+      
+      if (!response.ok) {
+        // Invalid token - clear and show setup
+        localStorage.removeItem('molDeviceToken');
+        localStorage.removeItem('molCardInfo');
+        showAccountSetupOverlay();
+        return false;
+      }
+      
+      const result = await response.json();
+      
+      // Update account status display
+      updateAccountStatus(result.user);
+      
+      // Show main app
+      showMainApp();
+      return true;
+      
+    } catch (error) {
+      console.error('Initial payment check failed:', error);
+      // Network error - allow offline usage
+      showMainApp();
+      return true;
+    }
+  }
+  
+  // Show account setup overlay
+  function showAccountSetupOverlay() {
+    document.getElementById('account-setup-overlay').style.display = 'block';
+    document.getElementById('main-app-interface').style.display = 'none';
+    
+    // Initialize payment setup
+    initializePaymentSetup();
+  }
+  
+  // Show main app interface
+  function showMainApp() {
+    document.getElementById('account-setup-overlay').style.display = 'none';
+    document.getElementById('main-app-interface').style.display = 'block';
+    
+    // Now it's safe to initialize camera
+    initializeMainApp();
+  }
+  
+  // Update account status in top bar
+  function updateAccountStatus(user) {
+    const accountStatus = document.getElementById('account-status');
+    const accountName = document.getElementById('account-name');
+    
+    if (user && user.name) {
+      accountName.textContent = user.name;
+    } else {
+      accountName.textContent = 'Account';
+    }
+    
+    accountStatus.style.display = 'flex';
+  }
+  
+  // Initialize payment setup functionality
+  async function initializePaymentSetup() {
+    if (setupInProgress) return;
+    setupInProgress = true;
+    
+    try {
+      // Get Stripe configuration
+      const response = await fetch('/stripe-config');
+      const config = await response.json();
+      
+      stripe = Stripe(config.publishableKey);
+      
+      // Initialize Payment Request (Apple Pay, Google Pay, etc.)
+      initializePaymentRequest();
+      
+      // Create card element
+      const elements = stripe.elements();
+      cardElement = elements.create('card', {
+        style: {
+          base: {
+            fontSize: '16px',
+            color: '#ffffff',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            '::placeholder': {
+              color: 'rgba(255, 255, 255, 0.6)'
+            }
+          },
+          invalid: {
+            color: '#ff6b6b',
+            iconColor: '#ff6b6b'
+          }
+        },
+        hidePostalCode: true
+      });
+      
+      cardElement.mount('#card-element');
+      
+      // Handle card errors
+      cardElement.on('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+          displayError.textContent = event.error.message;
+          displayError.style.display = 'block';
+        } else {
+          displayError.textContent = '';
+          displayError.style.display = 'none';
+        }
+      });
+      
+      // Setup form handler
+      document.getElementById('card-setup-form').addEventListener('submit', handleCardSetup);
+      document.getElementById('start-analyzing-btn').addEventListener('click', () => {
+        showMainApp();
+      });
+      
+      // Setup autofill detection
+      setupAutofillDetection();
+      
+    } catch (error) {
+      console.error('Payment setup initialization failed:', error);
+      // If payment setup fails, still allow access to the app
+      showMainApp();
+    }
+  }
+  
+  // Initialize Payment Request for express payments
+  function initializePaymentRequest() {
+    paymentRequest = stripe.paymentRequest({
+      country: 'US',
+      currency: 'usd',
+      total: {
+        label: 'Molecular Analysis Setup',
+        amount: 25, // $0.25 in cents
+      },
+      requestPayerName: true,
+      requestPayerEmail: false,
+    });
+
+    paymentRequest.canMakePayment().then(function(result) {
+      if (result) {
+        const paymentRequestButton = paymentRequest.mount('#payment-request-button');
+        document.getElementById('payment-request-button').style.display = 'block';
+        document.getElementById('or-divider').style.display = 'block';
+        document.getElementById('express-payment').style.display = 'block';
+      }
+    });
+
+    paymentRequest.on('paymentmethod', async function(ev) {
+      await handleExpressPayment(ev.paymentMethod, ev);
+    });
+  }
+  
+  // Setup autofill detection
+  function setupAutofillDetection() {
+    const autofillFields = document.querySelectorAll('.autofill-detector input');
+    
+    autofillFields.forEach(field => {
+      field.addEventListener('input', handleAutofillDetection);
+      field.addEventListener('change', handleAutofillDetection);
+      
+      setTimeout(() => {
+        if (field.value) {
+          handleAutofillDetection();
+        }
+      }, 100);
+    });
+  }
+  
+  // Handle autofill detection
+  function handleAutofillDetection() {
+    const nameField = document.querySelector('input[name="cc-name"]');
+    const numberField = document.querySelector('input[name="cc-number"]');
+    
+    if (nameField && nameField.value) {
+      const userNameField = document.getElementById('user-name');
+      if (!userNameField.value) {
+        userNameField.value = nameField.value;
+      }
+    }
+    
+    if (numberField && numberField.value) {
+      const note = document.querySelector('.autofill-note');
+      if (note) {
+        note.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span style="color: #00ff88;">Autofill detected - click below to use</span>
+        `;
+      }
+    }
+  }
+  
+  // Handle card setup form submission
+  async function handleCardSetup(event) {
+    event.preventDefault();
+    
+    const setupBtn = document.getElementById('setup-btn');
+    const btnText = setupBtn.querySelector('.btn-text');
+    const btnLoading = setupBtn.querySelector('.btn-loading');
+    
+    // Show loading state
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'flex';
+    setupBtn.disabled = true;
+    
+    try {
+      // Create payment method with Stripe
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: {
+          name: document.getElementById('user-name').value || 'Molecular Analysis User',
+        },
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Setup payment method with server
+      const response = await fetch('/setup-payment-method', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          payment_method: paymentMethod.id,
+          device_info: getDeviceFingerprint(),
+          name: document.getElementById('user-name').value || null
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Setup failed. Please try again.');
+      }
+      
+      const result = await response.json();
+      
+      // Store user info locally
+      const deviceToken = generateDeviceToken();
+      const cardInfo = {
+        last4: paymentMethod.card.last4,
+        brand: paymentMethod.card.brand,
+        usage: 0,
+        name: document.getElementById('user-name').value || null,
+        setupDate: new Date().toISOString()
+      };
+      
+      localStorage.setItem('molDeviceToken', deviceToken);
+      localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
+      
+      // Show success state
+      showSetupSuccess();
+      
+    } catch (error) {
+      console.error('Setup error:', error);
+      showSetupError(error.message);
+      
+      // Reset button state
+      btnText.style.display = 'inline';
+      btnLoading.style.display = 'none';
+      setupBtn.disabled = false;
+    }
+  }
+  
+  // Handle express payments
+  async function handleExpressPayment(paymentMethod, event) {
+    try {
+      const response = await fetch('/setup-payment-method', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          payment_method: paymentMethod.id,
+          device_info: getDeviceFingerprint(),
+          name: paymentMethod.billing_details.name || null,
+          express_type: 'payment_request'
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Setup failed. Please try again.');
+      }
+      
+      // Store user info locally
+      const deviceToken = generateDeviceToken();
+      const cardInfo = {
+        last4: paymentMethod.card ? paymentMethod.card.last4 : '••••',
+        brand: paymentMethod.card ? paymentMethod.card.brand : 'express',
+        usage: 0,
+        name: paymentMethod.billing_details.name || null,
+        setupDate: new Date().toISOString(),
+        type: 'express'
+      };
+      
+      localStorage.setItem('molDeviceToken', deviceToken);
+      localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
+      
+      event.complete('success');
+      showSetupSuccess();
+      
+    } catch (error) {
+      console.error('Express payment error:', error);
+      event.complete('fail');
+      showSetupError(error.message);
+    }
+  }
+  
+  // Show setup success
+  function showSetupSuccess() {
+    document.getElementById('card-setup-form').style.display = 'none';
+    document.getElementById('express-payment').style.display = 'none';
+    document.querySelector('.features').style.display = 'none';
+    document.getElementById('setup-success').style.display = 'block';
+  }
+  
+  // Show setup error
+  function showSetupError(message) {
+    const errorDiv = document.getElementById('card-errors');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    setTimeout(() => {
+      errorDiv.style.display = 'none';
+    }, 5000);
+  }
+  
+  // Generate device fingerprint
+  function getDeviceFingerprint() {
+    const screen = `${window.screen.width}x${window.screen.height}`;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const language = navigator.language;
+    const platform = navigator.platform;
+    
+    return btoa(`${screen}-${timezone}-${language}-${platform}`);
+  }
+  
+  // Generate device token
+  function generateDeviceToken() {
+    const fingerprint = getDeviceFingerprint();
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2);
+    
+    return btoa(`${fingerprint}-${timestamp}-${random}`).replace(/[+/=]/g, '');
+  }
+  
+  // Initialize main app functionality (only after payment setup)
+  function initializeMainApp() {
+    // This is where the original camera and app logic will go
+    initializeCameraAndApp();
+  }
+  
+  // Start the payment check process
+  checkInitialPaymentSetup();
+  
+  // ==================== ORIGINAL APP LOGIC (wrapped in function) ====================
+  
+  function initializeCameraAndApp() {
+
   // ==================== PAYMENT INTEGRATION ====================
   
   // Check if user has valid payment method (zero-overhead validation)
@@ -1516,4 +1901,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial update
   updateScrollHandles();
+  
+  } // End of initializeCameraAndApp function
 });

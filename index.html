@@ -17,21 +17,141 @@
   </head>
   <body>
     <div class="app-container">
-      <!-- Always visible text input bar -->
-      <div class="top-bar">
+      <!-- Account Setup Section (shown first if no payment method) -->
+      <div class="account-setup-overlay" id="account-setup-overlay" style="display: none;">
+        <div class="setup-container">
+          <header class="setup-header">
+            <h1>Quick Setup</h1>
+            <p class="subtitle">Just add your payment method to start analyzing molecules</p>
+          </header>
+
+          <!-- Express Payment Options -->
+          <div class="express-payment" id="express-payment">
+            <div class="express-title">Quick Payment</div>
+            
+            <!-- Apple Pay / Google Pay -->
+            <div id="payment-request-button" class="payment-request-btn" style="display: none;"></div>
+            
+            <!-- PayPal Express -->
+            <div id="paypal-button-container" class="paypal-container" style="display: none;"></div>
+            
+            <div class="or-divider" id="or-divider" style="display: none;">
+              <span>or</span>
+            </div>
+          </div>
+          
+          <form id="card-setup-form" class="setup-form">
+            <!-- Credit Card with Browser Autofill Support -->
+            <div class="form-group">
+              <label for="card-element">Card Details</label>
+              
+              <!-- Hidden fields for browser autofill detection -->
+              <div class="autofill-detector" style="position: absolute; left: -9999px; opacity: 0;">
+                <input type="text" name="cc-name" autocomplete="cc-name" tabindex="-1">
+                <input type="text" name="cc-number" autocomplete="cc-number" tabindex="-1">
+                <input type="text" name="cc-exp-month" autocomplete="cc-exp-month" tabindex="-1">
+                <input type="text" name="cc-exp-year" autocomplete="cc-exp-year" tabindex="-1">
+                <input type="text" name="cc-csc" autocomplete="cc-csc" tabindex="-1">
+              </div>
+              
+              <div id="card-element" class="card-element"></div>
+              <div id="card-errors" class="error-message" role="alert"></div>
+              
+              <!-- Autofill suggestions -->
+              <div class="autofill-note">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12l2 2 4-4"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>Browser autofill supported</span>
+              </div>
+            </div>
+
+            <!-- Optional name for personalization -->
+            <div class="form-group optional">
+              <label for="user-name">Name (optional)</label>
+              <input type="text" 
+                     id="user-name" 
+                     name="name" 
+                     placeholder="For personalized experience" 
+                     autocomplete="name">
+            </div>
+
+            <button type="submit" class="btn-primary setup-btn" id="setup-btn">
+              <span class="btn-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </span>
+              <span class="btn-text">Start Analyzing</span>
+              <span class="btn-loading" style="display: none;">
+                <svg class="spinner" width="16" height="16" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                    <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                    <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                  </circle>
+                </svg>
+                Securing...
+              </span>
+            </button>
+          </form>
+
+          <div class="features">
+            <div class="feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"/>
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+              <span>Works with all browser autofills</span>
+            </div>
+            <div class="feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+              </svg>
+              <span>Apple Pay, Google Pay & PayPal</span>
+            </div>
+            <div class="feature">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M7 15h0M17 15h0M7 11h0M13 11h0"/>
+              </svg>
+              <span>One-time setup, lifetime access</span>
+            </div>
+          </div>
+
+          <!-- Success State -->
+          <div class="setup-success" id="setup-success" style="display: none;">
+            <div class="success-animation">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"/>
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+            </div>
+            <h3>You're all set!</h3>
+            <p>Start analyzing molecules right away</p>
+            <button class="btn-primary" id="start-analyzing-btn">Start Analyzing</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main App Interface (hidden until payment setup) -->
+      <div class="main-app-interface" id="main-app-interface" style="display: none;">
+        <!-- Always visible text input bar -->
+        <div class="top-bar">
         <input
           id="object-input"
           type="text"
           placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter..."
           class="text-input"
         />
-        <a href="account.html" class="account-link">
+        <div class="account-link" id="account-status" style="display: none;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
           </svg>
-          <span>Account</span>
-        </a>
+          <span id="account-name">Account</span>
+        </div>
       </div>
 
       <!-- Input mode selection -->
@@ -282,11 +402,113 @@
           * These likely represent minerals/crystals that can't be shown in 3D
           molecular view
         </div>
-      </div>
-    </template>
+              </div>
+      </template>
+
+      </div> <!-- End of main-app-interface -->
+
+      <!-- HTML Templates -->
+      <template id="photo-upload-template">
+        <div class="upload-option">
+          <input
+            type="file"
+            id="photo-upload"
+            accept="image/*"
+            aria-label="Upload photo for molecular analysis"
+          />
+          <label for="photo-upload" class="upload-label">
+            <img src="photo-upload.svg" alt="Photo upload" width="24" height="24" />
+            <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
+              <text
+                x="40"
+                y="14"
+                text-anchor="middle"
+                font-family="system-ui, sans-serif"
+                font-size="11"
+                font-weight="500"
+                fill="currentColor"
+              >
+                Upload Photo
+              </text>
+            </svg>
+          </label>
+
+          <div class="url-input-container">
+            <input
+              type="url"
+              id="photo-url"
+              placeholder="Paste image URL..."
+              aria-label="Enter image URL for molecular analysis"
+            />
+            <button type="button" id="url-analyze" class="url-button">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                />
+                <path
+                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"
+                />
+              </svg>
+              <svg class="url-text" width="50" height="16" viewBox="0 0 50 16">
+                <text
+                  x="25"
+                  y="12"
+                  text-anchor="middle"
+                  font-family="system-ui, sans-serif"
+                  font-size="10"
+                  font-weight="500"
+                  fill="currentColor"
+                >
+                  Analyze
+                </text>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <template id="mobile-reticle-template">
+        <div class="reticle-circle"></div>
+        <div class="reticle-crosshair-h"></div>
+        <div class="reticle-crosshair-v"></div>
+      </template>
+
+      <template id="chemical-summary-template">
+        <div class="chemical-summary">
+          <div>Total chemicals found: <span class="summary-total"></span></div>
+          <div>3D visualizable: <span class="summary-visualizable"></span></div>
+          <div class="summary-skipped" style="display: none">
+            Non-SMILES formats: <span class="summary-skipped-count"></span>
+          </div>
+          <div class="summary-errors" style="display: none">
+            Failed: <span class="summary-errors-count"></span>
+          </div>
+        </div>
+      </template>
+
+      <template id="skipped-chemicals-template">
+        <div class="skipped-chemicals">
+          <div class="skipped-title">Other chemicals found:</div>
+          <div class="skipped-list"></div>
+          <div class="skipped-note">
+            * These likely represent minerals/crystals that can't be shown in 3D
+            molecular view
+          </div>
+        </div>
+      </template>
+
+    </div> <!-- End of app-container -->
 
     <script type="module" src="app.js"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <!-- LiveReload disabled - using nodemon for server restarts -->
   </body>
 </html>
