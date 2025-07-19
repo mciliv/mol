@@ -25,6 +25,57 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   };
+
+  // DEBUG METHODS: Comprehensive UI debugging tools
+  window.debugUI = function() {
+    const mainInterface = document.getElementById('main-app-interface');
+    const paymentPopdown = document.getElementById('payment-popdown');
+    const appContainer = document.querySelector('.app-container');
+    
+    console.log('🔍 UI Debug Information:');
+    console.log('Main Interface:', {
+      element: mainInterface,
+      display: mainInterface ? getComputedStyle(mainInterface).display : 'not found',
+      visibility: mainInterface ? getComputedStyle(mainInterface).visibility : 'not found',
+      opacity: mainInterface ? getComputedStyle(mainInterface).opacity : 'not found',
+      zIndex: mainInterface ? getComputedStyle(mainInterface).zIndex : 'not found',
+      classes: mainInterface ? Array.from(mainInterface.classList) : 'not found',
+      style: mainInterface ? mainInterface.style.cssText : 'not found'
+    });
+    
+    console.log('Payment Popdown:', {
+      element: paymentPopdown,
+      display: paymentPopdown ? getComputedStyle(paymentPopdown).display : 'not found',
+      visibility: paymentPopdown ? getComputedStyle(paymentPopdown).visibility : 'not found'
+    });
+    
+    console.log('App Container:', {
+      element: appContainer,
+      display: appContainer ? getComputedStyle(appContainer).display : 'not found',
+      children: appContainer ? appContainer.children.length : 'not found'
+    });
+  };
+
+  window.forceShowUI = function() {
+    console.log('🔧 Force showing UI elements');
+    const mainInterface = document.getElementById('main-app-interface');
+    const paymentPopdown = document.getElementById('payment-popdown');
+    
+    if (mainInterface) {
+      mainInterface.style.display = 'block';
+      mainInterface.style.visibility = 'visible';
+      mainInterface.style.opacity = '1';
+      mainInterface.style.filter = 'none';
+      mainInterface.style.pointerEvents = 'auto';
+      mainInterface.classList.remove('payment-required');
+    }
+    
+    if (paymentPopdown) {
+      paymentPopdown.style.display = 'none';
+    }
+    
+    console.log('✅ UI force-shown');
+  };
   // END DEVELOPMENT TOGGLE
 
   const video = document.getElementById("video-feed");
