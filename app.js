@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "Click on object or type name above";
 
     const closeButton = document.createElement("button");
-    closeButton.textContent = "×";
+    closeButton.innerHTML = '<img src="close.svg" alt="Close" width="16" height="16" />';
     closeButton.className = "close-button";
 
     closeButton.addEventListener("click", () => {
@@ -1030,7 +1030,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const closeButton = document.createElement("button");
     closeButton.className = "column-close";
-    closeButton.textContent = "×";
+    closeButton.innerHTML = '<img src="close.svg" alt="Close" width="16" height="16" />';
     closeButton.onclick = () => {
       objectColumn.remove();
       updateScrollHandles();
@@ -1271,7 +1271,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Create left scroll button
     const leftHandle = document.createElement("button");
     leftHandle.className = "scroll-handle scroll-handle-left";
-    leftHandle.textContent = "◀";
+    leftHandle.innerHTML = '<img src="chevron-left.svg" alt="Scroll left" width="16" height="16" />';
     leftHandle.setAttribute("aria-label", "Scroll left");
     leftHandle.setAttribute("title", "Scroll left (or press Left arrow)");
     leftHandle.id = "scroll-left-btn";
@@ -1279,7 +1279,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Create right scroll button
     const rightHandle = document.createElement("button");
     rightHandle.className = "scroll-handle scroll-handle-right";
-    rightHandle.textContent = "▶";
+    rightHandle.innerHTML = '<img src="chevron-right.svg" alt="Scroll right" width="16" height="16" />';
     rightHandle.setAttribute("aria-label", "Scroll right");
     rightHandle.setAttribute("title", "Scroll right (or press Right arrow)");
     rightHandle.id = "scroll-right-btn";
