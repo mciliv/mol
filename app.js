@@ -206,6 +206,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function handleImageClick(evt, img) {
+    // Check payment method before analysis
+    if (!checkPaymentMethod()) {
+      return;
+    }
+
     // Keep instruction text visible - it's meant to describe the functionality
 
     const rect = img.getBoundingClientRect();
@@ -317,6 +322,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function analyzeImageFromUrl(url) {
+    // Check payment method before analysis
+    if (!checkPaymentMethod()) {
+      return;
+    }
+
     try {
       // Fetch and convert image to base64
       const imageBase64 = await urlToBase64(url);
@@ -707,6 +717,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function handleInteraction(evt) {
     if (!cameraMode.checked) {
+      return;
+    }
+
+    // Check payment method before analysis
+    if (!checkPaymentMethod()) {
       return;
     }
 
