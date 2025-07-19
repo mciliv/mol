@@ -1,6 +1,7 @@
 // Modern Card-First Account Setup
 let stripe;
 let cardElement;
+let paymentRequest;
 let currentUser = null;
 
 // Initialize the page
@@ -8,9 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeStripe();
     checkExistingUser();
     setupEventListeners();
+    initializeExpressPayments();
 });
 
-// Initialize Stripe with modern styling
+// Initialize Stripe with modern styling and payment request
 async function initializeStripe() {
     try {
         // Get Stripe publishable key from server
@@ -18,6 +20,9 @@ async function initializeStripe() {
         const config = await response.json();
         
         stripe = Stripe(config.publishableKey);
+        
+        // Initialize Payment Request (Apple Pay, Google Pay, etc.)
+        initializePaymentRequest();
         
         // Create card element with modern dark theme
         const elements = stripe.elements();
@@ -53,9 +58,191 @@ async function initializeStripe() {
             }
         });
         
+        // Monitor autofill detector fields
+        setupAutofillDetection();
+        
     } catch (error) {
         console.error('Failed to initialize Stripe:', error);
         showError('Payment system unavailable. Please try again.');
+    }
+}
+
+// Initialize Payment Request for Apple Pay, Google Pay, etc.
+function initializePaymentRequest() {
+    paymentRequest = stripe.paymentRequest({
+        country: 'US',
+        currency: 'usd',
+        total: {
+            label: 'Molecular Analysis Setup',
+            amount: 25, // $0.25 in cents
+        },
+        requestPayerName: true,
+        requestPayerEmail: false,
+    });
+
+    paymentRequest.canMakePayment().then(function(result) {
+        if (result) {
+            const paymentRequestButton = paymentRequest.mount('#payment-request-button');
+            document.getElementById('payment-request-button').style.display = 'block';
+            document.getElementById('or-divider').style.display = 'block';
+            
+            // Style the payment request button
+            paymentRequestButton.update({
+                style: {
+                    paymentRequestButton: {
+                        theme: 'dark',
+                        height: '56px',
+                        borderRadius: '12px',
+                    },
+                },
+            });
+        }
+    });
+
+    paymentRequest.on('paymentmethod', async function(ev) {
+        await handleExpressPayment(ev.paymentMethod, ev);
+    });
+}
+
+// Setup browser autofill detection
+function setupAutofillDetection() {
+    const autofillFields = document.querySelectorAll('.autofill-detector input');
+    
+    autofillFields.forEach(field => {
+        // Monitor for autofill events
+        field.addEventListener('input', handleAutofillDetection);
+        field.addEventListener('change', handleAutofillDetection);
+        
+        // Check for autofill on page load (some browsers autofill immediately)
+        setTimeout(() => {
+            if (field.value) {
+                handleAutofillDetection();
+            }
+        }, 100);
+    });
+    
+    // Monitor for form autofill via MutationObserver
+    const observer = new MutationObserver(handleAutofillDetection);
+    autofillFields.forEach(field => {
+        observer.observe(field, { 
+            attributes: true, 
+            attributeFilter: ['value'], 
+            childList: false, 
+            subtree: false 
+        });
+    });
+}
+
+// Handle browser autofill detection
+function handleAutofillDetection() {
+    const nameField = document.querySelector('input[name="cc-name"]');
+    const numberField = document.querySelector('input[name="cc-number"]');
+    
+    if (nameField && nameField.value) {
+        // Auto-populate name field if detected
+        const userNameField = document.getElementById('user-name');
+        if (!userNameField.value) {
+            userNameField.value = nameField.value;
+        }
+    }
+    
+    if (numberField && numberField.value) {
+        // Show autofill detected message
+        showAutofillDetected();
+    }
+}
+
+// Show autofill detected message
+function showAutofillDetected() {
+    const note = document.querySelector('.autofill-note');
+    if (note) {
+        note.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4"/>
+                <circle cx="12" cy="12" r="10"/>
+            </svg>
+            <span style="color: #00ff88;">Autofill detected - click below to use</span>
+        `;
+    }
+}
+
+// Initialize express payment options
+function initializeExpressPayments() {
+    // PayPal integration (would need PayPal SDK)
+    if (window.paypal) {
+        initializePayPal();
+    }
+    
+    // Show express payment section if any options are available
+    const expressSection = document.getElementById('express-payment');
+    const hasOptions = document.getElementById('payment-request-button').style.display !== 'none' ||
+                      document.getElementById('paypal-button-container').style.display !== 'none';
+    
+    if (hasOptions) {
+        expressSection.style.display = 'block';
+    }
+}
+
+// Initialize PayPal (placeholder - would need actual PayPal SDK)
+function initializePayPal() {
+    // PayPal implementation would go here
+    console.log('PayPal integration available but not implemented in demo');
+}
+
+// Handle express payment (Apple Pay, Google Pay, etc.)
+async function handleExpressPayment(paymentMethod, event) {
+    try {
+        // Setup payment method with server
+        const response = await fetch('/setup-payment-method', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                payment_method: paymentMethod.id,
+                device_info: getDeviceFingerprint(),
+                name: paymentMethod.billing_details.name || null,
+                express_type: 'payment_request'
+            }),
+        });
+        
+        if (!response.ok) {
+            throw new Error('Setup failed. Please try again.');
+        }
+        
+        const result = await response.json();
+        
+        // Store user info locally
+        const deviceToken = generateDeviceToken();
+        const cardInfo = {
+            last4: paymentMethod.card ? paymentMethod.card.last4 : '••••',
+            brand: paymentMethod.card ? paymentMethod.card.brand : 'express',
+            usage: 0,
+            name: paymentMethod.billing_details.name || null,
+            setupDate: new Date().toISOString(),
+            type: 'express'
+        };
+        
+        localStorage.setItem('molDeviceToken', deviceToken);
+        localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
+        
+        currentUser = {
+            deviceToken,
+            cardLast4: cardInfo.last4,
+            usage: 0,
+            name: cardInfo.name
+        };
+        
+        // Complete the payment request
+        event.complete('success');
+        
+        // Show success
+        showSuccess();
+        
+    } catch (error) {
+        console.error('Express payment error:', error);
+        event.complete('fail');
+        showError(error.message);
     }
 }
 

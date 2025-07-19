@@ -50,18 +50,57 @@
                         Secured with 3D Secure & encrypted storage
                     </p>
                 </div>
+
+                <!-- Express Payment Options -->
+                <div class="express-payment" id="express-payment">
+                    <div class="express-title">Quick Payment</div>
+                    
+                    <!-- Apple Pay / Google Pay -->
+                    <div id="payment-request-button" class="payment-request-btn" style="display: none;"></div>
+                    
+                    <!-- PayPal Express -->
+                    <div id="paypal-button-container" class="paypal-container" style="display: none;"></div>
+                    
+                    <div class="or-divider" id="or-divider" style="display: none;">
+                        <span>or</span>
+                    </div>
+                </div>
                 
                 <form id="card-setup-form" class="setup-form">
+                    <!-- Credit Card with Browser Autofill Support -->
                     <div class="form-group">
                         <label for="card-element">Card Details</label>
+                        
+                        <!-- Hidden fields for browser autofill detection -->
+                        <div class="autofill-detector" style="position: absolute; left: -9999px; opacity: 0;">
+                            <input type="text" name="cc-name" autocomplete="cc-name" tabindex="-1">
+                            <input type="text" name="cc-number" autocomplete="cc-number" tabindex="-1">
+                            <input type="text" name="cc-exp-month" autocomplete="cc-exp-month" tabindex="-1">
+                            <input type="text" name="cc-exp-year" autocomplete="cc-exp-year" tabindex="-1">
+                            <input type="text" name="cc-csc" autocomplete="cc-csc" tabindex="-1">
+                        </div>
+                        
                         <div id="card-element" class="card-element"></div>
                         <div id="card-errors" class="error-message" role="alert"></div>
+                        
+                        <!-- Autofill suggestions -->
+                        <div class="autofill-note">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <circle cx="12" cy="12" r="10"/>
+                            </svg>
+                            <span>Browser autofill supported</span>
+                        </div>
                     </div>
 
                     <!-- Optional name for personalization -->
                     <div class="form-group optional">
                         <label for="user-name">Name (optional)</label>
-                        <input type="text" id="user-name" name="name" placeholder="For personalized experience" autocomplete="name">
+                        <input type="text" 
+                               id="user-name" 
+                               name="name" 
+                               placeholder="For personalized experience" 
+                               autocomplete="name">
                     </div>
 
                     <button type="submit" class="btn-primary setup-btn" id="setup-btn">
@@ -89,21 +128,21 @@
                             <path d="M9 12l2 2 4-4"/>
                             <circle cx="12" cy="12" r="10"/>
                         </svg>
-                        <span>No passwords to remember</span>
+                        <span>Works with all browser autofills</span>
                     </div>
                     <div class="feature">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="3"/>
                             <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
                         </svg>
-                        <span>Instant access across devices</span>
+                        <span>Apple Pay, Google Pay & PayPal</span>
                     </div>
                     <div class="feature">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="2" y="4" width="20" height="16" rx="2"/>
                             <path d="M7 15h0M17 15h0M7 11h0M13 11h0"/>
                         </svg>
-                        <span>Pay per analysis only</span>
+                        <span>One-time setup, lifetime access</span>
                     </div>
                 </div>
             </div>
