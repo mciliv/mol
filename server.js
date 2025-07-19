@@ -59,6 +59,9 @@ const molecularProcessor = new MolecularProcessor();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
+// In-memory user storage (for demo - replace with database in production)
+const users = new Map(); // deviceToken -> user data
+
 // ==================== DEVELOPMENT MIDDLEWARE ====================
 // Live reload disabled - using external tools if needed
 if (false && process.env.NODE_ENV === "development") {
@@ -129,7 +132,122 @@ if (false && process.env.NODE_ENV === "development") {
 app.use(express.static(__dirname));
 app.use("/sdf_files", express.static(path.join(__dirname, "sdf_files")));
 
-// ==================== ROUTES ====================
+// ==================== PAYMENT ROUTES ====================
+
+// Stripe configuration endpoint
+app.get("/stripe-config", (req, res) => {
+  res.json({
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_demo_key_for_development'
+  });
+});
+
+// Setup payment method endpoint
+app.post("/setup-payment-method", async (req, res) => {
+  try {
+    const { payment_method, device_info, name } = req.body;
+    
+    if (!payment_method || !device_info) {
+      return res.status(400).json({ error: "Payment method and device info required" });
+    }
+
+    // Generate device token
+    const deviceToken = Buffer.from(`${device_info}-${Date.now()}-${Math.random()}`).toString('base64').replace(/[+/=]/g, '');
+    
+    // Store user info (in production, this would go to a database)
+    const userData = {
+      deviceToken,
+      paymentMethodId: payment_method,
+      deviceInfo: device_info,
+      name: name || null,
+      usage: 0,
+      createdAt: new Date(),
+      lastUsed: new Date()
+    };
+    
+    users.set(deviceToken, userData);
+    
+    // In production, you would:
+    // 1. Create customer in Stripe
+    // 2. Attach payment method to customer
+    // 3. Handle 3D Secure if needed
+    // For demo, we'll just return success
+    
+    console.log(`✅ New user setup: ${name || 'Anonymous'} with device ${deviceToken.substring(0, 8)}...`);
+    
+    res.json({
+      success: true,
+      device_token: deviceToken,
+      requires_action: false // Set to true if 3D Secure needed
+    });
+    
+  } catch (error) {
+    console.error("Payment setup error:", error);
+    res.status(500).json({ error: "Failed to setup payment method" });
+  }
+});
+
+// Validate payment method endpoint
+app.post("/validate-payment", (req, res) => {
+  try {
+    const { device_token } = req.body;
+    
+    if (!device_token) {
+      return res.status(400).json({ error: "Device token required" });
+    }
+    
+    const user = users.get(device_token);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Update last used
+    user.lastUsed = new Date();
+    
+    res.json({
+      valid: true,
+      user: {
+        name: user.name,
+        usage: user.usage,
+        device_token: user.deviceToken
+      }
+    });
+    
+  } catch (error) {
+    console.error("Payment validation error:", error);
+    res.status(500).json({ error: "Failed to validate payment" });
+  }
+});
+
+// Increment usage endpoint
+app.post("/increment-usage", (req, res) => {
+  try {
+    const { device_token } = req.body;
+    
+    if (!device_token) {
+      return res.status(400).json({ error: "Device token required" });
+    }
+    
+    const user = users.get(device_token);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    user.usage++;
+    user.lastUsed = new Date();
+    
+    console.log(`📊 Usage: ${user.name || 'Anonymous'} - ${user.usage} analyses`);
+    
+    res.json({
+      usage: user.usage
+    });
+    
+  } catch (error) {
+    console.error("Usage increment error:", error);
+    res.status(500).json({ error: "Failed to increment usage" });
+  }
+});
+
+// ==================== ANALYSIS ROUTES ====================
 
 // Image analysis route
 app.post("/image-molecules", async (req, res) => {
