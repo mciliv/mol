@@ -1018,15 +1018,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add loading indicator
     const loadingIndicator = document.createElement("div");
-    loadingIndicator.className = "loading-indicator";
-    loadingIndicator.style.cssText = `
-      text-align: center;
-      padding: 40px 20px;
-      color: #ffffff;
-      font-style: italic;
-      opacity: 0.7;
-      font-size: 14px;
-    `;
+    loadingIndicator.className = "loading-indicator loading-message-italic";
     loadingIndicator.textContent = "Processing";
     loadingColumn.appendChild(loadingIndicator);
 
@@ -1037,22 +1029,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createClosableErrorMessage(message, container = snapshots) {
     const errorDiv = document.createElement("div");
-    errorDiv.style.cssText = `
-      background: rgba(255, 0, 0, 0.1);
-      border: 1px solid rgba(255, 0, 0, 0.3);
-      color: #ff6b6b;
-      padding: 20px;
-      margin: 20px;
-      border-radius: 8px;
-      text-align: center;
-      position: relative;
-    `;
+    errorDiv.className = "error-message-container";
 
     errorDiv.innerHTML = `
-      <div style="font-weight: 600; margin-bottom: 8px;">⚠️ Error</div>
+      <div class="error-message-title">⚠️ Error</div>
       <div>${message}</div>
-      <button onclick="this.parentElement.remove(); updateScrollHandles();" 
-              style="position: absolute; top: 8px; right: 8px; background: none; border: none; color: #ff6b6b; font-size: 18px; cursor: pointer; padding: 4px;">×</button>
+      <button class="error-close-btn" onclick="this.parentElement.remove(); updateScrollHandles();">×</button>
     `;
 
     container.appendChild(errorDiv);
@@ -1442,20 +1424,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const cropSize = 100;
     const outline = document.createElement("div");
     outline.className = "crop-outline";
-    outline.style.position = "fixed"; // Use fixed positioning for accurate placement
+    // Only set dynamic positioning styles
     outline.style.width = cropSize + "px";
     outline.style.height = cropSize + "px";
-    outline.style.border = "2.5px solid #ff0000";
-    outline.style.boxSizing = "border-box";
-    outline.style.pointerEvents = "none";
-    outline.style.zIndex = 20;
-    outline.style.left = evt.clientX - cropSize / 2 + "px"; // Center on cursor X
-    outline.style.top = evt.clientY - cropSize / 2 + "px"; // Center on cursor Y
-    outline.style.borderRadius = "0";
-    outline.style.background = "none";
-    outline.style.transition = "opacity 0.2s";
-    outline.style.opacity = "1";
-    document.body.appendChild(outline); // Append to body for fixed positioning
+    outline.style.left = evt.clientX - cropSize / 2 + "px";
+    outline.style.top = evt.clientY - cropSize / 2 + "px";
+    document.body.appendChild(outline);
     setTimeout(() => {
       outline.style.opacity = "0";
       setTimeout(() => outline.remove(), 200);
@@ -1712,23 +1686,7 @@ document.addEventListener("DOMContentLoaded", () => {
         wikipediaLink.href = `https://en.wikipedia.org/wiki/${encodeURIComponent(displayName)}`;
         wikipediaLink.target = "_blank";
         wikipediaLink.rel = "noopener noreferrer";
-        wikipediaLink.style.cssText = `
-          color: #ffffff;
-          text-decoration: none;
-          font-size: 12px;
-          opacity: 0.8;
-          transition: opacity 0.2s ease;
-        `;
-
-        wikipediaLink.addEventListener("mouseenter", () => {
-          wikipediaLink.style.opacity = "1";
-          wikipediaLink.style.textDecoration = "underline";
-        });
-
-        wikipediaLink.addEventListener("mouseleave", () => {
-          wikipediaLink.style.opacity = "0.8";
-          wikipediaLink.style.textDecoration = "none";
-        });
+        wikipediaLink.className = "wikipedia-link";
 
         moleculeName.appendChild(wikipediaLink);
         moleculeContainer.appendChild(moleculeName);
