@@ -82,26 +82,26 @@
                      autocomplete="name">
             </div>
 
-                          <div class="form-actions">
-                <button type="submit" class="btn-primary setup-btn" id="setup-btn">
-                  <span class="btn-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 12l2 2 4-4"/>
-                      <circle cx="12" cy="12" r="10"/>
-                    </svg>
-                  </span>
-                  <span class="btn-text">Complete Setup</span>
-                  <span class="btn-loading" style="display: none;">
-                    <svg class="spinner" width="16" height="16" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
-                        <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
-                        <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
-                      </circle>
-                    </svg>
-                    Securing...
-                  </span>
-                </button>
-              </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary setup-btn" id="setup-btn">
+                <span class="btn-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 12l2 2 4-4"/>
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                </span>
+                <span class="btn-text">Complete Setup</span>
+                <span class="btn-loading" style="display: none;">
+                  <svg class="spinner" width="16" height="16" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                      <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                      <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                    </circle>
+                  </svg>
+                  Securing...
+                </span>
+              </button>
+            </div>
             </form>
 
             <!-- Success State -->
@@ -123,130 +123,62 @@
       <div class="main-app-interface" id="main-app-interface">
         <!-- Always visible text input bar -->
         <div class="top-bar">
-        <input
-          id="object-input"
-          type="text"
-          placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter..."
-          class="text-input"
-        />
-        <div class="account-link" id="account-status" style="display: none;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-          <span id="account-name">Account</span>
-        </div>
-      </div>
-
-      <!-- Input mode selection -->
-      <div class="input-mode-section">
-        <div class="mode-selector">
-          <input type="checkbox" id="camera-mode" />
-          <label for="camera-mode" class="mode-label">
-            <img src="camera.svg" alt="Camera" width="16" height="16" />
-            <span>Camera</span>
-          </label>
-
-          <input type="checkbox" id="photo-mode" />
-          <label for="photo-mode" class="mode-label">
-            <img src="photo-upload.svg" alt="Photo upload" width="16" height="16" />
-            <span>Photo</span>
-          </label>
-        </div>
-
-        <!-- Camera section -->
-        <div
-          class="camera-container"
-          id="camera-container"
-          style="display: none"
-        >
-          <video
-            id="video-feed"
-            autoplay
-            playsinline
-            muted
-            webkit-playsinline
-            x-webkit-airplay="allow"
-            width="100%"
-          ></video>
-          <div class="permission-message" hidden></div>
-          <div class="crosshair"></div>
-
-          <!-- Switch camera button container -->
-          <div class="switch-camera-container" style="display: none">
-            <button
-              type="button"
-              id="switch-camera-btn"
-              class="switch-camera-btn"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <!-- Camera body -->
-                <path d="M14.5 4h-5L7 6H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3l-2.5-2z"/>
-                <circle cx="12" cy="13" r="3"/>
-                
-                <!-- Rotating arrows around camera -->
-                <path d="M7.5 2.5 6 4l1.5 1.5" stroke-width="1.5"/>
-                <path d="M16.5 21.5 18 20l-1.5-1.5" stroke-width="1.5"/>
-                <path d="M21.5 7.5 20 6l-1.5 1.5" stroke-width="1.5"/>
-                <path d="M2.5 16.5 4 18l1.5-1.5" stroke-width="1.5"/>
-              </svg>
-              <span>Switch Camera</span>
-            </button>
-          </div>
-
-          <div class="instruction-text">
-            Center object in circle & tap, or type name above
+          <input
+            id="object-input"
+            type="text"
+            placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter..."
+            class="text-input"
+          />
+          <div class="account-link" id="account-status" style="display: none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span id="account-name">Account</span>
           </div>
         </div>
 
-        <!-- Photo upload options -->
-        <div class="photo-options" id="photo-options">
-          <div class="upload-option">
-            <input
-              type="file"
-              id="photo-upload"
-              accept="image/*"
-              aria-label="Upload photo for molecular analysis"
-            />
-                            <label for="photo-upload" class="upload-label">
-          <img src="photo-upload.svg" alt="Photo upload" width="24" height="24" />
-          <svg
-            class="upload-text"
-            width="80"
-            height="20"
-            viewBox="0 0 80 20"
-          >
-                <text
-                  x="40"
-                  y="14"
-                  text-anchor="middle"
-                  font-family="system-ui, sans-serif"
-                  font-size="11"
-                  font-weight="500"
-                  fill="currentColor"
-                >
-                  Upload Photo
-                </text>
-              </svg>
+        <!-- Input mode selection -->
+        <div class="input-mode-section">
+          <div class="mode-selector">
+            <input type="checkbox" id="camera-mode" />
+            <label for="camera-mode" class="mode-label">
+              <img src="camera.svg" alt="Camera" width="16" height="16" />
+              <span>Camera</span>
             </label>
 
-            <div class="url-input-container">
-              <input
-                type="url"
-                id="photo-url"
-                placeholder="Paste image URL..."
-                aria-label="Enter image URL for molecular analysis"
-              />
-              <button type="button" id="url-analyze" class="url-button">
+            <input type="checkbox" id="photo-mode" />
+            <label for="photo-mode" class="mode-label">
+              <img src="photo-upload.svg" alt="Photo upload" width="16" height="16" />
+              <span>Photo</span>
+            </label>
+          </div>
+
+          <!-- Camera section -->
+          <div
+            class="camera-container"
+            id="camera-container"
+            style="display: none"
+          >
+            <video
+              id="video-feed"
+              autoplay
+              playsinline
+              muted
+              webkit-playsinline
+              x-webkit-airplay="allow"
+              width="100%"
+            ></video>
+            <div class="permission-message" hidden></div>
+            <div class="crosshair"></div>
+
+            <!-- Switch camera button container -->
+            <div class="switch-camera-container" style="display: none">
+              <button
+                type="button"
+                id="switch-camera-btn"
+                class="switch-camera-btn"
+              >
                 <svg
                   width="16"
                   height="16"
@@ -254,43 +186,113 @@
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                 >
-                  <path
-                    d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-                  />
-                  <path
-                    d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"
-                  />
+                  <!-- Camera body -->
+                  <path d="M14.5 4h-5L7 6H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3l-2.5-2z"/>
+                  <circle cx="12" cy="13" r="3"/>
+                  
+                  <!-- Rotating arrows around camera -->
+                  <path d="M7.5 2.5 6 4l1.5 1.5" stroke-width="1.5"/>
+                  <path d="M16.5 21.5 18 20l-1.5-1.5" stroke-width="1.5"/>
+                  <path d="M21.5 7.5 20 6l-1.5 1.5" stroke-width="1.5"/>
+                  <path d="M2.5 16.5 4 18l1.5-1.5" stroke-width="1.5"/>
                 </svg>
+                <span>Switch Camera</span>
+              </button>
+            </div>
+
+            <div class="instruction-text">
+              Center object in circle & tap, or type name above
+            </div>
+          </div>
+
+          <!-- Photo upload options -->
+          <div class="photo-options" id="photo-options">
+            <div class="upload-option">
+              <input
+                type="file"
+                id="photo-upload"
+                accept="image/*"
+                aria-label="Upload photo for molecular analysis"
+              />
+              <label for="photo-upload" class="upload-label">
+                <img src="photo-upload.svg" alt="Photo upload" width="24" height="24" />
                 <svg
-                  class="url-text"
-                  width="50"
-                  height="16"
-                  viewBox="0 0 50 16"
+                  class="upload-text"
+                  width="80"
+                  height="20"
+                  viewBox="0 0 80 20"
                 >
                   <text
-                    x="25"
-                    y="12"
+                    x="40"
+                    y="14"
                     text-anchor="middle"
                     font-family="system-ui, sans-serif"
-                    font-size="10"
+                    font-size="11"
                     font-weight="500"
                     fill="currentColor"
                   >
-                    Analyze
+                    Upload Photo
                   </text>
                 </svg>
-              </button>
+              </label>
+
+              <div class="url-input-container">
+                <input
+                  type="url"
+                  id="photo-url"
+                  placeholder="Paste image URL..."
+                  aria-label="Enter image URL for molecular analysis"
+                />
+                <button type="button" id="url-analyze" class="url-button">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                    />
+                    <path
+                      d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"
+                    />
+                  </svg>
+                  <svg
+                    class="url-text"
+                    width="50"
+                    height="16"
+                    viewBox="0 0 50 16"
+                  >
+                    <text
+                      x="25"
+                      y="12"
+                      text-anchor="middle"
+                      font-family="system-ui, sans-serif"
+                      font-size="10"
+                      font-weight="500"
+                      fill="currentColor"
+                    >
+                      Analyze
+                    </text>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="snapshots-container"></div>
+        <div class="snapshots-container"></div>
 
-      <!-- 3Dmol.js viewers go here -->
-      <div id="gldiv"></div>
-    </div>
+        <!-- 3Dmol.js viewers go here -->
+        <div id="gldiv"></div>
+      </div> <!-- End of main-app-interface -->
+
+    </div> <!-- End of app-container -->
 
     <!-- HTML Templates -->
     <template id="photo-upload-template">
@@ -386,109 +388,8 @@
           * These likely represent minerals/crystals that can't be shown in 3D
           molecular view
         </div>
-              </div>
-      </template>
-
-      </div> <!-- End of main-app-interface -->
-
-      <!-- HTML Templates -->
-      <template id="photo-upload-template">
-        <div class="upload-option">
-          <input
-            type="file"
-            id="photo-upload"
-            accept="image/*"
-            aria-label="Upload photo for molecular analysis"
-          />
-          <label for="photo-upload" class="upload-label">
-            <img src="photo-upload.svg" alt="Photo upload" width="24" height="24" />
-            <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
-              <text
-                x="40"
-                y="14"
-                text-anchor="middle"
-                font-family="system-ui, sans-serif"
-                font-size="11"
-                font-weight="500"
-                fill="currentColor"
-              >
-                Upload Photo
-              </text>
-            </svg>
-          </label>
-
-          <div class="url-input-container">
-            <input
-              type="url"
-              id="photo-url"
-              placeholder="Paste image URL..."
-              aria-label="Enter image URL for molecular analysis"
-            />
-            <button type="button" id="url-analyze" class="url-button">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
-                />
-                <path
-                  d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"
-                />
-              </svg>
-              <svg class="url-text" width="50" height="16" viewBox="0 0 50 16">
-                <text
-                  x="25"
-                  y="12"
-                  text-anchor="middle"
-                  font-family="system-ui, sans-serif"
-                  font-size="10"
-                  font-weight="500"
-                  fill="currentColor"
-                >
-                  Analyze
-                </text>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </template>
-
-      <template id="mobile-reticle-template">
-        <div class="reticle-circle"></div>
-        <div class="reticle-crosshair-h"></div>
-        <div class="reticle-crosshair-v"></div>
-      </template>
-
-      <template id="chemical-summary-template">
-        <div class="chemical-summary">
-          <div>Total chemicals found: <span class="summary-total"></span></div>
-          <div>3D visualizable: <span class="summary-visualizable"></span></div>
-          <div class="summary-skipped" style="display: none">
-            Non-SMILES formats: <span class="summary-skipped-count"></span>
-          </div>
-          <div class="summary-errors" style="display: none">
-            Failed: <span class="summary-errors-count"></span>
-          </div>
-        </div>
-      </template>
-
-      <template id="skipped-chemicals-template">
-        <div class="skipped-chemicals">
-          <div class="skipped-title">Other chemicals found:</div>
-          <div class="skipped-list"></div>
-          <div class="skipped-note">
-            * These likely represent minerals/crystals that can't be shown in 3D
-            molecular view
-          </div>
-        </div>
-      </template>
-
-    </div> <!-- End of app-container -->
+      </div>
+    </template>
 
     <script type="module" src="app.js"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
