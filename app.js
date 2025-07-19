@@ -13,6 +13,91 @@ document.addEventListener("DOMContentLoaded", () => {
   const photoUrl = document.getElementById("photo-url");
   const urlAnalyze = document.getElementById("url-analyze");
 
+  // ==================== PAYMENT INTEGRATION ====================
+  
+  // Check if user has valid payment method (zero-overhead validation)
+  async function checkPaymentMethod() {
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    const cardInfo = localStorage.getItem('molCardInfo');
+    
+    if (!deviceToken || !cardInfo) {
+      // No payment method setup - redirect to account setup
+      showPaymentRequiredMessage();
+      return false;
+    }
+    
+    try {
+      // Validate with server (this ensures user still exists server-side)
+      const response = await fetch('/validate-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_token: deviceToken })
+      });
+      
+      if (!response.ok) {
+        // Server doesn't recognize this device - clear local data and require setup
+        localStorage.removeItem('molDeviceToken');
+        localStorage.removeItem('molCardInfo');
+        showPaymentRequiredMessage();
+        return false;
+      }
+      
+      const result = await response.json();
+      
+      // Update local usage counter with server data
+      const localCardInfo = JSON.parse(cardInfo);
+      localCardInfo.usage = result.user.usage;
+      localStorage.setItem('molCardInfo', JSON.stringify(localCardInfo));
+      
+      return true;
+      
+    } catch (error) {
+      console.error('Payment validation error:', error);
+      // Network error - allow offline usage but show warning
+      console.warn('Unable to verify payment method online, allowing offline usage');
+      return true;
+    }
+  }
+  
+  // Increment usage counter after successful analysis
+  async function incrementUsage() {
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    if (!deviceToken) return;
+    
+    try {
+      const response = await fetch('/increment-usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_token: deviceToken })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Update local counter
+        const cardInfo = JSON.parse(localStorage.getItem('molCardInfo') || '{}');
+        cardInfo.usage = result.usage;
+        localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
+        
+        console.log(`📊 Analysis complete - Total usage: ${result.usage}`);
+      }
+    } catch (error) {
+      console.error('Usage increment error:', error);
+      // Increment locally as fallback
+      const cardInfo = JSON.parse(localStorage.getItem('molCardInfo') || '{}');
+      cardInfo.usage = (cardInfo.usage || 0) + 1;
+      localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
+    }
+  }
+  
+  // Show payment required message
+  function showPaymentRequiredMessage() {
+    createClosableErrorMessage(
+      'Payment method required. <a href="account.html" style="color: #00d4ff; text-decoration: underline;">Click here to set up payment</a> ($0.25 per analysis).',
+      'payment-required'
+    );
+  }
+
   function updateInputMode() {
     // Show/hide camera based on checkbox state
     cameraContainer.style.display = cameraMode.checked ? "flex" : "none";
@@ -80,6 +165,9 @@ document.addEventListener("DOMContentLoaded", () => {
       updateScrollHandles();
 
       processAnalysisResult(output, snapshots, "Text", object, true);
+      
+      // Increment usage counter after successful analysis
+      incrementUsage();
     } catch (err) {
       // Remove loading column on error
       loadingColumn.remove();
@@ -309,6 +397,9 @@ document.addEventListener("DOMContentLoaded", () => {
             false,
             croppedBase64,
           );
+          
+          // Increment usage counter after successful analysis
+          incrementUsage();
         })
         .catch((err) => {
           // Remove loading column on error
@@ -834,6 +925,9 @@ document.addEventListener("DOMContentLoaded", () => {
         false,
         croppedBase64,
       );
+      
+      // Increment usage counter after successful analysis
+      incrementUsage();
     } catch (err) {
       console.error("API call failed:", err);
       // Remove loading column on error
