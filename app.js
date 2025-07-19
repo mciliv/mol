@@ -1,26 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // DEVELOPMENT BYPASS: Remove payment requirements temporarily
-  // Remove this section for production
-  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('172.20.10.4');
-  if (isDevelopment) {
-    console.log('🔧 Development mode: Bypassing payment requirements');
-    // Remove payment-required class if it exists
-    setTimeout(() => {
-      const mainInterface = document.getElementById('main-app-interface');
-      if (mainInterface) {
-        mainInterface.classList.remove('payment-required');
-        mainInterface.style.opacity = '1';
-        mainInterface.style.filter = 'none';
-        mainInterface.style.pointerEvents = 'auto';
-      }
-      // Hide payment popdown
-      const paymentPopdown = document.getElementById('payment-popdown');
+  // DEVELOPMENT TOGGLE: Programmatic bypass for payment requirements
+  // Usage: Run `window.bypassPayment()` in console to toggle
+  window.bypassPayment = function() {
+    const mainInterface = document.getElementById('main-app-interface');
+    const paymentPopdown = document.getElementById('payment-popdown');
+    
+    if (mainInterface.classList.contains('payment-required')) {
+      console.log('🔧 Bypassing payment requirements');
+      mainInterface.classList.remove('payment-required');
+      mainInterface.style.opacity = '1';
+      mainInterface.style.filter = 'none';
+      mainInterface.style.pointerEvents = 'auto';
       if (paymentPopdown) {
         paymentPopdown.style.display = 'none';
       }
-    }, 100);
-  }
-  // END DEVELOPMENT BYPASS
+    } else {
+      console.log('🔒 Restoring payment requirements');
+      mainInterface.classList.add('payment-required');
+      mainInterface.style.opacity = '';
+      mainInterface.style.filter = '';
+      mainInterface.style.pointerEvents = '';
+      if (paymentPopdown) {
+        paymentPopdown.style.display = 'block';
+      }
+    }
+  };
+  // END DEVELOPMENT TOGGLE
 
   const video = document.getElementById("video-feed");
   const snapshots = document.querySelector(".snapshots-container");
