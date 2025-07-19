@@ -18,7 +18,7 @@
   <body>
     <div class="app-container">
       <!-- Payment Setup Popdown (appears from top when needed) -->
-      <div class="payment-popdown" id="payment-popdown" style="display: none;">
+      <div class="payment-popdown hidden" id="payment-popdown">
         <div class="popdown-container">
           <div class="popdown-header">
             <div class="popdown-title">
@@ -35,12 +35,12 @@
             <!-- Express Payment Options -->
             <div class="express-payment" id="express-payment">
               <!-- Apple Pay / Google Pay -->
-              <div id="payment-request-button" class="payment-request-btn" style="display: none;"></div>
+              <div id="payment-request-button" class="payment-request-btn hidden"></div>
               
               <!-- PayPal Express -->
-              <div id="paypal-button-container" class="paypal-container" style="display: none;"></div>
+              <div id="paypal-button-container" class="paypal-container hidden"></div>
               
-              <div class="or-divider" id="or-divider" style="display: none;">
+              <div class="or-divider hidden" id="or-divider">
                 <span>or</span>
               </div>
             </div>
@@ -50,62 +50,62 @@
               <div class="form-group">
                 <label for="card-element">Card Details</label>
               
-              <!-- Hidden fields for browser autofill detection -->
-              <div class="autofill-detector" style="position: absolute; left: -9999px; opacity: 0;">
-                <input type="text" name="cc-name" autocomplete="cc-name" tabindex="-1">
-                <input type="text" name="cc-number" autocomplete="cc-number" tabindex="-1">
-                <input type="text" name="cc-exp-month" autocomplete="cc-exp-month" tabindex="-1">
-                <input type="text" name="cc-exp-year" autocomplete="cc-exp-year" tabindex="-1">
-                <input type="text" name="cc-csc" autocomplete="cc-csc" tabindex="-1">
-              </div>
+                <!-- Hidden fields for browser autofill detection -->
+                <div class="autofill-detector visually-hidden">
+                  <input type="text" name="cc-name" autocomplete="cc-name" tabindex="-1">
+                  <input type="text" name="cc-number" autocomplete="cc-number" tabindex="-1">
+                  <input type="text" name="cc-exp-month" autocomplete="cc-exp-month" tabindex="-1">
+                  <input type="text" name="cc-exp-year" autocomplete="cc-exp-year" tabindex="-1">
+                  <input type="text" name="cc-csc" autocomplete="cc-csc" tabindex="-1">
+                </div>
               
-              <div id="card-element" class="card-element"></div>
-              <div id="card-errors" class="error-message" role="alert"></div>
+                <div id="card-element" class="card-element"></div>
+                <div id="card-errors" class="error-message" role="alert"></div>
               
-              <!-- Autofill suggestions -->
-              <div class="autofill-note">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <circle cx="12" cy="12" r="10"/>
-                </svg>
-                <span>Browser autofill supported</span>
-              </div>
-            </div>
-
-            <!-- Optional name for personalization -->
-            <div class="form-group optional">
-              <label for="user-name">Name (optional)</label>
-              <input type="text" 
-                     id="user-name" 
-                     name="name" 
-                     placeholder="For personalized experience" 
-                     autocomplete="name">
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" class="btn-primary setup-btn" id="setup-btn">
-                <span class="btn-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <!-- Autofill suggestions -->
+                <div class="autofill-note">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 12l2 2 4-4"/>
                     <circle cx="12" cy="12" r="10"/>
                   </svg>
-                </span>
-                <span class="btn-text">Complete Setup</span>
-                <span class="btn-loading" style="display: none;">
-                  <svg class="spinner" width="16" height="16" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
-                      <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
-                      <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
-                    </circle>
-                  </svg>
-                  Securing...
-                </span>
-              </button>
-            </div>
+                  <span>Browser autofill supported</span>
+                </div>
+              </div>
+
+              <!-- Optional name for personalization -->
+              <div class="form-group optional">
+                <label for="user-name">Name (optional)</label>
+                <input type="text" 
+                       id="user-name" 
+                       name="name" 
+                       placeholder="For personalized experience" 
+                       autocomplete="name">
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary setup-btn" id="setup-btn">
+                  <span class="btn-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 12l2 2 4-4"/>
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                  </span>
+                  <span class="btn-text">Complete Setup</span>
+                  <span class="btn-loading hidden">
+                    <svg class="spinner" width="16" height="16" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                        <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                        <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                      </circle>
+                    </svg>
+                    Securing...
+                  </span>
+                </button>
+              </div>
             </form>
 
             <!-- Success State -->
-            <div class="setup-success" id="setup-success" style="display: none;">
+            <div class="setup-success hidden" id="setup-success">
               <div class="success-message">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M9 12l2 2 4-4"/>
@@ -129,7 +129,7 @@
             placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter..."
             class="text-input"
           />
-          <div class="account-link" id="account-status" style="display: none;">
+          <div class="account-link hidden" id="account-status">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
               <circle cx="12" cy="7" r="4"/>
@@ -156,9 +156,8 @@
 
           <!-- Camera section -->
           <div
-            class="camera-container"
+            class="camera-container hidden"
             id="camera-container"
-            style="display: none"
           >
             <video
               id="video-feed"
@@ -173,7 +172,7 @@
             <div class="crosshair"></div>
 
             <!-- Switch camera button container -->
-            <div class="switch-camera-container" style="display: none">
+            <div class="switch-camera-container hidden">
               <button
                 type="button"
                 id="switch-camera-btn"
@@ -371,10 +370,10 @@
       <div class="chemical-summary">
         <div>Total chemicals found: <span class="summary-total"></span></div>
         <div>3D visualizable: <span class="summary-visualizable"></span></div>
-        <div class="summary-skipped" style="display: none">
+        <div class="summary-skipped hidden">
           Non-SMILES formats: <span class="summary-skipped-count"></span>
         </div>
-        <div class="summary-errors" style="display: none">
+        <div class="summary-errors hidden">
           Failed: <span class="summary-errors-count"></span>
         </div>
       </div>
