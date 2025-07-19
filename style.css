@@ -75,6 +75,14 @@ body {
   gap: 6px;
 }
 
+.account-link svg {
+  filter: none;
+  opacity: 1;
+  display: block;
+  flex-shrink: 0;
+  color: inherit;
+}
+
 .account-link:hover {
   background: rgba(0, 212, 255, 0.1);
   color: #0099cc;
@@ -655,7 +663,7 @@ input[type="checkbox"]:checked + .mode-label {
     height: 28px;
   }
   
-  .account-link img {
+  .account-link svg {
     width: 14px;
     height: 14px;
   }
