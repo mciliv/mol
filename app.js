@@ -25,9 +25,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     
+    // Always show main app interface
+    showMainApp();
+    
     if (!deviceToken || !cardInfo) {
-      // No payment setup - show overlay
-      showAccountSetupOverlay();
+      // No payment setup - show popdown
+      showPaymentPopdown();
       return false;
     }
     
@@ -43,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Invalid token - clear and show setup
         localStorage.removeItem('molDeviceToken');
         localStorage.removeItem('molCardInfo');
-        showAccountSetupOverlay();
+        showPaymentPopdown();
         return false;
       }
       
@@ -52,33 +55,52 @@ document.addEventListener("DOMContentLoaded", () => {
       // Update account status display
       updateAccountStatus(result.user);
       
-      // Show main app
-      showMainApp();
       return true;
       
     } catch (error) {
       console.error('Initial payment check failed:', error);
-      // Network error - allow offline usage
-      showMainApp();
+      // Network error - allow offline usage without popdown
       return true;
     }
   }
   
-  // Show account setup overlay
-  function showAccountSetupOverlay() {
-    document.getElementById('account-setup-overlay').style.display = 'block';
-    document.getElementById('main-app-interface').style.display = 'none';
+  // Show payment popdown (blocking access to app)
+  function showPaymentPopdown() {
+    const popdown = document.getElementById('payment-popdown');
+    const backdrop = document.getElementById('app-backdrop');
+    
+    popdown.style.display = 'block';
+    backdrop.style.display = 'block';
+    
+    // Trigger animation
+    setTimeout(() => {
+      popdown.classList.add('show');
+      backdrop.classList.add('show');
+    }, 10);
     
     // Initialize payment setup
     initializePaymentSetup();
   }
   
+  // Hide payment popdown
+  function hidePaymentPopdown() {
+    const popdown = document.getElementById('payment-popdown');
+    const backdrop = document.getElementById('app-backdrop');
+    
+    popdown.classList.remove('show');
+    backdrop.classList.remove('show');
+    
+    setTimeout(() => {
+      popdown.style.display = 'none';
+      backdrop.style.display = 'none';
+    }, 400);
+  }
+  
   // Show main app interface
   function showMainApp() {
-    document.getElementById('account-setup-overlay').style.display = 'none';
     document.getElementById('main-app-interface').style.display = 'block';
     
-    // Now it's safe to initialize camera
+    // Initialize camera and app (but don't start camera if payment required)
     initializeMainApp();
   }
   
@@ -148,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Setup form handler
       document.getElementById('card-setup-form').addEventListener('submit', handleCardSetup);
       document.getElementById('start-analyzing-btn').addEventListener('click', () => {
-        showMainApp();
+        hidePaymentPopdown();
       });
       
       // Setup autofill detection
@@ -351,7 +373,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function showSetupSuccess() {
     document.getElementById('card-setup-form').style.display = 'none';
     document.getElementById('express-payment').style.display = 'none';
-    document.querySelector('.features').style.display = 'none';
     document.getElementById('setup-success').style.display = 'block';
   }
   
@@ -385,9 +406,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return btoa(`${fingerprint}-${timestamp}-${random}`).replace(/[+/=]/g, '');
   }
   
-  // Initialize main app functionality (only after payment setup)
+  // Initialize main app functionality  
   function initializeMainApp() {
-    // This is where the original camera and app logic will go
+    // Initialize camera and app logic, but camera won't start if payment popdown is showing
     initializeCameraAndApp();
   }
   
@@ -406,8 +427,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const cardInfo = localStorage.getItem('molCardInfo');
     
     if (!deviceToken || !cardInfo) {
-      // No payment method setup - redirect to account setup
-      showPaymentRequiredMessage();
+      // No payment method setup - show popdown
+      showPaymentPopdown();
       return false;
     }
     
@@ -423,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Server doesn't recognize this device - clear local data and require setup
         localStorage.removeItem('molDeviceToken');
         localStorage.removeItem('molCardInfo');
-        showPaymentRequiredMessage();
+        showPaymentPopdown();
         return false;
       }
       
@@ -475,12 +496,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  // Show payment required message
-  function showPaymentRequiredMessage() {
-    createClosableErrorMessage(
-      'Payment method required. <a href="account.html" style="color: #00d4ff; text-decoration: underline;">Click here to set up payment</a> ($0.25 per analysis).',
-      'payment-required'
-    );
+  // Helper function to check if payment is required
+  function isPaymentRequired() {
+    const paymentPopdown = document.getElementById('payment-popdown');
+    return paymentPopdown && paymentPopdown.classList.contains('show');
   }
 
   function updateInputMode() {
@@ -1050,6 +1069,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function startCamera() {
+    // Don't start camera if payment setup is required
+    if (isPaymentRequired()) {
+      console.log('Camera access blocked - payment setup required');
+      return;
+    }
+    
     currentStream?.getTracks().forEach((t) => t.stop());
 
     try {
