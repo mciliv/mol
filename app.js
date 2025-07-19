@@ -1,4 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // DEVELOPMENT BYPASS: Remove payment requirements temporarily
+  // Remove this section for production
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('172.20.10.4');
+  if (isDevelopment) {
+    console.log('🔧 Development mode: Bypassing payment requirements');
+    // Remove payment-required class if it exists
+    setTimeout(() => {
+      const mainInterface = document.getElementById('main-app-interface');
+      if (mainInterface) {
+        mainInterface.classList.remove('payment-required');
+        mainInterface.style.opacity = '1';
+        mainInterface.style.filter = 'none';
+        mainInterface.style.pointerEvents = 'auto';
+      }
+      // Hide payment popdown
+      const paymentPopdown = document.getElementById('payment-popdown');
+      if (paymentPopdown) {
+        paymentPopdown.style.display = 'none';
+      }
+    }, 100);
+  }
+  // END DEVELOPMENT BYPASS
+
   const video = document.getElementById("video-feed");
   const snapshots = document.querySelector(".snapshots-container");
   const msgBox = document.querySelector(".permission-message");
