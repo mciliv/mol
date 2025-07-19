@@ -38,11 +38,14 @@ body {
   background: rgba(0, 0, 0, 0.95);
   z-index: 1000;
   position: relative;
+  overflow: hidden;
 }
 
 .account-link {
   position: absolute;
   right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #00d4ff;
   text-decoration: none;
   font-size: 14px;
@@ -50,6 +53,8 @@ body {
   padding: 8px 12px;
   border-radius: 6px;
   transition: all 0.3s ease;
+  z-index: 1001;
+  white-space: nowrap;
 }
 
 .account-link:hover {
@@ -70,6 +75,7 @@ body {
   outline: none;
   transition: all 0.2s ease;
   border-radius: 8px;
+  margin-right: 80px;
 }
 
 .text-input:focus {
