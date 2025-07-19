@@ -49,6 +49,34 @@ document.addEventListener("DOMContentLoaded", () => {
     
     console.log('✅ Both sections should now be clearly visible');
   };
+
+  // SIMPLE APPROACH: Just show the app interface
+  window.showApp = function() {
+    console.log('🔧 Simple app show');
+    const mainInterface = document.getElementById('main-app-interface');
+    console.log('Main interface element:', mainInterface);
+    
+    if (mainInterface) {
+      mainInterface.style.display = 'block';
+      mainInterface.style.opacity = '1';
+      mainInterface.style.filter = 'none';
+      mainInterface.style.pointerEvents = 'auto';
+      mainInterface.style.visibility = 'visible';
+      mainInterface.classList.remove('payment-required');
+      console.log('✅ App interface forced visible');
+    } else {
+      console.error('❌ Main interface element not found');
+    }
+  };
+
+  // CHECK WHAT EXISTS
+  window.checkElements = function() {
+    console.log('📋 Element Check:');
+    console.log('main-app-interface:', document.getElementById('main-app-interface'));
+    console.log('payment-popdown:', document.getElementById('payment-popdown'));
+    console.log('app-container:', document.querySelector('.app-container'));
+    console.log('top-bar:', document.querySelector('.top-bar'));
+  };
   // END DEVELOPMENT TOGGLE
 
   const video = document.getElementById("video-feed");
