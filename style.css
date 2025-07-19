@@ -1421,179 +1421,217 @@ input[type="checkbox"]:checked + .mode-label {
   box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
 }
 
-/* Account Setup Overlay */
-.account-setup-overlay {
+/* Payment Popdown from Top */
+.payment-popdown {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 10000;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10px);
 }
 
-.account-setup-overlay .setup-container {
-  max-width: 480px;
+.payment-popdown.show {
+  transform: translateY(0);
+}
+
+.popdown-container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 24px 20px;
 }
 
-.setup-header {
+.popdown-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
-.setup-header h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  background: linear-gradient(135deg, #00d4ff, #0099cc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.popdown-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
 }
 
-.setup-header .subtitle {
-  font-size: 16px;
+.popdown-title svg {
+  color: #00d4ff;
+  flex-shrink: 0;
+}
+
+.popdown-subtitle {
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
   font-weight: 400;
 }
 
-/* Price display */
-.account-setup-overlay .price-display {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 16px;
+/* App Backdrop */
+.app-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
-.account-setup-overlay .price {
-  font-size: 32px;
-  font-weight: 700;
-  color: #00d4ff;
+.app-backdrop.show {
+  opacity: 1;
+  pointer-events: all;
 }
 
-.account-setup-overlay .per {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
-}
-
-.account-setup-overlay .security-note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 32px 0;
-}
-
-.account-setup-overlay .security-note svg {
-  color: #00ff88;
-  flex-shrink: 0;
+/* Popdown Content */
+.popdown-content {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 32px;
+  align-items: start;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 /* Express payment section */
-.account-setup-overlay .express-payment {
-  margin-bottom: 24px;
+.payment-popdown .express-payment {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.payment-popdown .or-divider {
+  position: relative;
+  text-align: center;
+  margin: 16px 0;
   display: none;
 }
 
-.account-setup-overlay .express-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-  text-align: center;
+.payment-popdown .or-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.payment-popdown .or-divider span {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  padding: 0 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+/* Popdown form */
+.popdown-form {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 320px;
+}
+
+.popdown-form .form-group {
   margin-bottom: 16px;
 }
 
-/* Setup form */
-.account-setup-overlay .setup-form {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 32px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 32px;
-  position: relative;
+.popdown-form .form-group.optional {
+  margin-bottom: 20px;
 }
 
-.account-setup-overlay .form-group {
-  margin-bottom: 24px;
-}
-
-.account-setup-overlay .form-group.optional {
-  margin-bottom: 32px;
-}
-
-.account-setup-overlay .form-group label {
+.popdown-form .form-group label {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-.account-setup-overlay .card-element {
+.popdown-form .card-element {
   background: rgba(255, 255, 255, 0.08);
-  padding: 16px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 }
 
-.account-setup-overlay .card-element:focus-within {
+.popdown-form .card-element:focus-within {
   border-color: #00d4ff;
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
 }
 
-.account-setup-overlay #user-name {
+.popdown-form #user-name {
   width: 100%;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 16px;
-  font-size: 16px;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
   color: #ffffff;
   font-family: inherit;
   transition: all 0.3s ease;
 }
 
-.account-setup-overlay #user-name:focus {
+.popdown-form #user-name:focus {
   outline: none;
   border-color: #00d4ff;
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
   background: rgba(255, 255, 255, 0.12);
 }
 
-.account-setup-overlay #user-name::placeholder {
+.popdown-form #user-name::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.account-setup-overlay .error-message {
+.popdown-form .error-message {
   color: #ff6b6b;
-  font-size: 14px;
-  margin-top: 8px;
+  font-size: 12px;
+  margin-top: 6px;
   display: none;
 }
 
+.popdown-form .autofill-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.popdown-form .autofill-note svg {
+  color: #00ff88;
+  flex-shrink: 0;
+}
+
+.form-actions {
+  margin-top: 20px;
+}
+
 /* Setup button */
-.account-setup-overlay .setup-btn {
+.payment-popdown .setup-btn {
   width: 100%;
   background: linear-gradient(135deg, #00d4ff, #0099cc);
   border: none;
-  border-radius: 12px;
-  padding: 16px 24px;
-  font-size: 16px;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
   font-weight: 600;
   color: #000000;
   cursor: pointer;
@@ -1601,82 +1639,79 @@ input[type="checkbox"]:checked + .mode-label {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 56px;
+  gap: 6px;
+  min-height: 44px;
 }
 
-.account-setup-overlay .setup-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+.payment-popdown .setup-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
 }
 
-.account-setup-overlay .setup-btn:disabled {
+.payment-popdown .setup-btn:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-/* Features */
-.account-setup-overlay .features {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* Success state */
+.payment-popdown .setup-success {
+  text-align: center;
+  padding: 20px;
+  background: rgba(0, 255, 136, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
 }
 
-.account-setup-overlay .feature {
+.payment-popdown .success-message {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  color: #ffffff;
 }
 
-.account-setup-overlay .feature svg {
+.payment-popdown .success-message svg {
   color: #00ff88;
   flex-shrink: 0;
 }
 
-/* Success state */
-.account-setup-overlay .setup-success {
-  text-align: center;
-  padding: 40px 20px;
+/* Mobile optimizations for popdown */
+@media (max-width: 768px) {
+  .popdown-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .popdown-container {
+    padding: 20px 16px;
+  }
+  
+  .popdown-form {
+    min-width: auto;
+  }
+  
+  .payment-popdown .express-payment {
+    order: -1; /* Show express payments first on mobile */
+  }
 }
 
-.account-setup-overlay .success-animation {
-  margin-bottom: 24px;
-}
-
-.account-setup-overlay .success-animation svg {
-  color: #00ff88;
-  animation: successPulse 2s ease-in-out infinite;
-}
-
-.account-setup-overlay .setup-success h3 {
-  font-size: 24px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-}
-
-.account-setup-overlay .setup-success p {
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 32px 0;
-  font-size: 16px;
-}
-
-/* Mobile optimizations for overlay */
 @media (max-width: 480px) {
-  .account-setup-overlay .setup-container {
-    padding: 24px 16px;
+  .popdown-container {
+    padding: 16px 12px;
   }
   
-  .setup-header h1 {
-    font-size: 24px;
+  .popdown-title {
+    font-size: 16px;
   }
   
-  .account-setup-overlay .setup-form {
-    padding: 24px 20px;
+  .popdown-subtitle {
+    font-size: 13px;
   }
   
-  .account-setup-overlay .price {
-    font-size: 28px;
+  .popdown-form {
+    padding: 16px;
   }
 }

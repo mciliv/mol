@@ -17,33 +17,38 @@
   </head>
   <body>
     <div class="app-container">
-      <!-- Account Setup Section (shown first if no payment method) -->
-      <div class="account-setup-overlay" id="account-setup-overlay" style="display: none;">
-        <div class="setup-container">
-          <header class="setup-header">
-            <h1>Quick Setup</h1>
-            <p class="subtitle">Just add your payment method to start analyzing molecules</p>
-          </header>
-
-          <!-- Express Payment Options -->
-          <div class="express-payment" id="express-payment">
-            <div class="express-title">Quick Payment</div>
-            
-            <!-- Apple Pay / Google Pay -->
-            <div id="payment-request-button" class="payment-request-btn" style="display: none;"></div>
-            
-            <!-- PayPal Express -->
-            <div id="paypal-button-container" class="paypal-container" style="display: none;"></div>
-            
-            <div class="or-divider" id="or-divider" style="display: none;">
-              <span>or</span>
+      <!-- Payment Setup Popdown (appears from top when needed) -->
+      <div class="payment-popdown" id="payment-popdown" style="display: none;">
+        <div class="popdown-container">
+          <div class="popdown-header">
+            <div class="popdown-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <path d="M7 15h0M17 15h0M7 11h0M13 11h0"/>
+              </svg>
+              <span>Payment Required</span>
             </div>
+            <p class="popdown-subtitle">Add payment method to analyze molecules ($0.25 per analysis)</p>
           </div>
+
+          <div class="popdown-content">
+            <!-- Express Payment Options -->
+            <div class="express-payment" id="express-payment">
+              <!-- Apple Pay / Google Pay -->
+              <div id="payment-request-button" class="payment-request-btn" style="display: none;"></div>
+              
+              <!-- PayPal Express -->
+              <div id="paypal-button-container" class="paypal-container" style="display: none;"></div>
+              
+              <div class="or-divider" id="or-divider" style="display: none;">
+                <span>or</span>
+              </div>
+            </div>
           
-          <form id="card-setup-form" class="setup-form">
-            <!-- Credit Card with Browser Autofill Support -->
-            <div class="form-group">
-              <label for="card-element">Card Details</label>
+            <form id="card-setup-form" class="popdown-form">
+              <!-- Credit Card with Browser Autofill Support -->
+              <div class="form-group">
+                <label for="card-element">Card Details</label>
               
               <!-- Hidden fields for browser autofill detection -->
               <div class="autofill-detector" style="position: absolute; left: -9999px; opacity: 0;">
@@ -77,66 +82,48 @@
                      autocomplete="name">
             </div>
 
-            <button type="submit" class="btn-primary setup-btn" id="setup-btn">
-              <span class="btn-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </span>
-              <span class="btn-text">Start Analyzing</span>
-              <span class="btn-loading" style="display: none;">
-                <svg class="spinner" width="16" height="16" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
-                    <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
-                    <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
-                  </circle>
-                </svg>
-                Securing...
-              </span>
-            </button>
-          </form>
+                          <div class="form-actions">
+                <button type="submit" class="btn-primary setup-btn" id="setup-btn">
+                  <span class="btn-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 12l2 2 4-4"/>
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                  </span>
+                  <span class="btn-text">Complete Setup</span>
+                  <span class="btn-loading" style="display: none;">
+                    <svg class="spinner" width="16" height="16" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                        <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                        <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                      </circle>
+                    </svg>
+                    Securing...
+                  </span>
+                </button>
+              </div>
+            </form>
 
-          <div class="features">
-            <div class="feature">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 12l2 2 4-4"/>
-                <circle cx="12" cy="12" r="10"/>
-              </svg>
-              <span>Works with all browser autofills</span>
+            <!-- Success State -->
+            <div class="setup-success" id="setup-success" style="display: none;">
+              <div class="success-message">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12l2 2 4-4"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>Payment method added successfully!</span>
+              </div>
+              <button class="btn-primary" id="start-analyzing-btn">Continue to Analysis</button>
             </div>
-            <div class="feature">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
-              </svg>
-              <span>Apple Pay, Google Pay & PayPal</span>
-            </div>
-            <div class="feature">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <path d="M7 15h0M17 15h0M7 11h0M13 11h0"/>
-              </svg>
-              <span>One-time setup, lifetime access</span>
-            </div>
-          </div>
-
-          <!-- Success State -->
-          <div class="setup-success" id="setup-success" style="display: none;">
-            <div class="success-animation">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 12l2 2 4-4"/>
-                <circle cx="12" cy="12" r="10"/>
-              </svg>
-            </div>
-            <h3>You're all set!</h3>
-            <p>Start analyzing molecules right away</p>
-            <button class="btn-primary" id="start-analyzing-btn">Start Analyzing</button>
           </div>
         </div>
       </div>
 
-      <!-- Main App Interface (hidden until payment setup) -->
-      <div class="main-app-interface" id="main-app-interface" style="display: none;">
+      <!-- App Interface Backdrop (dimmed when payment required) -->
+      <div class="app-backdrop" id="app-backdrop" style="display: none;"></div>
+
+      <!-- Main App Interface -->
+      <div class="main-app-interface" id="main-app-interface">
         <!-- Always visible text input bar -->
         <div class="top-bar">
         <input
