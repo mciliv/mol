@@ -37,6 +37,24 @@ body {
   padding: 20px;
   background: rgba(0, 0, 0, 0.95);
   z-index: 1000;
+  position: relative;
+}
+
+.account-link {
+  position: absolute;
+  right: 20px;
+  color: #00d4ff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.account-link:hover {
+  background: rgba(0, 212, 255, 0.1);
+  color: #0099cc;
 }
 
 .text-input {

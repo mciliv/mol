@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account & Payment Setup - Molecular Analysis</title>
+    <link rel="stylesheet" href="account.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Account & Payment Setup</h1>
+            <a href="index.html" class="back-link">← Back to Analysis</a>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="signin">Sign In</button>
+            <button class="tab-btn" data-tab="register">Register</button>
+            <button class="tab-btn" data-tab="payment">Payment</button>
+            <button class="tab-btn" data-tab="account">Account</button>
+        </div>
+
+        <!-- Sign In Tab -->
+        <div class="tab-content active" id="signin">
+            <form id="signin-form" class="auth-form">
+                <div class="form-group">
+                    <label for="signin-email">Email</label>
+                    <input type="email" id="signin-email" name="email" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" name="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+            <div class="demo-note">
+                <p>💡 Demo Mode: Use any email/password to sign in</p>
+            </div>
+        </div>
+
+        <!-- Register Tab -->
+        <div class="tab-content" id="register">
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" name="name" autocomplete="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" autocomplete="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">Confirm Password</label>
+                    <input type="password" id="register-confirm" name="confirm" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+            <div class="demo-note">
+                <p>💡 Demo Mode: Account creation is simulated</p>
+            </div>
+        </div>
+
+        <!-- Payment Tab -->
+        <div class="tab-content" id="payment">
+            <div class="payment-info">
+                <h3>Payment Method Setup</h3>
+                <p>Add a payment method to analyze molecules. Each analysis costs $0.25.</p>
+            </div>
+            
+            <form id="payment-form" class="payment-form">
+                <div class="form-group">
+                    <label for="card-element">Credit or Debit Card</label>
+                    <div id="card-element" class="card-element"></div>
+                    <div id="card-errors" class="error-message" role="alert"></div>
+                </div>
+                <button type="submit" class="btn-primary" id="save-payment-btn">
+                    <span class="btn-text">Save Payment Method</span>
+                    <span class="btn-loading" style="display: none;">Saving...</span>
+                </button>
+            </form>
+            
+            <div class="payment-status" id="payment-status" style="display: none;">
+                <div class="status-success" id="payment-success" style="display: none;">
+                    ✅ Payment method saved successfully!
+                </div>
+                <div class="status-error" id="payment-error" style="display: none;">
+                    ❌ Failed to save payment method
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Tab -->
+        <div class="tab-content" id="account">
+            <div class="account-info" id="account-info" style="display: none;">
+                <h3>Account Information</h3>
+                <div class="info-item">
+                    <strong>Name:</strong> <span id="account-name">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Email:</strong> <span id="account-email">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Member Since:</strong> <span id="account-date">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Payment Method:</strong> <span id="account-payment">-</span>
+                </div>
+                <div class="info-item">
+                    <strong>Analyses Used:</strong> <span id="account-usage">-</span>
+                </div>
+            </div>
+            
+            <div class="account-actions">
+                <button class="btn-secondary" id="signout-btn">Sign Out</button>
+                <button class="btn-secondary" id="delete-account-btn">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="account.js"></script>
+</body>
+</html> 
