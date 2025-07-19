@@ -1,302 +1,400 @@
-/* Account Page Styles */
+/*
+  MODERN CARD-FIRST ACCOUNT SETUP
+  
+  Design Principle: Minimal, secure, and frictionless setup
+  - Single-screen card entry (no complex forms)
+  - Device-based recognition (no passwords)
+  - Modern payment app aesthetics
+  - "Stupid simple" UX with maximum security
+*/
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0a0a0a;
-    color: #ffffff;
-    line-height: 1.6;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #ffffff;
+  min-height: 100vh;
+  line-height: 1.6;
 }
 
 .container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Header */
 header {
-    text-align: center;
-    margin-bottom: 30px;
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
 }
 
 header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-    background: linear-gradient(45deg, #00d4ff, #0099cc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 20px 0;
+  font-weight: 400;
 }
 
 .back-link {
-    color: #00d4ff;
-    text-decoration: none;
-    font-size: 1rem;
-    transition: color 0.3s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
 }
 
 .back-link:hover {
-    color: #0099cc;
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.1);
 }
 
-/* Tabs */
-.tabs {
-    display: flex;
-    background: #1a1a1a;
-    border-radius: 10px;
-    padding: 5px;
-    margin-bottom: 30px;
+/* Setup Container */
+.setup-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.tab-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    color: #888;
-    padding: 12px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-size: 1rem;
+/* Existing User Card */
+.existing-user {
+  text-align: center;
 }
 
-.tab-btn.active {
-    background: #00d4ff;
-    color: #000;
+.user-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 32px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
 }
 
-.tab-btn:hover:not(.active) {
-    background: #333;
-    color: #fff;
+.user-card svg {
+  margin-bottom: 16px;
+  color: #00d4ff;
 }
 
-/* Tab Content */
-.tab-content {
-    display: none;
-    background: #1a1a1a;
-    padding: 30px;
-    border-radius: 10px;
-    margin-bottom: 20px;
+.user-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.tab-content.active {
-    display: block;
+.user-info p {
+  margin: 4px 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
 }
 
-/* Forms */
-.auth-form, .payment-form {
-    max-width: 400px;
-    margin: 0 auto;
+.usage {
+  font-size: 14px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: underline;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+  transition: color 0.3s ease;
+}
+
+.btn-link:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* New User Setup */
+.new-user {
+  max-width: 100%;
+}
+
+.setup-info {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.price-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #00d4ff;
+}
+
+.per {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.security-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.security-note svg {
+  color: #00ff88;
+  flex-shrink: 0;
+}
+
+/* Setup Form */
+.setup-form {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 32px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 32px;
 }
 
 .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.form-group.optional {
+  margin-bottom: 32px;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #ccc;
-    font-weight: 500;
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 8px;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #333;
-    border-radius: 8px;
-    background: #2a2a2a;
-    color: #fff;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
+.card-element {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: #00d4ff;
+.card-element:focus-within {
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
 }
 
-/* Buttons */
-.btn-primary, .btn-secondary {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 10px;
+#user-name {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 16px;
+  color: #ffffff;
+  font-family: inherit;
+  transition: all 0.3s ease;
 }
 
+#user-name:focus {
+  outline: none;
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+#user-name::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 14px;
+  margin-top: 8px;
+  display: none;
+}
+
+/* Setup Button */
+.setup-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 56px;
+}
+
+.setup-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+}
+
+.setup-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-icon svg {
+  flex-shrink: 0;
+}
+
+.btn-loading {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  color: #000000;
+}
+
+/* Primary Button */
 .btn-primary {
-    background: linear-gradient(45deg, #00d4ff, #0099cc);
-    color: #000;
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  border: none;
+  border-radius: 12px;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
 }
 
-.btn-secondary {
-    background: #333;
-    color: #fff;
+/* Features List */
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.btn-secondary:hover {
-    background: #444;
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-/* Card Element */
-.card-element {
-    padding: 12px;
-    border: 2px solid #333;
-    border-radius: 8px;
-    background: #2a2a2a;
-    margin-bottom: 10px;
+.feature svg {
+  color: #00ff88;
+  flex-shrink: 0;
 }
 
-.card-element.StripeElement--focus {
-    border-color: #00d4ff;
+/* Success State */
+.setup-success {
+  text-align: center;
+  padding: 40px 20px;
 }
 
-.card-element.StripeElement--invalid {
-    border-color: #ff4444;
+.success-animation {
+  margin-bottom: 24px;
 }
 
-/* Error Messages */
-.error-message {
-    color: #ff4444;
-    font-size: 0.9rem;
-    margin-top: 5px;
+.success-animation svg {
+  color: #00ff88;
+  animation: successPulse 2s ease-in-out infinite;
 }
 
-/* Status Messages */
-.payment-status {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
+.setup-success h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
 }
 
-.status-success {
-    background: rgba(0, 255, 0, 0.1);
-    color: #00ff00;
-    border: 1px solid #00ff00;
+.setup-success p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 32px 0;
+  font-size: 16px;
 }
 
-.status-error {
-    background: rgba(255, 0, 0, 0.1);
-    color: #ff4444;
-    border: 1px solid #ff4444;
+/* Animations */
+@keyframes successPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
 }
 
-/* Demo Notes */
-.demo-note {
-    margin-top: 20px;
-    padding: 15px;
-    background: rgba(0, 212, 255, 0.1);
-    border: 1px solid #00d4ff;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.demo-note p {
-    color: #00d4ff;
-    font-size: 0.9rem;
-}
-
-/* Payment Info */
-.payment-info {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.payment-info h3 {
-    color: #00d4ff;
-    margin-bottom: 10px;
-}
-
-.payment-info p {
-    color: #ccc;
-}
-
-/* Account Info */
-.account-info {
-    margin-bottom: 30px;
-}
-
-.account-info h3 {
-    color: #00d4ff;
-    margin-bottom: 20px;
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #333;
-}
-
-.info-item:last-child {
-    border-bottom: none;
-}
-
-.info-item strong {
-    color: #ccc;
-}
-
-/* Account Actions */
-.account-actions {
-    text-align: center;
-}
-
-/* Loading States */
-.btn-loading {
-    display: none;
-}
-
-.btn-primary:disabled .btn-text {
-    display: none;
-}
-
-.btn-primary:disabled .btn-loading {
-    display: inline;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .container {
-        padding: 15px;
-    }
-    
-    header h1 {
-        font-size: 2rem;
-    }
-    
-    .tabs {
-        flex-direction: column;
-    }
-    
-    .tab-btn {
-        margin-bottom: 5px;
-    }
-    
-    .tab-content {
-        padding: 20px;
-    }
-    
-    .info-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .info-item strong {
-        margin-bottom: 5px;
-    }
+/* Mobile Optimizations */
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+  }
+  
+  header h1 {
+    font-size: 24px;
+  }
+  
+  .setup-form {
+    padding: 24px 20px;
+  }
+  
+  .user-card {
+    padding: 24px 20px;
+  }
+  
+  .price {
+    font-size: 28px;
+  }
+  
+  .back-link {
+    position: static;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
 } 
