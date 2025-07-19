@@ -170,7 +170,7 @@ input[type="checkbox"]:checked + .mode-label {
   position: relative;
   flex: 1;
   background: #000;
-  display: flex;
+  display: none; /* Initially hidden to prevent FOUC */
   align-items: center;
   justify-content: center;
   cursor: crosshair;
@@ -180,14 +180,24 @@ input[type="checkbox"]:checked + .mode-label {
   margin-bottom: 20px;
 }
 
+/* When camera mode is active, show as flex */
+.camera-container.active {
+  display: flex;
+}
+
 /* Photo options container */
 .photo-options {
   padding: 60px 32px;
   background: #000;
   min-height: 70vh;
-  display: flex;
+  display: none; /* Initially hidden to prevent FOUC */
   align-items: center;
   justify-content: center;
+}
+
+/* When photo mode is active, show as flex */
+.photo-options.active {
+  display: flex;
 }
 
 #video-feed {

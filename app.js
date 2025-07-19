@@ -584,10 +584,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function updateInputMode() {
     // Show/hide camera based on checkbox state
-    cameraContainer.style.display = cameraMode.checked ? "flex" : "none";
+    if (cameraMode.checked) {
+      cameraContainer.classList.add('active');
+    } else {
+      cameraContainer.classList.remove('active');
+    }
 
     // Show/hide photo options based on checkbox state
-    photoOptions.style.display = photoMode.checked ? "flex" : "none";
+    if (photoMode.checked) {
+      photoOptions.classList.add('active');
+    } else {
+      photoOptions.classList.remove('active');
+    }
   }
 
   // Auto-switch checkboxes based on user interaction
