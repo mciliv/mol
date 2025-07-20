@@ -65,11 +65,13 @@ class MolecularProcessor {
   async generateSmilesSDF(chemical) {
     return new Promise((resolve, reject) => {
       const pythonProcess = spawn("python", [
-        "../chemistry/processors/sdf.py",
+        path.join(__dirname, "..", "..", "chemistry", "processors", "sdf.py"),
         chemical,
         "--dir",
         this.sdfDir,
-      ]);
+      ], {
+        cwd: path.join(__dirname, "..", "..")
+      });
 
       let output = "";
       pythonProcess.stdout.on("data", (data) => {
