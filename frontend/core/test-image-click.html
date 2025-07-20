@@ -154,77 +154,111 @@
                 img.src = `data:${file.type};base64,${imageBase64}`;
                 img.dataset.base64 = imageBase64;
                 
-                // Add click handler
-                img.addEventListener('click', async (evt) => {
-                    console.log('🖱️ Image clicked!');
+                // Wait for image to load before allowing clicks
+                img.onload = () => {
+                    console.log('🖼️ Image loaded with dimensions:', {
+                        naturalWidth: img.naturalWidth,
+                        naturalHeight: img.naturalHeight,
+                        clientWidth: img.clientWidth,
+                        clientHeight: img.clientHeight
+                    });
                     
-                    const rect = img.getBoundingClientRect();
-                    const clickX = evt.clientX - rect.left;
-                    const clickY = evt.clientY - rect.top;
-                    const relativeX = clickX / rect.width;
-                    const relativeY = clickY / rect.height;
+                    // Add click handler after image is loaded
+                    img.addEventListener('click', async (evt) => {
+                        console.log('🖱️ Image clicked!');
+                        
+                        const rect = img.getBoundingClientRect();
+                        const clickX = evt.clientX - rect.left;
+                        const clickY = evt.clientY - rect.top;
+                        const relativeX = clickX / rect.width;
+                        const relativeY = clickY / rect.height;
 
-                    console.log('📊 Click coordinates:', { clickX, clickY, relativeX, relativeY });
+                        // Calculate actual image coordinates
+                        const actualX = relativeX * img.naturalWidth;
+                        const actualY = relativeY * img.naturalHeight;
 
-                    // Create loading indicator
-                    const loadingColumn = window.uiManager.createLoadingColumn('Analyzing...');
+                        console.log('📊 Click coordinates:', { 
+                            clickX, 
+                            clickY, 
+                            relativeX, 
+                            relativeY,
+                            actualX,
+                            actualY,
+                            naturalWidth: img.naturalWidth,
+                            naturalHeight: img.naturalHeight
+                        });
 
-                    try {
-                        console.log('🌐 Sending analysis request...');
-                        const response = await fetch('/image-molecules', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
+                        // Create loading indicator
+                        const loadingColumn = window.uiManager.createLoadingColumn('Analyzing...');
+
+                        try {
+                            console.log('🌐 Sending analysis request...');
+                            const requestBody = {
                                 imageBase64,
                                 croppedImageBase64: imageBase64, // Use full image for testing
-                                x: relativeX * img.naturalWidth,
-                                y: relativeY * img.naturalHeight,
+                                x: actualX,
+                                y: actualY,
                                 cropMiddleX: 50,
                                 cropMiddleY: 50,
                                 cropSize: 100,
-                            }),
-                        });
+                            };
+                            
+                            console.log('📤 Request body coordinates:', {
+                                x: requestBody.x,
+                                y: requestBody.y,
+                                cropMiddleX: requestBody.cropMiddleX,
+                                cropMiddleY: requestBody.cropMiddleY,
+                                cropSize: requestBody.cropSize
+                            });
+                            
+                            const response = await fetch('/image-molecules', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(requestBody),
+                            });
 
-                        console.log('📡 Response status:', response.status);
-                        
-                        if (!response.ok) {
-                            const errorText = await response.text();
-                            throw new Error(`HTTP ${response.status}: ${errorText}`);
+                            console.log('📡 Response status:', response.status);
+                            
+                            if (!response.ok) {
+                                const errorText = await response.text();
+                                throw new Error(`HTTP ${response.status}: ${errorText}`);
+                            }
+
+                            const result = await response.json();
+                            console.log('✅ Analysis result:', result);
+
+                            // Remove loading and show success
+                            loadingColumn.remove();
+                            const successDiv = document.createElement('div');
+                            successDiv.className = 'success-message';
+                            successDiv.innerHTML = `
+                                <h3>Analysis Complete!</h3>
+                                <p>Object: ${result.output.object || 'Unknown'}</p>
+                                <p>Chemicals found: ${result.output.chemicals ? result.output.chemicals.length : 0}</p>
+                                <p>Click coordinates: (${actualX.toFixed(1)}, ${actualY.toFixed(1)})</p>
+                            `;
+                            document.body.appendChild(successDiv);
+
+                        } catch (error) {
+                            console.error('❌ Analysis error:', error);
+                            loadingColumn.remove();
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'error-message';
+                            errorDiv.textContent = `Error: ${error.message}`;
+                            document.body.appendChild(errorDiv);
                         }
+                    });
 
-                        const result = await response.json();
-                        console.log('✅ Analysis result:', result);
+                    const instructionText = document.createElement('div');
+                    instructionText.className = 'instruction-text';
+                    instructionText.textContent = 'Click on the image to analyze';
 
-                        // Remove loading and show success
-                        loadingColumn.remove();
-                        const successDiv = document.createElement('div');
-                        successDiv.className = 'success-message';
-                        successDiv.innerHTML = `
-                            <h3>Analysis Complete!</h3>
-                            <p>Object: ${result.output.object || 'Unknown'}</p>
-                            <p>Chemicals found: ${result.output.chemicals ? result.output.chemicals.length : 0}</p>
-                        `;
-                        document.body.appendChild(successDiv);
+                    imageContainer.appendChild(img);
+                    imageContainer.appendChild(instructionText);
+                    photoOptions.appendChild(imageContainer);
 
-                    } catch (error) {
-                        console.error('❌ Analysis error:', error);
-                        loadingColumn.remove();
-                        const errorDiv = document.createElement('div');
-                        errorDiv.className = 'error-message';
-                        errorDiv.textContent = `Error: ${error.message}`;
-                        document.body.appendChild(errorDiv);
-                    }
-                });
-
-                const instructionText = document.createElement('div');
-                instructionText.className = 'instruction-text';
-                instructionText.textContent = 'Click on the image to analyze';
-
-                imageContainer.appendChild(img);
-                imageContainer.appendChild(instructionText);
-                photoOptions.appendChild(imageContainer);
-
-                console.log('✅ Image displayed and ready for clicking');
+                    console.log('✅ Image displayed and ready for clicking');
+                };
 
             } catch (error) {
                 console.error('❌ Error processing image:', error);

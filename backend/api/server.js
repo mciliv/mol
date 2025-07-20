@@ -316,7 +316,13 @@ app.post("/image-molecules", async (req, res) => {
     console.log('📊 Image analysis parameters:', {
       hasImageBase64: !!imageBase64,
       hasCroppedImage: !!croppedImageBase64,
-      x, y, cropMiddleX, cropMiddleY, cropSize
+      coordinates: {
+        x: typeof x === 'number' ? x.toFixed(2) : x,
+        y: typeof y === 'number' ? y.toFixed(2) : y,
+        cropMiddleX: typeof cropMiddleX === 'number' ? cropMiddleX.toFixed(2) : cropMiddleX,
+        cropMiddleY: typeof cropMiddleY === 'number' ? cropMiddleY.toFixed(2) : cropMiddleY,
+        cropSize: typeof cropSize === 'number' ? cropSize.toFixed(2) : cropSize
+      }
     });
 
     if (!imageBase64) {

@@ -157,7 +157,16 @@ class CameraHandler {
     const relativeX = clickX / rect.width;
     const relativeY = clickY / rect.height;
 
-    console.log('📊 Click coordinates:', { clickX, clickY, relativeX, relativeY });
+    console.log('📊 Click coordinates:', { 
+      clickX, 
+      clickY, 
+      relativeX, 
+      relativeY,
+      actualX: relativeX * tempImg.width,
+      actualY: relativeY * tempImg.height,
+      imageWidth: tempImg.width,
+      imageHeight: tempImg.height
+    });
 
     const imageBase64 = img.dataset.base64;
     if (!imageBase64) {
