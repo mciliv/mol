@@ -138,6 +138,12 @@
           </div>
         </div>
 
+        <!-- Development mode indicator (only shown in local development) -->
+        <div class="dev-mode-indicator hidden" id="dev-mode-indicator">
+          <span>🛠️ Local Development Mode</span>
+          <button onclick="window.paymentManager.resetLocalDevUser()" class="dev-reset-btn">Reset User</button>
+        </div>
+
         <!-- Input mode selection -->
         <div class="input-mode-section">
           <div class="mode-selector">

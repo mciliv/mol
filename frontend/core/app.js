@@ -28,6 +28,19 @@ class MolecularApp {
 
     // Initialize payment system
     await paymentManager.checkInitialPaymentSetup();
+    
+    // Setup local development user if needed
+    if (paymentManager.isLocalDevelopment() && !paymentManager.getLocalDevUser()) {
+      paymentManager.setupLocalDevUser();
+    }
+    
+    // Show development mode indicator if in local development
+    if (paymentManager.isLocalDevelopment()) {
+      const devIndicator = document.getElementById('dev-mode-indicator');
+      if (devIndicator) {
+        devIndicator.classList.remove('hidden');
+      }
+    }
       
     // Initialize camera system
     await cameraManager.initialize();

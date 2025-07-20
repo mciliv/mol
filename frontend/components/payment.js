@@ -8,8 +8,22 @@ class PaymentManager {
     this.setupInProgress = false;
   }
 
+  // Check if we're in local development mode
+  isLocalDevelopment() {
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1' ||
+           window.location.hostname.includes('192.168.') ||
+           window.location.hostname.includes('172.20.');
+  }
+
   // Initialize payment setup
   async checkInitialPaymentSetup() {
+    // Skip payment setup in local development
+    if (this.isLocalDevelopment()) {
+      console.log('Local development mode - skipping payment setup');
+      return true;
+    }
+
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     
@@ -86,15 +100,21 @@ class PaymentManager {
 
   // Check if payment is required
   isPaymentRequired() {
+    // Skip payment requirement in local development
+    if (this.isLocalDevelopment()) {
+      return false;
+    }
+    
     const paymentPopdown = document.getElementById('payment-popdown');
     return paymentPopdown && paymentPopdown.classList.contains('show');
   }
 
   // Check payment method validity
   async checkPaymentMethod() {
-    // TEMPORARY: Bypass payment check for testing
-    console.log('🔓 Payment check bypassed for testing');
-    return true;
+    // Skip payment check in local development
+    if (this.isLocalDevelopment()) {
+      return true;
+    }
     
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
@@ -159,10 +179,65 @@ class PaymentManager {
     }
   }
 
+  // Reset local development user
+  resetLocalDevUser() {
+    if (!this.isLocalDevelopment()) {
+      return;
+    }
+    
+    localStorage.removeItem('molDeviceToken');
+    localStorage.removeItem('molCardInfo');
+    localStorage.removeItem('molLocalUser');
+    
+    console.log('Local development user reset');
+    
+    // Setup a new local user
+    this.setupLocalDevUser();
+  }
+
   // Initialize payment setup UI
   initializePaymentSetup() {
     // Payment setup logic would go here
     console.log('Payment setup initialized');
+  }
+
+  // Setup local development user
+  setupLocalDevUser() {
+    if (!this.isLocalDevelopment()) {
+      return;
+    }
+
+    const localUser = {
+      name: 'Local Developer',
+      email: 'dev@localhost',
+      usage: 0,
+      device_token: 'local_dev_token_' + Date.now(),
+      card_info: {
+        last4: '0000',
+        brand: 'Development',
+        usage: 0
+      }
+    };
+
+    // Store local user data
+    localStorage.setItem('molDeviceToken', localUser.device_token);
+    localStorage.setItem('molCardInfo', JSON.stringify(localUser.card_info));
+    localStorage.setItem('molLocalUser', JSON.stringify(localUser));
+
+    // Update UI to show local user
+    this.updateAccountStatus(localUser);
+    
+    console.log('Local development user setup complete');
+  }
+
+  // Get local development user info
+  getLocalDevUser() {
+    if (!this.isLocalDevelopment()) {
+      return null;
+    }
+    
+    const localUser = localStorage.getItem('molLocalUser');
+    return localUser ? JSON.parse(localUser) : null;
   }
 }
 

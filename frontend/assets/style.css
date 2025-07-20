@@ -1846,3 +1846,30 @@ input[type="checkbox"]:checked + .mode-label {
 #video-feed.permission-granted {
   opacity: 1;
 }
+
+/* Development mode indicator */
+.dev-mode-indicator {
+  background: #ff6b35;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dev-reset-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.dev-reset-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
