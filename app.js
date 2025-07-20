@@ -44,11 +44,8 @@ class MolecularApp {
 
   // Setup main application event listeners
   setupEventListeners() {
-    // Text input analysis
-    this.objectInput.addEventListener("keyup", async (e) => {
-      if (e.key !== "Enter") return;
-      await this.handleTextAnalysis();
-    });
+    // Setup text analysis with debugging support
+    this.setupTextAnalysis();
 
     // Photo upload handling
     const photoUpload = document.getElementById("photo-upload");
@@ -87,41 +84,104 @@ class MolecularApp {
     this.objectInput.addEventListener("focus", () => uiManager.clearModeSelection());
   }
   
-  // Handle text-based molecular analysis
-  async handleTextAnalysis() {
-    const object = this.objectInput.value.trim();
-    if (!object) return;
+  // Handle Enter key press for text analysis
+  setupTextAnalysis() {
+    this.objectInput.addEventListener("keyup", async (e) => {
+      if (e.key !== "Enter") return;
+      
+      // 🔴 BREAKPOINT: Set breakpoint here to debug text analysis trigger
+      console.log('🚀 Text analysis triggered from Enter key');
+      console.log('📊 App state before analysis:', {
+        isProcessing: this.isProcessing,
+        hasPaymentSetup: this.hasPaymentSetup,
+        inputValue: this.objectInput.value,
+        paymentVisible: this.paymentPopdown.style.display !== 'none'
+      });
+      
+      await this.handleTextAnalysis();
+    });
+  }
 
-    // Check payment before analysis
-    if (!await paymentManager.checkPaymentMethod()) {
+  // Main text analysis handler
+  async handleTextAnalysis() {
+    // 🔴 BREAKPOINT: Set breakpoint here to debug main analysis flow
+    console.log('🔬 Starting handleTextAnalysis');
+    console.log('📊 Current state:', {
+      isProcessing: this.isProcessing,
+      hasPaymentSetup: this.hasPaymentSetup,
+      inputValue: this.objectInput.value
+    });
+    
+    if (this.isProcessing) {
+      console.log('⚠️ Already processing, skipping analysis');
       return;
     }
 
-    const loadingColumn = uiManager.createLoadingColumn(`Analyzing "${object}"...`);
-
-    try {
-      const response = await fetch("/object-molecules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ object }),
-      });
-
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const { output } = await response.json();
-
-      loadingColumn.remove();
-      this.updateScrollHandles();
-
-      this.processAnalysisResult(output, "Text", object, true);
-      await paymentManager.incrementUsage();
-      
-    } catch (err) {
-      loadingColumn.remove();
-      this.updateScrollHandles();
-      this.createClosableErrorMessage(`Error analyzing "${object}": ${err.message}`);
+    const inputValue = this.objectInput.value.trim();
+    console.log('📝 Input value:', inputValue);
+    
+    if (!inputValue) {
+      console.log('❌ No input value, skipping analysis');
+      return;
     }
 
-    this.objectInput.value = "";
+    // 🔴 BREAKPOINT: Set breakpoint here to debug payment check
+    if (!this.hasPaymentSetup) {
+      console.log('💳 Payment not set up, showing payment popdown');
+      this.showPaymentPopdown();
+      return;
+    }
+
+    // 🔴 BREAKPOINT: Set breakpoint here to debug processing start
+    this.isProcessing = true;
+    this.currentAnalysisType = 'text';
+    console.log('🏁 Starting processing with type:', this.currentAnalysisType);
+    
+    try {
+      this.hidePaymentPopdown();
+      this.showProcessing();
+      
+      // 🔴 BREAKPOINT: Set breakpoint here to debug API call preparation
+      console.log('🌐 Preparing API call for text analysis');
+      const response = await fetch("/analyze-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: inputValue }),
+      });
+
+      // 🔴 BREAKPOINT: Set breakpoint here to debug API response
+      console.log('📡 API response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API error response:', errorText);
+        throw new Error(`Failed to analyze text: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      // 🔴 BREAKPOINT: Set breakpoint here to debug API result processing
+      console.log('📋 API result:', result);
+      
+      this.lastAnalysis = result;
+      this.displayResults(result);
+      
+      // Clear the input
+      this.objectInput.value = "";
+      
+    } catch (error) {
+      // 🔴 BREAKPOINT: Set breakpoint here to debug errors
+      console.error('💥 Error in handleTextAnalysis:', error);
+      this.handleError(error);
+    } finally {
+      // 🔴 BREAKPOINT: Set breakpoint here to debug cleanup
+      console.log('🧹 Cleaning up processing state');
+      this.isProcessing = false;
+      this.hideProcessing();
+    }
   }
 
   // Handle photo upload analysis

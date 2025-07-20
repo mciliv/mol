@@ -1,307 +1,258 @@
-// debug-events.js - Event debugging utilities
+// Enhanced debugging utilities for Cursor/VS Code debugging
+// Place breakpoints at the lines marked with "// 🔴 BREAKPOINT:" comments
 
-console.log('🐛 Debug script loading...');
+// Global debugging state tracker
+window.debugState = {
+  lastEvent: null,
+  currentInput: null,
+  appState: null,
+  apiCalls: [],
+  errors: []
+};
 
-class EventDebugger {
-  constructor() {
-    this.originalAddEventListener = EventTarget.prototype.addEventListener;
-    this.eventLog = [];
-    this.isLogging = false;
-    console.log('🔧 EventDebugger initialized');
-  }
-
-  // Start logging all events
-  startLogging() {
-    this.isLogging = true;
-    this.eventLog = [];
+// Enhanced state inspector for debugging
+window.inspectAppState = () => {
+  const app = window.molecularApp;
+  const state = {
+    // Input state
+    objectInputValue: document.getElementById('object-input')?.value || '',
+    objectInputFocused: document.activeElement?.id === 'object-input',
     
-    // Override addEventListener to intercept all event registrations
-    EventTarget.prototype.addEventListener = (type, listener, options) => {
-      if (this.isLogging) {
-        console.log(`🔗 Event listener added: ${type} on`, this);
-      }
-      return this.originalAddEventListener.call(this, type, listener, options);
-    };
+    // UI state
+    paymentPopdown: document.getElementById('payment-popdown'),
+    paymentDisplay: getComputedStyle(document.getElementById('payment-popdown') || {}).display,
+    mainApp: document.getElementById('main-app-interface'),
+    mainAppDisplay: getComputedStyle(document.getElementById('main-app-interface') || {}).display,
     
-    console.log('🐛 Event debugging started. All events will be logged.');
-  }
-
-  // Stop logging
-  stopLogging() {
-    this.isLogging = false;
-    EventTarget.prototype.addEventListener = this.originalAddEventListener;
-    console.log('🐛 Event debugging stopped.');
-  }
-
-  // Log a specific event
-  logEvent(event, element, handler) {
-    if (!this.isLogging) return;
+    // App instance state
+    molecularApp: app ? {
+      isProcessing: app.isProcessing,
+      hasPaymentSetup: app.hasPaymentSetup,
+      lastAnalysis: app.lastAnalysis,
+      currentAnalysisType: app.currentAnalysisType
+    } : null,
     
-    const logEntry = {
-      timestamp: Date.now(),
-      type: event.type,
-      target: element.tagName || element.constructor.name,
-      id: element.id || 'no-id',
-      className: element.className || 'no-class',
-      key: event.key || null,
-      code: event.code || null,
-      value: element.value || null,
-      handler: handler.name || 'anonymous',
-      stack: new Error().stack
-    };
+    // API state
+    recentApiCalls: window.debugState.apiCalls.slice(-3),
+    recentErrors: window.debugState.errors.slice(-3),
     
-    this.eventLog.push(logEntry);
-    console.log('📝 Event captured:', logEntry);
-  }
-
-  // Get recent events
-  getRecentEvents(count = 10) {
-    return this.eventLog.slice(-count);
-  }
-
-  // Clear event log
-  clearLog() {
-    this.eventLog = [];
-    console.log('🗑️ Event log cleared');
-  }
-}
-
-// Global event debugger instance
-window.eventDebugger = new EventDebugger();
-
-// Debug specific enter key events
-function debugEnterKeyEvents() {
-  console.log('🎯 Setting up Enter key debugging...');
-  
-  // Wait for elements to be available
-  const checkForElements = () => {
-    // Debug object input
-    const objectInput = document.getElementById('object-input');
-    if (objectInput) {
-      console.log('✅ Found object-input element');
-      
-      objectInput.addEventListener('keydown', (e) => {
-        console.log(`⬇️ KEYDOWN on object-input:`, {
-          key: e.key,
-          code: e.code,
-          target: e.target.tagName,
-          value: e.target.value,
-          timestamp: Date.now()
-        });
-      });
-      
-      objectInput.addEventListener('keyup', (e) => {
-        console.log(`⬆️ KEYUP on object-input:`, {
-          key: e.key,
-          code: e.code,
-          target: e.target.tagName,
-          value: e.target.value,
-          willTriggerHandler: e.key === 'Enter',
-          timestamp: Date.now()
-        });
-        
-        if (e.key === 'Enter') {
-          console.log('🚀 Enter pressed - about to trigger text analysis');
-          console.log('📊 Current app state:', {
-            objectInputValue: e.target.value,
-            paymentPopdown: document.getElementById('payment-popdown'),
-            paymentDisplay: document.getElementById('payment-popdown')?.style.display,
-            mainApp: document.getElementById('main-app-interface'),
-            mainAppDisplay: document.getElementById('main-app-interface')?.style.display
-          });
-        }
-      });
-      
-      objectInput.addEventListener('input', (e) => {
-        console.log('📝 INPUT on object-input:', e.target.value);
-      });
-      
-    } else {
-      console.log('❌ object-input element not found');
-    }
-
-    // Debug photo URL input  
-    const photoUrl = document.getElementById('photo-url');
-    if (photoUrl) {
-      console.log('✅ Found photo-url element');
-      
-      photoUrl.addEventListener('keydown', (e) => {
-        console.log(`⬇️ KEYDOWN on photo-url:`, {
-          key: e.key,
-          code: e.code,
-          value: e.target.value,
-          timestamp: Date.now()
-        });
-      });
-      
-      photoUrl.addEventListener('keyup', (e) => {
-        console.log(`⬆️ KEYUP on photo-url:`, {
-          key: e.key,
-          code: e.code,
-          value: e.target.value,
-          willTriggerHandler: e.key === 'Enter',
-          timestamp: Date.now()
-        });
-        
-        if (e.key === 'Enter') {
-          console.log('🚀 Enter pressed on URL field - about to trigger URL analysis');
-        }
-      });
-    } else {
-      console.log('❌ photo-url element not found');
-    }
-  };
-
-  // Try immediately and also wait for DOM
-  checkForElements();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkForElements);
-  }
-  
-  console.log('✅ Enter key debugging setup complete');
-}
-
-// Debug form submissions
-function debugFormEvents() {
-  console.log('📋 Setting up form debugging...');
-  
-  const checkForms = () => {
-    const forms = document.querySelectorAll('form');
-    console.log(`Found ${forms.length} forms`);
+    // DOM state
+    allInputs: Array.from(document.querySelectorAll('input')).map(input => ({
+      id: input.id,
+      type: input.type,
+      value: input.value,
+      focused: input === document.activeElement
+    })),
     
-    forms.forEach((form, index) => {
-      form.addEventListener('submit', (e) => {
-        console.log(`📝 FORM SUBMIT #${index}:`, {
-          formId: form.id,
-          action: form.action,
-          method: form.method,
-          preventDefault: e.defaultPrevented,
-          timestamp: Date.now()
-        });
-      });
-    });
+    timestamp: Date.now()
   };
   
-  checkForms();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkForms);
-  }
-}
+  window.debugState.appState = state;
+  return state;
+};
 
-// Debug all input events
-function debugAllInputs() {
-  console.log('🎛️ Setting up input debugging...');
-  
-  const checkInputs = () => {
-    const inputs = document.querySelectorAll('input, textarea');
-    console.log(`Found ${inputs.length} input elements`);
-    
-    inputs.forEach((input, index) => {
-      console.log(`Input ${index}: ${input.tagName} id="${input.id}" type="${input.type}"`);
-      
-      ['focus', 'blur', 'input', 'change'].forEach(eventType => {
-        input.addEventListener(eventType, (e) => {
-          console.log(`📝 ${eventType.toUpperCase()} on ${input.tagName}:`, {
-            id: input.id,
-            type: input.type,
-            value: input.value,
-            name: input.name,
-            timestamp: Date.now()
-          });
-        });
-      });
-    });
+// Enhanced API call tracker
+const originalFetch = window.fetch;
+window.fetch = function(...args) {
+  const callInfo = {
+    url: args[0],
+    options: args[1] || {},
+    timestamp: Date.now(),
+    stack: new Error().stack
   };
   
-  checkInputs();
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkInputs);
-  }
-}
-
-// Simple immediate debugging function
-function simpleDebug() {
-  console.log('🔍 Simple debug check:');
-  console.log('- Document ready state:', document.readyState);
-  console.log('- object-input exists:', !!document.getElementById('object-input'));
-  console.log('- photo-url exists:', !!document.getElementById('photo-url'));
-  console.log('- All inputs:', document.querySelectorAll('input').length);
-  console.log('- Active element:', document.activeElement);
+  // 🔴 BREAKPOINT: Set breakpoint here to inspect all API calls
+  console.log('🌐 API Call:', callInfo);
+  window.debugState.apiCalls.push(callInfo);
   
-  // Add immediate keydown listener to document
-  document.addEventListener('keydown', (e) => {
-    console.log('🔑 Global keydown:', e.key, 'on', e.target.tagName, e.target.id || 'no-id');
-  });
-}
-
-// Comprehensive debugging setup
-function setupDebugMode() {
-  console.log('🔍 Setting up comprehensive event debugging...');
-  
-  // Run simple debug immediately
-  simpleDebug();
-  
-  debugEnterKeyEvents();
-  debugFormEvents();
-  debugAllInputs();
-  
-  // Add global keyboard debugger
-  document.addEventListener('keydown', (e) => {
-    // Log all keydowns first
-    console.log('🌍 Global keydown captured:', {
-      key: e.key,
-      code: e.code,
-      ctrl: e.ctrlKey,
-      shift: e.shiftKey,
-      alt: e.altKey,
-      target: e.target.tagName,
-      targetId: e.target.id
+  return originalFetch.apply(this, args)
+    .then(response => {
+      callInfo.response = {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      };
+      // 🔴 BREAKPOINT: Set breakpoint here to inspect API responses
+      console.log('✅ API Response:', callInfo);
+      return response;
+    })
+    .catch(error => {
+      callInfo.error = error.message;
+      // 🔴 BREAKPOINT: Set breakpoint here to inspect API errors
+      console.log('❌ API Error:', callInfo);
+      window.debugState.errors.push(callInfo);
+      throw error;
     });
-    
-    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-      console.log('🎛️ Debug toggle pressed (Ctrl+Shift+D)');
-      if (window.eventDebugger.isLogging) {
-        window.eventDebugger.stopLogging();
-      } else {
-        window.eventDebugger.startLogging();
-      }
-    }
-  });
+};
+
+// Enhanced error tracking
+window.addEventListener('error', (event) => {
+  const errorInfo = {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    error: event.error,
+    timestamp: Date.now()
+  };
   
-  console.log('✅ Debug mode active. Press Ctrl+Shift+D to toggle detailed logging.');
-  console.log('💡 Available commands:');
-  console.log('  - debugEnterKeyEvents() - Track enter key presses');
-  console.log('  - debugAllInputs() - Track all input events');
-  console.log('  - simpleDebug() - Quick debug check');
-  console.log('  - eventDebugger.startLogging() - Start comprehensive logging');
-  console.log('  - eventDebugger.getRecentEvents() - Get recent events');
-}
-
-// Auto-setup with multiple triggers
-console.log('🚀 Auto-setting up debug mode...');
-
-// Try immediate setup
-setupDebugMode();
-
-// Also setup on DOMContentLoaded
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 DOM loaded - setting up debug again');
-    setupDebugMode();
-  });
-}
-
-// And also on window load
-window.addEventListener('load', () => {
-  console.log('🪟 Window loaded - final debug setup');
-  setupDebugMode();
+  // 🔴 BREAKPOINT: Set breakpoint here to inspect JavaScript errors
+  console.error('💥 JavaScript Error:', errorInfo);
+  window.debugState.errors.push(errorInfo);
 });
 
-// Export for global access
-window.debugEnterKeyEvents = debugEnterKeyEvents;
-window.debugFormEvents = debugFormEvents;
-window.debugAllInputs = debugAllInputs;
-window.setupDebugMode = setupDebugMode;
-window.simpleDebug = simpleDebug;
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('🔧 Debug system loaded - breakpoint-ready');
+  console.log('📍 Set breakpoints on lines marked with "🔴 BREAKPOINT:" comments');
+  console.log('🎯 Key debugging functions available:');
+  console.log('   • window.inspectAppState() - Get detailed app state');
+  console.log('   • window.debugState - Access debugging history');
+  
+  const objectInput = document.getElementById('object-input');
+  
+  if (objectInput) {
+    // Enhanced keyup handler with debugging hooks
+    objectInput.addEventListener('keyup', (e) => {
+      window.debugState.lastEvent = {
+        type: 'keyup',
+        key: e.key,
+        target: e.target.id,
+        value: e.target.value,
+        timestamp: Date.now()
+      };
+      
+      console.log(`⬆️ KEYUP on object-input:`, { 
+        key: e.key, 
+        value: e.target.value, 
+        willTriggerHandler: e.key === 'Enter' 
+      });
+      
+      if (e.key === 'Enter') {
+        // 🔴 BREAKPOINT: Set breakpoint here to debug Enter key handling
+        console.log('🚀 Enter pressed - about to trigger text analysis');
+        const currentState = window.inspectAppState();
+        console.log('📊 Current app state:', currentState);
+        
+        // Additional debugging info for Enter key press
+        console.log('🔍 Enter Key Debug Details:', {
+          inputElement: e.target,
+          inputValue: e.target.value,
+          inputFocused: document.activeElement === e.target,
+          eventPhase: e.eventPhase,
+          bubbles: e.bubbles,
+          cancelable: e.cancelable,
+          defaultPrevented: e.defaultPrevented,
+          molecularAppExists: !!window.molecularApp,
+          timestamp: Date.now()
+        });
+      }
+    });
+    
+    // Enhanced input change tracking
+    objectInput.addEventListener('input', (e) => {
+      window.debugState.currentInput = {
+        value: e.target.value,
+        timestamp: Date.now(),
+        length: e.target.value.length
+      };
+      
+      // 🔴 BREAKPOINT: Set breakpoint here to debug input changes
+      console.log('✏️ INPUT CHANGE:', window.debugState.currentInput);
+    });
+    
+    // Enhanced focus/blur tracking
+    objectInput.addEventListener('focus', (e) => {
+      // 🔴 BREAKPOINT: Set breakpoint here to debug focus events
+      console.log('🎯 FOCUS on object-input:', {
+        value: e.target.value,
+        timestamp: Date.now(),
+        previousActiveElement: window.debugState.lastActiveElement
+      });
+      window.debugState.lastActiveElement = e.target;
+    });
+    
+    objectInput.addEventListener('blur', (e) => {
+      // 🔴 BREAKPOINT: Set breakpoint here to debug blur events
+      const blurInfo = {
+        id: e.target.id,
+        type: e.target.type,
+        value: e.target.value,
+        name: e.target.name,
+        timestamp: Date.now()
+      };
+      
+      console.log('📝 BLUR on INPUT:', blurInfo);
+      window.debugState.lastBlur = blurInfo;
+    });
+  }
+  
+  // Track all form submissions
+  document.addEventListener('submit', (e) => {
+    // 🔴 BREAKPOINT: Set breakpoint here to debug form submissions
+    console.log('📤 FORM SUBMIT:', {
+      form: e.target,
+      formData: new FormData(e.target),
+      timestamp: Date.now()
+    });
+  });
+  
+  // Enhanced click tracking for buttons
+  document.addEventListener('click', (e) => {
+    if (e.target.tagName === 'BUTTON' || e.target.type === 'button') {
+      // 🔴 BREAKPOINT: Set breakpoint here to debug button clicks
+      console.log('🖱️ BUTTON CLICK:', {
+        button: e.target,
+        id: e.target.id,
+        className: e.target.className,
+        textContent: e.target.textContent,
+        timestamp: Date.now()
+      });
+    }
+  });
+});
 
-console.log('🐛 Debug script loaded completely'); 
+// Global debugging commands
+window.debugCommands = {
+  // Get current state
+  state: () => window.inspectAppState(),
+  
+  // Start detailed logging
+  startDetailedLogging: () => {
+    window.debugState.detailedLogging = true;
+    console.log('🔍 Detailed logging started');
+  },
+  
+  // Stop detailed logging
+  stopDetailedLogging: () => {
+    window.debugState.detailedLogging = false;
+    console.log('🔍 Detailed logging stopped');
+  },
+  
+  // Clear debug history
+  clearHistory: () => {
+    window.debugState.apiCalls = [];
+    window.debugState.errors = [];
+    console.log('🧹 Debug history cleared');
+  },
+  
+  // Export debug session
+  exportSession: () => {
+    const session = {
+      debugState: window.debugState,
+      currentState: window.inspectAppState(),
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+    
+    console.log('📊 Debug Session Export:', session);
+    return session;
+  }
+};
+
+// Make debugging easier in console
+window.debug = window.debugCommands;
+
+console.log('🚀 Enhanced debugging system loaded!');
+console.log('💡 Use window.debug.state() for current state');
+console.log('📍 Set breakpoints on lines with "🔴 BREAKPOINT:" comments'); 
