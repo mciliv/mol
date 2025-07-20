@@ -291,12 +291,10 @@ app.post("/increment-usage", (req, res) => {
 
 // Image analysis route
 app.post("/image-molecules", async (req, res) => {
-  console.log('🖼️ Image analysis request received');
   try {
     // Validate input schema
     const validation = ImageMoleculeSchema.safeParse(req.body);
     if (!validation.success) {
-      console.log('❌ Image analysis validation failed:', validation.error.issues);
       return res.status(400).json({
         error: "Invalid input data",
         details: validation.error.issues,
@@ -313,24 +311,10 @@ app.post("/image-molecules", async (req, res) => {
       cropSize,
     } = req.body;
 
-    console.log('📊 Image analysis parameters:', {
-      hasImageBase64: !!imageBase64,
-      hasCroppedImage: !!croppedImageBase64,
-      coordinates: {
-        x: typeof x === 'number' ? x.toFixed(2) : x,
-        y: typeof y === 'number' ? y.toFixed(2) : y,
-        cropMiddleX: typeof cropMiddleX === 'number' ? cropMiddleX.toFixed(2) : cropMiddleX,
-        cropMiddleY: typeof cropMiddleY === 'number' ? cropMiddleY.toFixed(2) : cropMiddleY,
-        cropSize: typeof cropSize === 'number' ? cropSize.toFixed(2) : cropSize
-      }
-    });
-
     if (!imageBase64) {
-      console.log('❌ No image data provided');
       return res.status(400).json({ error: "No image data provided" });
     }
 
-    console.log('🔬 Starting AI analysis...');
     const result = await atomPredictor.analyzeImage(
       imageBase64,
       croppedImageBase64,
@@ -340,41 +324,10 @@ app.post("/image-molecules", async (req, res) => {
       cropMiddleY,
       cropSize,
     );
-    console.log('✅ AI analysis completed:', result);
     res.json({ output: result });
   } catch (error) {
-    console.error("❌ Image analysis error:", error);
-
-    // Provide more specific error messages
-    let errorMessage = error.message;
-    let statusCode = 500;
-
-    if (error.message.includes("network") || error.message.includes("fetch")) {
-      errorMessage =
-        "Network error: Unable to connect to AI service. Please check your internet connection.";
-      statusCode = 503;
-    } else if (
-      error.message.includes("API key") ||
-      error.message.includes("authentication")
-    ) {
-      errorMessage = "Authentication error: Invalid or missing API key.";
-      statusCode = 401;
-    } else if (
-      error.message.includes("rate limit") ||
-      error.message.includes("quota")
-    ) {
-      errorMessage = "Rate limit exceeded: Please try again later.";
-      statusCode = 429;
-    } else if (error.message.includes("timeout")) {
-      errorMessage =
-        "Request timeout: The AI service is taking too long to respond.";
-      statusCode = 408;
-    }
-
-    res.status(statusCode).json({
-      error: errorMessage,
-      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
-    });
+    console.error("Image analysis error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

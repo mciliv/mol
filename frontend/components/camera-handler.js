@@ -120,58 +120,35 @@ class CameraHandler {
 
   // Handle click on uploaded image
   async handleImageClick(evt, img) {
-    console.log('🖱️ Image click detected:', evt);
-    
-    // Temporarily bypass payment check for testing
     let paymentCheck = false;
     try {
       paymentCheck = await paymentManager.checkPaymentMethod();
-      console.log('💳 Payment check result:', paymentCheck);
     } catch (error) {
-      console.log('⚠️ Payment check failed, proceeding anyway:', error);
       paymentCheck = true; // Fallback to allow analysis
     }
     
     if (!paymentCheck) {
-      console.log('🚫 Payment required - showing message');
-      // Show simple message instead of popdown
-      const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
+      const messageColumn = uiManager.createColumn("Payment required", "payment-required");
       messageColumn.innerHTML = `
         <div class="molecule-container">
           <div class="molecule-info">
             <h3>Payment Required</h3>
-            <p>See payment setup above</p>
-            <div class="analysis-note">Complete payment setup to analyze molecules from images</div>
+            <p>Complete payment setup to analyze molecules</p>
           </div>
         </div>
       `;
       return;
     }
-
-    console.log('✅ Payment check passed, proceeding with analysis');
     
     const rect = img.getBoundingClientRect();
     const clickX = evt.clientX - rect.left;
     const clickY = evt.clientY - rect.top;
-
     const relativeX = clickX / rect.width;
     const relativeY = clickY / rect.height;
 
-    console.log('📊 Click coordinates:', { 
-      clickX, 
-      clickY, 
-      relativeX, 
-      relativeY,
-      actualX: relativeX * tempImg.width,
-      actualY: relativeY * tempImg.height,
-      imageWidth: tempImg.width,
-      imageHeight: tempImg.height
-    });
-
     const imageBase64 = img.dataset.base64;
     if (!imageBase64) {
-      console.error('❌ No image data found');
-      this.createClosableErrorMessage('No image data available for analysis');
+      this.createClosableErrorMessage('No image data available');
       return;
     }
 
@@ -181,7 +158,6 @@ class CameraHandler {
 
     const tempImg = new Image();
     tempImg.onload = async () => {
-      console.log('🖼️ Image loaded, processing crop');
       canvas.width = tempImg.width;
       canvas.height = tempImg.height;
       ctx.drawImage(tempImg, 0, 0);
@@ -209,12 +185,9 @@ class CameraHandler {
       cropCtx.restore();
 
       const croppedBase64 = cropCanvas.toDataURL("image/jpeg", 0.9).split(",")[1];
-      console.log('✂️ Crop created, size:', cropSize);
-      
       const loadingColumn = uiManager.createLoadingColumn("Analyzing...", croppedBase64);
 
       try {
-        console.log('🌐 Sending analysis request to server');
         const response = await fetch("/image-molecules", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -229,31 +202,26 @@ class CameraHandler {
           }),
         });
 
-        console.log('📡 Server response status:', response.status);
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
         
         const { output } = await response.json();
-        console.log('✅ Analysis completed:', output);
 
         loadingColumn.remove();
         this.updateScrollHandles();
 
         const objectName = output.object || "Uploaded image";
-        // Emit event for app to handle analysis result
         this.emitAnalysisResult(output, "Photo", objectName, false, croppedBase64);
         
-        // Try to increment usage, but don't fail if it doesn't work
         try {
           await paymentManager.incrementUsage();
         } catch (usageError) {
-          console.log('⚠️ Usage increment failed:', usageError);
+          // Ignore usage increment errors
         }
         
       } catch (err) {
-        console.error('❌ Analysis error:', err);
         loadingColumn.remove();
         this.updateScrollHandles();
         this.createClosableErrorMessage(`Error: ${err.message}`);
@@ -261,8 +229,7 @@ class CameraHandler {
     };
 
     tempImg.onerror = () => {
-      console.error('❌ Failed to load image for processing');
-      this.createClosableErrorMessage('Failed to process image for analysis');
+      this.createClosableErrorMessage('Failed to process image');
     };
 
     tempImg.src = `data:image/jpeg;base64,${imageBase64}`;
