@@ -13,11 +13,13 @@ class AtomPredictor {
   buildChemicalInstructions() {
     return `You are a molecular analysis expert. Analyze the object and provide a JSON response with relevant chemical components.
 
+If you cannot analyze the image or identify specific chemicals, provide a reasonable generic response based on common materials that might be present.
+
 Generate truthful, concise SMILES strings for the main chemical constituents. Keep SMILES strings reasonable in length (typically under 100 characters).
 
 Response format:
 {
-  "object": "Object name",
+  "object": "Object name or description",
   "chemicals": [
     {"name": "Chemical name", "smiles": "SMILES notation"},
     {"name": "Chemical name", "smiles": "SMILES notation"}
@@ -29,6 +31,8 @@ Examples:
 - Glucose: "C(C(C(C(C(C=O)O)O)O)O)O"
 - Caffeine: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"
 - Lycopene: "CC1=C(C(=C(C=C1)C)C)C=C(C=C2C(=C(C(=C(C2=C)C)C)C)C)C"
+
+If you cannot identify specific chemicals, provide common environmental chemicals like water, oxygen, carbon dioxide, etc.
 
 Focus on the most important chemical components. Use standard SMILES notation that can be parsed by chemical software.`;
   }
@@ -87,6 +91,7 @@ Focus on the most important chemical components. Use standard SMILES notation th
       });
 
       const content = response.choices[0].message.content;
+      console.log('🤖 AI Response:', content);
       const parsed = this.parseAIResponse(content);
 
       return {
@@ -114,6 +119,7 @@ Focus on the most important chemical components. Use standard SMILES notation th
       });
 
       const content = response.choices[0].message.content;
+      console.log('🤖 AI Response:', content);
       const parsed = this.parseAIResponse(content);
 
       return {
@@ -143,7 +149,16 @@ Focus on the most important chemical components. Use standard SMILES notation th
       if (
         content.includes("can't analyze images") ||
         content.includes("unable to identify") ||
-        content.includes("I'm sorry")
+        content.includes("I'm sorry") ||
+        content.includes("unable to analyze") ||
+        content.includes("I'm unable to analyze") ||
+        content.includes("cannot analyze") ||
+        content.includes("unable to determine") ||
+        content.includes("cannot identify") ||
+        content.includes("unable to identify") ||
+        content.includes("I cannot") ||
+        content.includes("I'm unable to") ||
+        content.includes("I am unable to")
       ) {
         // AI refused to analyze - provide a generic but useful response
         return {
@@ -160,7 +175,10 @@ Focus on the most important chemical components. Use standard SMILES notation th
       // Check if AI refused to analyze people specifically
       if (
         content.includes("unable to identify or analyze people") ||
-        content.includes("can't identify people")
+        content.includes("can't identify people") ||
+        content.includes("people") ||
+        content.includes("person") ||
+        content.includes("human")
       ) {
         return {
           object: "Human body (generic composition)",
