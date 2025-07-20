@@ -12,7 +12,10 @@ jest.mock("openai", () => ({
               message: {
                 content: JSON.stringify({
                   object: "test object",
-                  smiles: ["CCO", "CC(=O)O"],
+                  chemicals: [
+                    { name: "Ethanol", smiles: "CCO" },
+                    { name: "Acetic acid", smiles: "CC(=O)O" }
+                  ],
                 }),
               },
             },
@@ -31,12 +34,39 @@ jest.mock("child_process", () => ({
     const fs = require("fs");
     const path = require("path");
 
-    // Extract SMILES from args (assuming it's the second argument)
-    const smiles = args[0];
-    const sdfDir = args[2]; // --dir argument
+    // Add stdout and stderr as EventEmitters
+    mockProcess.stdout = new EventEmitter();
+    mockProcess.stderr = new EventEmitter();
 
-    // Create a mock SDF file
-    const sdfContent = `${smiles}
+    // Parse arguments correctly: python sdf.py SMILES --dir DIRECTORY
+    const smiles = args[1]; // args[0] = "sdf.py", args[1] = SMILES
+    const dirArgIndex = args.indexOf("--dir");
+    const sdfDir = dirArgIndex !== -1 ? args[dirArgIndex + 1] : "./sdf_files";
+
+    // Ensure the directory exists
+    if (!fs.existsSync(sdfDir)) {
+      fs.mkdirSync(sdfDir, { recursive: true });
+    }
+
+    // Check for invalid SMILES patterns
+    const isInvalidSmiles = 
+      smiles.includes("INVALID") || 
+      smiles.includes("invalid") ||
+      smiles.includes("bad") ||
+      smiles.includes("error");
+
+    // Simulate async process execution
+    setTimeout(() => {
+      if (isInvalidSmiles) {
+        // Simulate stderr output for invalid SMILES
+        mockProcess.stderr.emit("data", `Error: Invalid SMILES string: ${smiles}\n`);
+        
+        // Simulate failed SDF generation
+        mockProcess.emit("close", 1);
+      } else {
+        try {
+          // Create a mock SDF file
+          const sdfContent = `${smiles}
   RDKit          3D
 
   3  2  0  0  0  0  0  0  0  0999 V2000
@@ -48,12 +78,22 @@ jest.mock("child_process", () => ({
 M  END
 $$$$`;
 
-    const sdfPath = path.join(sdfDir, `${smiles}.sdf`);
-    fs.writeFileSync(sdfPath, sdfContent);
-
-    // Simulate successful SDF generation
-    setTimeout(() => {
-      mockProcess.emit("close", 0);
+          const sdfPath = path.join(sdfDir, `${smiles}.sdf`);
+          fs.writeFileSync(sdfPath, sdfContent);
+          
+          // Simulate stdout output
+          mockProcess.stdout.emit("data", `SDF file saved: ${sdfPath}\n`);
+          
+          // Simulate successful SDF generation
+          mockProcess.emit("close", 0);
+        } catch (error) {
+          // Simulate stderr output
+          mockProcess.stderr.emit("data", `Error: ${error.message}\n`);
+          
+          // Simulate failed SDF generation
+          mockProcess.emit("close", 1);
+        }
+      }
     }, 10);
 
     return mockProcess;
@@ -167,15 +207,22 @@ describe("Integration Tests", () => {
 M  END
 $$$$`;
 
-      fs.writeFileSync(path.join(sdfDir, "test.sdf"), testSdfContent);
+      const testSdfPath = path.join(sdfDir, "test.sdf");
+      fs.writeFileSync(testSdfPath, testSdfContent);
+      
+      // Verify file was created
+      expect(fs.existsSync(testSdfPath)).toBe(true);
 
       const response = await request(app)
         .get("/sdf_files/test.sdf")
         .expect(200);
 
-      expect(response.text).toBeDefined();
-      expect(response.text).toContain("CCO");
-      expect(response.text).toContain("$$$$");
+      // SDF files are served as binary, so we need to convert to string
+      const responseText = response.body.toString();
+      
+      expect(responseText).toBeDefined();
+      expect(responseText).toContain("CCO");
+      expect(responseText).toContain("$$$$");
     });
   });
 

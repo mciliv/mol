@@ -1,4 +1,6 @@
-# CSS Patterns for Molecular App
+# UI
+
+in terms of natural language, only generate rules here in .mdc files, not markdown
 
 ## "Stupid Simple" UI Guidelines
 - **No Extraneous Lines**: Avoid borders, outlines, shadows, or decorative elements

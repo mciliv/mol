@@ -3,11 +3,13 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { execSync } = require("child_process");
+const net = require("net");
 
 class HttpsServer {
   constructor(app, port = 3001) {
     this.app = app;
-    this.port = port;
+    this.requestedPort = port;
+    this.actualPort = port;
     this.localIP = this.getLocalIPAddress();
   }
 
@@ -21,6 +23,30 @@ class HttpsServer {
       }
     }
     return "127.0.0.1";
+  }
+
+  // Check if a port is available
+  async isPortAvailable(port) {
+    return new Promise((resolve) => {
+      const server = net.createServer();
+      
+      server.listen(port, "0.0.0.0", () => {
+        server.once("close", () => resolve(true));
+        server.close();
+      });
+      
+      server.on("error", () => resolve(false));
+    });
+  }
+
+  // Find an available port starting from the requested port
+  async findAvailablePort(startPort) {
+    for (let port = startPort; port < startPort + 100; port++) {
+      if (await this.isPortAvailable(port)) {
+        return port;
+      }
+    }
+    throw new Error(`No available ports found in range ${startPort}-${startPort + 99}`);
   }
 
   generateSelfSignedCert() {
@@ -69,10 +95,10 @@ IP.4 = ::1
 
       fs.writeFileSync(configPath, configContent);
 
-      execSync(`openssl genrsa -out ${keyPath} 2048`, { stdio: "inherit" });
+      execSync(`openssl genrsa -out ${keyPath} 2048`, { stdio: "pipe" });
       execSync(
         `openssl req -new -x509 -key ${keyPath} -out ${certPath} -days 365 -config ${configPath}`,
-        { stdio: "inherit" },
+        { stdio: "pipe" },
       );
 
       fs.unlinkSync(configPath);
@@ -85,19 +111,87 @@ IP.4 = ::1
     }
   }
 
-  start() {
-    const credentials = this.generateSelfSignedCert();
-    if (credentials) {
+  async start() {
+    try {
+      const credentials = this.generateSelfSignedCert();
+      if (!credentials) {
+        console.log("⚠️ HTTPS not started — SSL certificate generation failed");
+        return null;
+      }
+
+      // Find an available port
+      try {
+        this.actualPort = await this.findAvailablePort(this.requestedPort);
+        
+        if (this.actualPort !== this.requestedPort) {
+          console.log(
+            `⚠️ HTTPS port ${this.requestedPort} in use, using port ${this.actualPort} instead`
+          );
+        }
+      } catch (error) {
+        console.error(`❌ Could not find available HTTPS port: ${error.message}`);
+        console.log("💡 Try stopping other services or use a different port range");
+        return null;
+      }
+
       const server = https.createServer(credentials, this.app);
-      server.listen(this.port, "0.0.0.0", () => {
-        console.log(
-          `🔒 HTTPS server running on https://${this.localIP}:${this.port}`,
-        );
+      
+      return new Promise((resolve, reject) => {
+        server.listen(this.actualPort, "0.0.0.0", () => {
+          console.log(
+            `🔒 HTTPS server running on https://${this.localIP}:${this.actualPort}`
+          );
+          console.log(
+            `📱 Mobile HTTPS: https://${this.localIP}:${this.actualPort}`
+          );
+          resolve(server);
+        });
+
+        server.on("error", (error) => {
+          if (error.code === "EADDRINUSE") {
+            console.error(`❌ HTTPS port ${this.actualPort} is already in use`);
+            console.log("💡 HTTPS server will retry with a different port...");
+            
+            // Try to find another port and restart
+            this.findAvailablePort(this.actualPort + 1)
+              .then(newPort => {
+                this.actualPort = newPort;
+                console.log(`🔄 Retrying HTTPS on port ${newPort}...`);
+                server.close();
+                this.start().then(resolve).catch(reject);
+              })
+              .catch(err => {
+                console.error("❌ Could not find alternative HTTPS port:", err.message);
+                resolve(null);
+              });
+          } else if (error.code === "EACCES") {
+            console.error(`❌ Permission denied: Cannot bind to HTTPS port ${this.actualPort}`);
+            console.log("💡 Try using a port > 1024 or run with appropriate permissions");
+            resolve(null);
+          } else {
+            console.error("❌ HTTPS server error:", error.message);
+            console.log("💡 HTTPS server will continue without SSL");
+            resolve(null);
+          }
+        });
       });
-      return server;
-    } else {
-      console.log("⚠️ HTTPS not started — use ngrok if needed");
+
+    } catch (error) {
+      console.error("❌ Failed to start HTTPS server:", error.message);
+      console.log("💡 Continuing without HTTPS support");
       return null;
+    }
+  }
+
+  // Graceful shutdown
+  async stop(server) {
+    if (server) {
+      return new Promise((resolve) => {
+        server.close(() => {
+          console.log("🔒 HTTPS server stopped gracefully");
+          resolve();
+        });
+      });
     }
   }
 }

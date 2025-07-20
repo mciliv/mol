@@ -20,7 +20,45 @@ const app = express();
 const DEFAULT_PORT = 8080;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
 
-// Function to find available port
+// Utility to attempt cleanup of processes using our ports
+const attemptPortCleanup = async (port) => {
+  try {
+    const { execSync } = require("child_process");
+    
+    // Try to find and kill processes using the port (Unix/macOS)
+    if (process.platform !== "win32") {
+      try {
+        const result = execSync(`lsof -ti:${port}`, { encoding: "utf8", stdio: "pipe" });
+        const pids = result.trim().split("\n").filter(Boolean);
+        
+        if (pids.length > 0) {
+          console.log(`🧹 Found ${pids.length} process(es) using port ${port}, attempting cleanup...`);
+          
+          for (const pid of pids) {
+            try {
+              execSync(`kill -9 ${pid}`, { stdio: "pipe" });
+              console.log(`   ✅ Killed process ${pid}`);
+            } catch (e) {
+              console.log(`   ⚠️ Could not kill process ${pid} (may not have permission)`);
+            }
+          }
+          
+          // Wait a moment for cleanup
+          await new Promise(resolve => setTimeout(resolve, 500));
+          return true;
+        }
+      } catch (e) {
+        // No processes found or lsof not available
+        return false;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.log(`⚠️ Port cleanup failed: ${error.message}`);
+    return false;
+  }
+};
+
 const findAvailablePort = async (startPort) => {
   const net = require("net");
 
@@ -476,9 +514,31 @@ if (!isServerless && !isTestMode) {
     try {
       let actualPort = PORT;
 
-      // If default port is in use, try to find an available port
+      // If default port is in use, try cleanup and then find an available port
       if (PORT === DEFAULT_PORT) {
         try {
+          // First check if port is available
+          if (!(await (async () => {
+            const net = require("net");
+            return new Promise((resolve) => {
+              const server = net.createServer();
+              server.listen(PORT, "0.0.0.0", () => {
+                server.once("close", () => resolve(true));
+                server.close();
+              });
+              server.on("error", () => resolve(false));
+            });
+          })())) {
+            console.log(`⚠️ Port ${PORT} is in use, attempting cleanup...`);
+            const cleanupSuccessful = await attemptPortCleanup(PORT);
+            
+            if (cleanupSuccessful) {
+              console.log(`✅ Port ${PORT} cleanup completed, retrying...`);
+              // Give a moment for the port to be fully released
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          }
+          
           actualPort = await findAvailablePort(PORT);
           if (actualPort !== PORT) {
             console.log(
@@ -487,6 +547,7 @@ if (!isServerless && !isTestMode) {
           }
         } catch (error) {
           console.error(`❌ Could not find available port: ${error.message}`);
+          console.log(`💡 Try: pkill -f "node.*server.js" or use a different port`);
           process.exit(1);
         }
       }
@@ -534,8 +595,30 @@ if (!isServerless && !isTestMode) {
 
   // Start HTTPS server for development
   if (process.env.NODE_ENV !== "production") {
-    const httpsServer = new HttpsServer(app, HTTPS_PORT);
-    httpsServerInstance = httpsServer.start();
+    const startHttpsServer = async () => {
+      try {
+        const httpsServer = new HttpsServer(app, HTTPS_PORT);
+        httpsServerInstance = await httpsServer.start();
+        
+        if (httpsServerInstance) {
+          console.log("✅ HTTPS server started successfully");
+          
+          // Handle HTTPS server errors after startup
+          httpsServerInstance.on("error", (error) => {
+            console.error("❌ HTTPS server error after startup:", error.message);
+            console.log("💡 HTTPS server will continue running if possible");
+          });
+        } else {
+          console.log("⚠️ HTTPS server not started - continuing with HTTP only");
+        }
+      } catch (error) {
+        console.error("❌ Failed to start HTTPS server:", error.message);
+        console.log("💡 Continuing with HTTP server only");
+      }
+    };
+
+    // Start HTTPS server after a short delay to avoid port conflicts
+    setTimeout(startHttpsServer, 1000);
   }
 } else {
   // Serverless mode

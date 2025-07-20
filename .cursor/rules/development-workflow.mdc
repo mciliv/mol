@@ -9,7 +9,6 @@ alwaysApply: false
 - Use descriptive commit messages
 - Commit frequently to maintain clean history
 - Test changes before committing
-- Use meaningful branch names for features
 
 ## After Accepting Changes
 - **Automatic Git Commit**: After accepting any changes, immediately commit to git
@@ -38,7 +37,7 @@ git status  # Check if there are remaining changes
 - Use modern JavaScript (ES6+, async/await)
 - Implement proper error handling for all async operations
 - Avoid console.log spam - use proper logging
-- Remove emojis from code for professional appearance
+- avoid emojis just for appearance
 - Follow consistent naming conventions
 
 ## Debugging
@@ -122,7 +121,6 @@ git status  # Check if there are remaining changes
 - Use minimal dependencies for fast cold starts
 
 ## File Organization
-- Keep SDF files in dedicated `sdf_files/` directory
 - Maintain clean separation between frontend and backend
 - Use consistent file naming conventions
 - Organize static assets in root for simple serving

@@ -27,18 +27,18 @@ class MolecularApp {
 
     // Initialize payment system
     await paymentManager.checkInitialPaymentSetup();
-
+      
     // Initialize camera system
     await cameraManager.initialize();
 
     // Safari-specific camera permission request
     if (cameraManager.isSafari) {
       console.log('🍎 Safari detected - requesting camera permission early');
-      setTimeout(() => {
+    setTimeout(() => {
         cameraManager.requestPermission();
       }, 1000);
-    }
-
+  }
+  
     console.log('✅ Molecular analysis app initialized');
   }
 
@@ -54,8 +54,8 @@ class MolecularApp {
     const photoUpload = document.getElementById("photo-upload");
     if (photoUpload) {
       photoUpload.addEventListener("change", (e) => this.handlePhotoUpload(e));
-    }
-
+  }
+  
     // URL analysis
     const photoUrl = document.getElementById("photo-url");
     const urlAnalyze = document.getElementById("url-analyze");
@@ -64,15 +64,15 @@ class MolecularApp {
         if (e.key === "Enter") this.handleUrlAnalysis();
       });
       urlAnalyze.addEventListener("click", () => this.handleUrlAnalysis());
-    }
-
+      }
+      
     // Mode switching based on user interaction
     const video = document.getElementById("video-feed");
     if (video) {
       video.addEventListener("click", () => uiManager.switchToCameraMode());
       video.addEventListener("touchstart", () => uiManager.switchToCameraMode());
-    }
-
+  }
+  
     if (photoUpload) {
       photoUpload.addEventListener("change", () => uiManager.switchToPhotoMode());
     }
@@ -81,12 +81,12 @@ class MolecularApp {
     }
     if (urlAnalyze) {
       urlAnalyze.addEventListener("click", () => uiManager.switchToPhotoMode());
-    }
-
+  }
+  
     // Text input clears mode selection
     this.objectInput.addEventListener("focus", () => uiManager.clearModeSelection());
   }
-
+  
   // Handle text-based molecular analysis
   async handleTextAnalysis() {
     const object = this.objectInput.value.trim();
@@ -213,7 +213,7 @@ class MolecularApp {
       const template = document.getElementById("photo-upload-template");
       const clone = template.content.cloneNode(true);
       photoOptions.appendChild(clone);
-      
+
       const newPhotoUpload = photoOptions.querySelector("#photo-upload");
       newPhotoUpload.addEventListener("change", (e) => this.handlePhotoUpload(e));
     };
@@ -287,30 +287,30 @@ class MolecularApp {
 
       try {
         const response = await fetch("/image-molecules", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            imageBase64,
-            croppedImageBase64: croppedBase64,
-            x: relativeX * tempImg.width,
-            y: relativeY * tempImg.height,
-            cropMiddleX: middleX,
-            cropMiddleY: middleY,
-            cropSize: cropSize,
-          }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64,
+          croppedImageBase64: croppedBase64,
+          x: relativeX * tempImg.width,
+          y: relativeY * tempImg.height,
+          cropMiddleX: middleX,
+          cropMiddleY: middleY,
+          cropSize: cropSize,
+        }),
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const { output } = await response.json();
 
-        loadingColumn.remove();
+          loadingColumn.remove();
         this.updateScrollHandles();
 
         const objectName = output.object || "Uploaded image";
         this.processAnalysisResult(output, "Photo", objectName, false, croppedBase64);
         await paymentManager.incrementUsage();
         
-      } catch (err) {
+    } catch (err) {
         loadingColumn.remove();
         this.updateScrollHandles();
         this.createClosableErrorMessage(`Error: ${err.message}`);
@@ -318,7 +318,7 @@ class MolecularApp {
     };
 
     tempImg.src = `data:image/jpeg;base64,${imageBase64}`;
-  }
+    }
 
   // Process analysis results and display molecules
   processAnalysisResult(output, icon, objectName, useQuotes = false, croppedImageData = null) {
@@ -342,18 +342,18 @@ class MolecularApp {
   async generateSDFs(smiles, objectName, description = null, chemicals = null, croppedImageData = null) {
     if (smiles.length === 0 && !description) {
       this.createClosableErrorMessage("No valid molecules found for visualization");
-      return;
-    }
+    return;
+  }
 
     try {
       let sdfPaths = [];
       
       if (smiles.length > 0) {
         const response = await fetch("/generate-sdfs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ smiles, overwrite: true }),
-        });
+      });
 
         if (!response.ok) throw new Error(`SDF generation failed: ${response.status}`);
         const result = await response.json();
@@ -361,7 +361,7 @@ class MolecularApp {
       }
 
       await this.createObjectColumn(
-        objectName,
+    objectName,
         sdfPaths,
         smiles,
         null,
@@ -390,10 +390,10 @@ class MolecularApp {
     // Create header
     const header = document.createElement("div");
     header.className = "object-header";
-    
+
     const titleContainer = document.createElement("div");
     titleContainer.className = "object-title-container";
-    
+
     const icon = document.createElement("div");
     icon.className = "object-icon";
     icon.textContent = description ? "📖" : "🔬";
@@ -401,7 +401,7 @@ class MolecularApp {
     const name = document.createElement("div");
     name.className = "object-name";
     name.textContent = objectName;
-    
+
     const closeBtn = document.createElement("button");
     closeBtn.className = "object-close";
     closeBtn.innerHTML = '<img src="close.svg" alt="Close" width="16" height="16" />';
@@ -420,12 +420,12 @@ class MolecularApp {
     if (croppedImageData) {
       const imageContainer = document.createElement("div");
       imageContainer.className = "cropped-image-container";
-      
+
       const img = document.createElement("img");
       img.src = `data:image/jpeg;base64,${croppedImageData}`;
       img.className = "image-highlighted";
       img.alt = "Analysis region";
-      
+
       imageContainer.appendChild(img);
       objectColumn.appendChild(imageContainer);
     }
@@ -451,7 +451,7 @@ class MolecularApp {
 
         const moleculeName = document.createElement("div");
         moleculeName.className = "molecule-name";
-        
+
         const displayName = uiManager.getMoleculeName(chemical);
         moleculeName.textContent = displayName;
 
@@ -540,14 +540,14 @@ class MolecularApp {
       }
     });
     this.viewers = [];
+    }
   }
-}
 
 // Initialize app when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   const app = new MolecularApp();
   await app.initialize();
-  
+
   // Make app globally available for debugging
   window.molecularApp = app;
 });

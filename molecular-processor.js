@@ -54,7 +54,8 @@ class MolecularProcessor {
       const sdfPath = await this.generateSmilesSDF(smiles);
       if (sdfPath) return sdfPath;
     } catch (error) {
-      console.log(`SMILES generation failed for ${smiles}`);
+      console.error(`SMILES generation failed for ${smiles}:`, error.message);
+      console.error(`Full error:`, error);
       throw error;
     }
 
@@ -95,7 +96,11 @@ class MolecularProcessor {
             );
           }
         } else {
-          reject(new Error(`SMILES generation failed for ${chemical}`));
+          console.error(`Python process failed with exit code: ${code}`);
+          console.error(`Working directory: ${process.cwd()}`);
+          console.error(`Python command: python sdf.py ${chemical} --dir ${this.sdfDir}`);
+          console.error(`SDF directory exists: ${fs.existsSync(this.sdfDir)}`);
+          reject(new Error(`SMILES generation failed for ${chemical} (exit code: ${code})`));
         }
       });
     });
