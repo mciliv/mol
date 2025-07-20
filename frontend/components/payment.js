@@ -8,12 +8,10 @@ class PaymentManager {
     this.setupInProgress = false;
   }
 
-  // Check if we're in local development mode
+  // Check if we're in local development mode (DEPRECATED - use developer account instead)
   isLocalDevelopment() {
-    return window.location.hostname === 'localhost' || 
-           window.location.hostname === '127.0.0.1' ||
-           window.location.hostname.includes('192.168.') ||
-           window.location.hostname.includes('172.20.');
+    console.warn('isLocalDevelopment() is deprecated - use developer account instead');
+    return false;
   }
 
   // Check if current user is the developer account
@@ -39,14 +37,9 @@ class PaymentManager {
 
   // Initialize payment setup
   async checkInitialPaymentSetup() {
-    // Skip payment setup for developer account or local development
+    // Skip payment setup for developer account
     if (this.isDeveloperAccount()) {
       console.log('Developer account detected - skipping payment setup');
-      return true;
-    }
-    
-    if (this.isLocalDevelopment()) {
-      console.log('Local development mode - skipping payment setup');
       return true;
     }
 
@@ -126,12 +119,8 @@ class PaymentManager {
 
   // Check if payment is required
   isPaymentRequired() {
-    // Skip payment requirement for developer account or local development
+    // Skip payment requirement for developer account
     if (this.isDeveloperAccount()) {
-      return false;
-    }
-    
-    if (this.isLocalDevelopment()) {
       return false;
     }
     
@@ -141,12 +130,8 @@ class PaymentManager {
 
   // Check payment method validity
   async checkPaymentMethod() {
-    // Skip payment check for developer account or local development
+    // Skip payment check for developer account
     if (this.isDeveloperAccount()) {
-      return true;
-    }
-    
-    if (this.isLocalDevelopment()) {
       return true;
     }
     
@@ -213,20 +198,10 @@ class PaymentManager {
     }
   }
 
-  // Reset local development user
+  // Reset local development user (DEPRECATED)
   resetLocalDevUser() {
-    if (!this.isLocalDevelopment()) {
-      return;
-    }
-    
-    localStorage.removeItem('molDeviceToken');
-    localStorage.removeItem('molCardInfo');
-    localStorage.removeItem('molLocalUser');
-    
-    console.log('Local development user reset');
-    
-    // Setup a new local user
-    this.setupLocalDevUser();
+    console.warn('resetLocalDevUser() is deprecated - use developer account instead');
+    this.setupDeveloperAccount();
   }
 
   // Initialize payment setup UI
@@ -235,43 +210,16 @@ class PaymentManager {
     console.log('Payment setup initialized');
   }
 
-  // Setup local development user
+  // Setup local development user (DEPRECATED)
   setupLocalDevUser() {
-    if (!this.isLocalDevelopment()) {
-      return;
-    }
-
-    const localUser = {
-      name: 'Local Developer',
-      email: 'dev@localhost',
-      usage: 0,
-      device_token: 'local_dev_token_' + Date.now(),
-      card_info: {
-        last4: '0000',
-        brand: 'Development',
-        usage: 0
-      }
-    };
-
-    // Store local user data
-    localStorage.setItem('molDeviceToken', localUser.device_token);
-    localStorage.setItem('molCardInfo', JSON.stringify(localUser.card_info));
-    localStorage.setItem('molLocalUser', JSON.stringify(localUser));
-
-    // Update UI to show local user
-    this.updateAccountStatus(localUser);
-    
-    console.log('Local development user setup complete');
+    console.warn('setupLocalDevUser() is deprecated - use developer account instead');
+    this.setupDeveloperAccount();
   }
 
-  // Get local development user info
+  // Get local development user info (DEPRECATED)
   getLocalDevUser() {
-    if (!this.isLocalDevelopment()) {
-      return null;
-    }
-    
-    const localUser = localStorage.getItem('molLocalUser');
-    return localUser ? JSON.parse(localUser) : null;
+    console.warn('getLocalDevUser() is deprecated - use developer account instead');
+    return this.getDeveloperAccount();
   }
 
   // Setup developer account (your account)

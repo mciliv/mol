@@ -1847,19 +1847,6 @@ input[type="checkbox"]:checked + .mode-label {
   opacity: 1;
 }
 
-/* Development mode indicator */
-.dev-mode-indicator {
-  background: #ff6b35;
-  color: white;
-  padding: 8px 16px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 500;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 /* Developer account indicator */
 .dev-account-indicator {
   background: #00d4ff;

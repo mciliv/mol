@@ -30,21 +30,8 @@ class MolecularApp {
     await paymentManager.checkInitialPaymentSetup();
     
     // Setup developer account (your account) if not already set up
-    if (!paymentManager.isDeveloperAccount() && !paymentManager.getLocalDevUser()) {
+    if (!paymentManager.isDeveloperAccount()) {
       paymentManager.setupDeveloperAccount();
-    }
-    
-    // Setup local development user if needed (fallback)
-    if (paymentManager.isLocalDevelopment() && !paymentManager.getLocalDevUser() && !paymentManager.isDeveloperAccount()) {
-      paymentManager.setupLocalDevUser();
-    }
-    
-    // Show development mode indicator if in local development
-    if (paymentManager.isLocalDevelopment()) {
-      const devIndicator = document.getElementById('dev-mode-indicator');
-      if (devIndicator) {
-        devIndicator.classList.remove('hidden');
-      }
     }
     
     // Show developer account indicator if using developer account
