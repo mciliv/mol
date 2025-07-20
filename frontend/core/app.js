@@ -29,8 +29,13 @@ class MolecularApp {
     // Initialize payment system
     await paymentManager.checkInitialPaymentSetup();
     
-    // Setup local development user if needed
-    if (paymentManager.isLocalDevelopment() && !paymentManager.getLocalDevUser()) {
+    // Setup developer account (your account) if not already set up
+    if (!paymentManager.isDeveloperAccount() && !paymentManager.getLocalDevUser()) {
+      paymentManager.setupDeveloperAccount();
+    }
+    
+    // Setup local development user if needed (fallback)
+    if (paymentManager.isLocalDevelopment() && !paymentManager.getLocalDevUser() && !paymentManager.isDeveloperAccount()) {
       paymentManager.setupLocalDevUser();
     }
     
@@ -39,6 +44,14 @@ class MolecularApp {
       const devIndicator = document.getElementById('dev-mode-indicator');
       if (devIndicator) {
         devIndicator.classList.remove('hidden');
+      }
+    }
+    
+    // Show developer account indicator if using developer account
+    if (paymentManager.isDeveloperAccount()) {
+      const devAccountIndicator = document.getElementById('dev-account-indicator');
+      if (devAccountIndicator) {
+        devAccountIndicator.classList.remove('hidden');
       }
     }
       

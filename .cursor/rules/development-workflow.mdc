@@ -27,7 +27,8 @@ git status  # Check if there are remaining changes
 ```
 
 ## Testing Patterns
-- Run unit tests before committing: `npm test`
+- Run unit tests before committing & running: `npm test`
+- in terms of natural language, only generate rules here in .mdc files, not markdown
 - Ensure integration tests pass: `npm run test:integration`
 - Test camera functionality on both mobile and desktop
 - Verify SMILES validation and SDF generation

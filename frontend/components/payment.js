@@ -16,9 +16,35 @@ class PaymentManager {
            window.location.hostname.includes('172.20.');
   }
 
+  // Check if current user is the developer account
+  isDeveloperAccount() {
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    const cardInfo = localStorage.getItem('molCardInfo');
+    
+    if (!deviceToken || !cardInfo) {
+      return false;
+    }
+    
+    try {
+      const card = JSON.parse(cardInfo);
+      // Check for developer account indicators
+      return card.brand === 'Development' || 
+             card.last4 === '0000' ||
+             deviceToken.includes('local_dev_token') ||
+             deviceToken.includes('dev_');
+    } catch (error) {
+      return false;
+    }
+  }
+
   // Initialize payment setup
   async checkInitialPaymentSetup() {
-    // Skip payment setup in local development
+    // Skip payment setup for developer account or local development
+    if (this.isDeveloperAccount()) {
+      console.log('Developer account detected - skipping payment setup');
+      return true;
+    }
+    
     if (this.isLocalDevelopment()) {
       console.log('Local development mode - skipping payment setup');
       return true;
@@ -100,7 +126,11 @@ class PaymentManager {
 
   // Check if payment is required
   isPaymentRequired() {
-    // Skip payment requirement in local development
+    // Skip payment requirement for developer account or local development
+    if (this.isDeveloperAccount()) {
+      return false;
+    }
+    
     if (this.isLocalDevelopment()) {
       return false;
     }
@@ -111,7 +141,11 @@ class PaymentManager {
 
   // Check payment method validity
   async checkPaymentMethod() {
-    // Skip payment check in local development
+    // Skip payment check for developer account or local development
+    if (this.isDeveloperAccount()) {
+      return true;
+    }
+    
     if (this.isLocalDevelopment()) {
       return true;
     }
@@ -238,6 +272,38 @@ class PaymentManager {
     
     const localUser = localStorage.getItem('molLocalUser');
     return localUser ? JSON.parse(localUser) : null;
+  }
+
+  // Setup developer account (your account)
+  setupDeveloperAccount() {
+    const developerUser = {
+      name: 'Developer',
+      email: 'developer@mol.com',
+      usage: 0,
+      device_token: 'dev_token_' + Date.now(),
+      card_info: {
+        last4: '0000',
+        brand: 'Development',
+        usage: 0
+      }
+    };
+
+    // Store developer account data
+    localStorage.setItem('molDeviceToken', developerUser.device_token);
+    localStorage.setItem('molCardInfo', JSON.stringify(developerUser.card_info));
+    localStorage.setItem('molDeveloperUser', JSON.stringify(developerUser));
+
+    // Update UI to show developer account
+    this.updateAccountStatus(developerUser);
+    
+    console.log('Developer account setup complete');
+    return developerUser;
+  }
+
+  // Get developer account info
+  getDeveloperAccount() {
+    const developerUser = localStorage.getItem('molDeveloperUser');
+    return developerUser ? JSON.parse(developerUser) : null;
   }
 }
 

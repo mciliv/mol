@@ -1860,6 +1860,19 @@ input[type="checkbox"]:checked + .mode-label {
   align-items: center;
 }
 
+/* Developer account indicator */
+.dev-account-indicator {
+  background: #00d4ff;
+  color: white;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .dev-reset-btn {
   background: rgba(255, 255, 255, 0.2);
   color: white;
