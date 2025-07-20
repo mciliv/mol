@@ -291,10 +291,12 @@ app.post("/increment-usage", (req, res) => {
 
 // Image analysis route
 app.post("/image-molecules", async (req, res) => {
+  console.log('🖼️ Image analysis request received');
   try {
     // Validate input schema
     const validation = ImageMoleculeSchema.safeParse(req.body);
     if (!validation.success) {
+      console.log('❌ Image analysis validation failed:', validation.error.issues);
       return res.status(400).json({
         error: "Invalid input data",
         details: validation.error.issues,
@@ -311,10 +313,18 @@ app.post("/image-molecules", async (req, res) => {
       cropSize,
     } = req.body;
 
+    console.log('📊 Image analysis parameters:', {
+      hasImageBase64: !!imageBase64,
+      hasCroppedImage: !!croppedImageBase64,
+      x, y, cropMiddleX, cropMiddleY, cropSize
+    });
+
     if (!imageBase64) {
+      console.log('❌ No image data provided');
       return res.status(400).json({ error: "No image data provided" });
     }
 
+    console.log('🔬 Starting AI analysis...');
     const result = await atomPredictor.analyzeImage(
       imageBase64,
       croppedImageBase64,
@@ -324,9 +334,10 @@ app.post("/image-molecules", async (req, res) => {
       cropMiddleY,
       cropSize,
     );
+    console.log('✅ AI analysis completed:', result);
     res.json({ output: result });
   } catch (error) {
-    console.error("Image analysis error:", error);
+    console.error("❌ Image analysis error:", error);
 
     // Provide more specific error messages
     let errorMessage = error.message;

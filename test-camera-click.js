@@ -1,29 +1,11 @@
-// Test script to verify camera click triggers analysis
-// Run this in the browser console
+// Test camera click functionality and debug image analysis issues
+// Run this in browser console to diagnose problems
 
-console.log('🧪 Testing Camera Click → Analysis Connection');
+console.log('🔍 Camera Click Analysis Debug Tool');
 
-// Test 1: Check if camera elements are properly set up
-function testCameraSetup() {
-  console.log('\n🔍 Test 1: Camera Setup');
-  
-  const elements = {
-    'Video Element': document.getElementById('video-feed'),
-    'Camera Manager': window.cameraManager,
-    'UI Manager': window.uiManager,
-    'Payment Manager': window.paymentManager
-  };
-  
-  Object.entries(elements).forEach(([name, element]) => {
-    console.log(`${element ? '✅' : '❌'} ${name}: ${element ? 'Available' : 'Missing'}`);
-  });
-  
-  return Object.values(elements).every(Boolean);
-}
-
-// Test 2: Test camera click event binding
-function testCameraClickBinding() {
-  console.log('\n👆 Test 2: Camera Click Event Binding');
+// Test 1: Check if camera manager is properly initialized
+function testCameraManager() {
+  console.log('\n📷 Test 1: Camera Manager Status');
   
   const video = document.getElementById('video-feed');
   if (!video) {
@@ -31,65 +13,122 @@ function testCameraClickBinding() {
     return false;
   }
   
-  // Check if click event is bound
-  const events = getEventListeners ? getEventListeners(video) : null;
-  if (events && events.click) {
-    console.log(`✅ Click event bound: ${events.click.length} listener(s)`);
+  console.log('✅ Video element found:', video);
+  console.log('📊 Video properties:', {
+    videoWidth: video.videoWidth,
+    videoHeight: video.videoHeight,
+    clientWidth: video.clientWidth,
+    clientHeight: video.clientHeight,
+    srcObject: !!video.srcObject,
+    paused: video.paused
+  });
+  
+  // Check if camera manager exists
+  if (window.cameraManager) {
+    console.log('✅ Camera manager found');
+    console.log('📊 Camera manager state:', {
+      isMobile: window.cameraManager.isMobile,
+      isSafari: window.cameraManager.isSafari,
+      isIOS: window.cameraManager.isIOS,
+      currentStream: !!window.cameraManager.currentStream
+    });
   } else {
-    console.log('⚠️ Click event listeners not visible (normal in production)');
-  }
-  
-  // Test click simulation
-  console.log('Simulating camera click...');
-  video.click();
-  
-  return true;
-}
-
-// Test 3: Test camera capture functionality
-function testCameraCapture() {
-  console.log('\n📸 Test 3: Camera Capture');
-  
-  if (!window.cameraManager) {
-    console.log('❌ Camera manager not available');
-    return false;
-  }
-  
-  // Check if camera is initialized
-  if (window.cameraManager.video && window.cameraManager.video.srcObject) {
-    console.log('✅ Camera stream active');
-  } else {
-    console.log('⚠️ Camera stream not active - may need permission');
+    console.log('❌ Camera manager not found');
   }
   
   return true;
 }
 
-// Test 4: Test analysis API endpoint
-async function testAnalysisAPI() {
-  console.log('\n🌐 Test 4: Analysis API');
+// Test 2: Check payment manager status
+function testPaymentManager() {
+  console.log('\n💳 Test 2: Payment Manager Status');
   
-  try {
-    const response = await fetch('/image-molecules', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        imageBase64: 'test',
-        croppedImageBase64: 'test',
-        x: 100,
-        y: 100,
-        cropMiddleX: 50,
-        cropMiddleY: 50,
-        cropSize: 100
-      })
+  if (window.paymentManager) {
+    console.log('✅ Payment manager found');
+    
+    // Check local storage
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    const cardInfo = localStorage.getItem('molCardInfo');
+    
+    console.log('📊 Payment status:', {
+      deviceToken: !!deviceToken,
+      cardInfo: !!cardInfo,
+      hasPaymentSetup: !!(deviceToken && cardInfo)
     });
     
-    console.log(`✅ API endpoint responds: ${response.status}`);
-    return true;
-  } catch (error) {
-    console.log(`❌ API endpoint error: ${error.message}`);
+    // Test payment check
+    window.paymentManager.checkPaymentMethod().then(hasPayment => {
+      console.log('✅ Payment check result:', hasPayment);
+    }).catch(err => {
+      console.log('❌ Payment check error:', err);
+    });
+    
+  } else {
+    console.log('❌ Payment manager not found');
+  }
+  
+  return true;
+}
+
+// Test 3: Test camera click event
+function testCameraClick() {
+  console.log('\n👆 Test 3: Camera Click Event');
+  
+  const videoFeed = document.getElementById('video-feed');
+  if (!videoFeed) {
+    console.log('❌ Video feed not found');
     return false;
   }
+  
+  // Add click event listener to test
+  let clickDetected = false;
+  const testClickListener = () => {
+    clickDetected = true;
+    console.log('✅ Camera click detected');
+  };
+  
+  videoFeed.addEventListener('click', testClickListener);
+  
+  // Simulate click
+  videoFeed.click();
+  
+  // Remove test listener
+  setTimeout(() => {
+    videoFeed.removeEventListener('click', testClickListener);
+    if (!clickDetected) {
+      console.log('❌ Camera click not detected');
+    }
+  }, 100);
+  
+  return true;
+}
+
+// Test 4: Test image analysis event
+function testImageAnalysis() {
+  console.log('\n🔬 Test 4: Image Analysis Event');
+  
+  // Listen for analysis completion event
+  const analysisListener = (event) => {
+    console.log('✅ Image analysis completed:', event.detail);
+    document.removeEventListener('imageAnalysisComplete', analysisListener);
+  };
+  
+  document.addEventListener('imageAnalysisComplete', analysisListener);
+  
+  // Simulate camera click to trigger analysis
+  const video = document.getElementById('video-feed');
+  if (video) {
+    video.click();
+    console.log('✅ Camera click triggered for analysis test');
+  }
+  
+  // Clean up listener after 10 seconds
+  setTimeout(() => {
+    document.removeEventListener('imageAnalysisComplete', analysisListener);
+    console.log('⚠️ Analysis event not received within 10 seconds');
+  }, 10000);
+  
+  return true;
 }
 
 // Test 5: Test complete camera click flow
@@ -123,42 +162,92 @@ function testCompleteFlow() {
   return true;
 }
 
-// Run all tests
-function runCameraClickTests() {
-  console.log('🚀 Running Camera Click Tests...\n');
+// Test 6: Check if payment is blocking analysis
+function testPaymentBlocking() {
+  console.log('\n🚫 Test 6: Payment Blocking Check');
   
-  const tests = [
-    testCameraSetup,
-    testCameraClickBinding,
-    testCameraCapture,
-    testAnalysisAPI,
-    testCompleteFlow
-  ];
-  
-  tests.forEach((test, index) => {
-    try {
-      test();
-    } catch (error) {
-      console.log(`❌ Test ${index + 1} failed:`, error.message);
+  // Check if payment popdown is visible
+  const paymentPopdown = document.getElementById('payment-popdown');
+  if (paymentPopdown) {
+    const isVisible = paymentPopdown.style.display !== 'none' && 
+                     !paymentPopdown.classList.contains('hidden');
+    console.log('📊 Payment popdown visible:', isVisible);
+    
+    if (isVisible) {
+      console.log('🚫 Analysis blocked by payment requirement');
+      console.log('💡 Solution: Complete payment setup to enable analysis');
     }
-  });
+  }
   
-  console.log('\n📝 Manual Test Instructions:');
-  console.log('1. Make sure camera mode is activated (checkbox checked)');
-  console.log('2. Grant camera permission if prompted');
-  console.log('3. Click on an object in the camera view');
-  console.log('4. Verify analysis starts and results appear');
-  console.log('5. Check browser console for any errors');
+  // Check local storage for payment setup
+  const deviceToken = localStorage.getItem('molDeviceToken');
+  const cardInfo = localStorage.getItem('molCardInfo');
+  
+  if (!deviceToken || !cardInfo) {
+    console.log('🚫 Payment not set up - analysis will be blocked');
+    console.log('💡 Solution: Set up payment method to enable analysis');
+  } else {
+    console.log('✅ Payment appears to be set up');
+  }
+  
+  return true;
 }
 
-// Export for manual testing
-window.cameraClickTests = {
-  runCameraClickTests,
-  testCameraSetup,
-  testCameraClickBinding,
-  testCameraCapture,
-  testAnalysisAPI,
-  testCompleteFlow
-};
+// Test 7: Debug camera interaction handler
+function testCameraInteraction() {
+  console.log('\n🎯 Test 7: Camera Interaction Handler');
+  
+  if (window.cameraManager && window.cameraManager.handleInteraction) {
+    console.log('✅ Camera interaction handler found');
+    
+    // Create a mock event
+    const mockEvent = {
+      clientX: 100,
+      clientY: 100,
+      preventDefault: () => console.log('Event prevented')
+    };
+    
+    // Test the handler (this will show payment check)
+    console.log('Testing camera interaction handler...');
+    window.cameraManager.handleInteraction(mockEvent).then(() => {
+      console.log('✅ Camera interaction handler completed');
+    }).catch(err => {
+      console.log('❌ Camera interaction handler error:', err);
+    });
+    
+  } else {
+    console.log('❌ Camera interaction handler not found');
+  }
+  
+  return true;
+}
 
-console.log('✅ Camera click testing functions loaded. Run cameraClickTests.runCameraClickTests() to test.'); 
+// Run all tests
+function runAllTests() {
+  console.log('🚀 Running all camera click tests...\n');
+  
+  testCameraManager();
+  testPaymentManager();
+  testCameraClick();
+  testPaymentBlocking();
+  testCameraInteraction();
+  
+  // Wait a bit then run analysis tests
+  setTimeout(() => {
+    testImageAnalysis();
+    testCompleteFlow();
+  }, 1000);
+  
+  console.log('\n📋 Test Summary:');
+  console.log('- Check console for individual test results');
+  console.log('- Look for ❌ errors that indicate problems');
+  console.log('- Payment issues are the most common cause of blocked analysis');
+}
+
+// Export functions for manual testing
+window.testCameraClick = testCameraClick;
+window.testPaymentBlocking = testPaymentBlocking;
+window.testCompleteFlow = testCompleteFlow;
+window.runAllTests = runAllTests;
+
+console.log('✅ Debug functions loaded. Run runAllTests() to start testing.'); 

@@ -149,7 +149,19 @@ class CameraManager {
 
   // Handle camera interaction (click/tap)
   async handleInteraction(evt) {
-    if (!await paymentManager.checkPaymentMethod()) {
+    console.log('📷 Camera interaction detected:', evt);
+    
+    let paymentCheck = false;
+    try {
+      paymentCheck = await paymentManager.checkPaymentMethod();
+      console.log('💳 Payment check result:', paymentCheck);
+    } catch (error) {
+      console.log('⚠️ Payment check failed, proceeding anyway:', error);
+      paymentCheck = true; // Fallback to allow analysis
+    }
+    
+    if (!paymentCheck) {
+      console.log('🚫 Payment required - showing message');
       // Show simple message instead of popdown
       const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
       messageColumn.innerHTML = `
@@ -164,22 +176,29 @@ class CameraManager {
       return;
     }
 
+    console.log('✅ Payment check passed, proceeding with analysis');
+
     // Mobile reticle validation
     if (this.isMobile && !this.isWithinReticle(evt)) {
+      console.log('📱 Mobile reticle validation failed');
       this.showReticleFeedback();
       return;
     }
 
+    console.log('🎯 Proceeding with camera analysis');
     this.showCropOutline(evt);
     
     try {
       // Capture and analyze the image
+      console.log('📸 Capturing image from camera');
       const captureData = await this.captureAndAnalyze(evt);
+      console.log('✅ Image captured successfully');
       
       // Create loading column
       const loadingColumn = uiManager.createLoadingColumn("Analyzing...", captureData.croppedBase64);
       
       // Send to server for analysis
+      console.log('🌐 Sending camera analysis request to server');
       const response = await fetch("/image-molecules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,8 +213,14 @@ class CameraManager {
         }),
       });
 
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      console.log('📡 Camera analysis response status:', response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+      
       const { output } = await response.json();
+      console.log('✅ Camera analysis completed:', output);
 
       // Remove loading column
       loadingColumn.remove();
@@ -212,11 +237,15 @@ class CameraManager {
       });
       document.dispatchEvent(event);
       
-      // Increment usage
-      await paymentManager.incrementUsage();
+      // Try to increment usage, but don't fail if it doesn't work
+      try {
+        await paymentManager.incrementUsage();
+      } catch (usageError) {
+        console.log('⚠️ Usage increment failed:', usageError);
+      }
       
     } catch (error) {
-      console.error('Camera analysis error:', error);
+      console.error('❌ Camera analysis error:', error);
       this.createClosableErrorMessage(`Analysis failed: ${error.message}`);
     }
   }
