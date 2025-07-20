@@ -73,6 +73,15 @@ class CameraManager {
     }
   }
 
+  // Check if camera is ready for interaction
+  isCameraReady() {
+    return this.video && 
+           this.currentStream && 
+           this.video.videoWidth > 0 && 
+           this.video.videoHeight > 0 && 
+           this.video.readyState >= 2;
+  }
+
   // Update UI based on permission status
   updatePermissionUI() {
     const status = this.getPermissionStatus();
@@ -114,6 +123,7 @@ class CameraManager {
     }
 
     this.setupEventListeners();
+    this.updateCameraInstructions();
     
     // Check if we have stored permission and auto-start camera
     if (this.hasStoredCameraPermission()) {
@@ -125,6 +135,7 @@ class CameraManager {
       } catch (err) {
         // If auto-start fails, clear the stored permission
         this.saveCameraPermission(false);
+        this.updateCameraInstructions();
       }
     }
     
@@ -161,6 +172,12 @@ class CameraManager {
     }
 
     this.stopCurrentStream();
+    
+    // Validate video element
+    if (!this.video) {
+      console.error('Video element not found');
+      return;
+    }
 
     try {
       let stream;
@@ -193,6 +210,16 @@ class CameraManager {
       
       // Save successful camera permission
       this.saveCameraPermission(true);
+      
+      console.log('✅ Camera started successfully:', {
+        videoWidth: this.video.videoWidth,
+        videoHeight: this.video.videoHeight,
+        readyState: this.video.readyState,
+        srcObject: !!this.video.srcObject
+      });
+      
+      // Update instruction text based on camera readiness
+      this.updateCameraInstructions();
       
     } catch (err) {
       this.saveCameraPermission(false);
@@ -277,9 +304,31 @@ class CameraManager {
     }
 
     console.log('🎯 Proceeding with camera analysis');
+    
+    // Check if camera is ready
+    if (!this.isCameraReady()) {
+      console.log('⚠️ Camera not ready, attempting to restart...');
+      try {
+        await this.startCamera();
+        // Wait a moment for camera to stabilize
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (!this.isCameraReady()) {
+          throw new Error('Camera failed to initialize - please refresh the page and try again');
+        }
+      } catch (restartError) {
+        throw new Error('Camera initialization failed - please check camera permissions and try again');
+      }
+    }
+    
     this.showCropOutline(evt);
     
     try {
+      // Validate camera state before capture
+      if (!this.video || !this.currentStream) {
+        throw new Error('Camera not ready - please wait for camera to initialize');
+      }
+      
       // Capture and analyze the image
       console.log('📸 Capturing image from camera');
       const captureData = await this.captureAndAnalyze(evt);
@@ -387,10 +436,38 @@ class CameraManager {
 
   // Capture image and prepare for analysis
   async captureAndAnalyze(evt) {
+    // Validate video element state
+    if (!this.video) {
+      throw new Error('Video element not found');
+    }
+    
+    if (!this.currentStream) {
+      throw new Error('No camera stream active');
+    }
+    
+    if (this.video.videoWidth === 0 || this.video.videoHeight === 0) {
+      throw new Error('Video stream not ready - please wait a moment and try again');
+    }
+    
+    if (this.video.readyState < 2) {
+      throw new Error('Video stream not ready - please wait a moment and try again');
+    }
+    
     const canvas = document.createElement("canvas");
     canvas.width = this.video.videoWidth;
     canvas.height = this.video.videoHeight;
-    canvas.getContext("2d").drawImage(this.video, 0, 0, canvas.width, canvas.height);
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      throw new Error('Failed to get canvas context');
+    }
+    
+    try {
+      ctx.drawImage(this.video, 0, 0, canvas.width, canvas.height);
+    } catch (drawError) {
+      throw new Error('Failed to capture image from camera - please try again');
+    }
+    
     const imageBase64 = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
 
     const scaleX = this.video.videoWidth / this.video.clientWidth;
@@ -475,6 +552,23 @@ class CameraManager {
     const existingReticle = document.querySelector(".mobile-reticle");
     if (existingReticle) {
       existingReticle.remove();
+    }
+  }
+
+  // Update camera instruction text
+  updateCameraInstructions() {
+    const instructionText = document.querySelector('.instruction-text');
+    if (!instructionText) return;
+    
+    if (this.isCameraReady()) {
+      instructionText.textContent = 'Center object in circle & tap, or type name above';
+      instructionText.style.color = '#ffffff';
+    } else if (this.currentStream) {
+      instructionText.textContent = 'Camera initializing... please wait';
+      instructionText.style.color = '#ffa500';
+    } else {
+      instructionText.textContent = 'Camera not available - check permissions';
+      instructionText.style.color = '#ff6b6b';
     }
   }
 
