@@ -7,10 +7,95 @@ class CameraManager {
   constructor() {
     this.video = null;
     this.currentStream = null;
-    this.facingMode = 'environment';
-    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    this.facingMode = "environment";
+    
+    // Permission persistence
+    this.permissionKey = 'mol_camera_permission';
+    this.deviceId = this.getDeviceId();
+  }
+
+  // Generate or retrieve device ID for permission persistence
+  getDeviceId() {
+    let deviceId = localStorage.getItem('mol_device_id');
+    if (!deviceId) {
+      deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('mol_device_id', deviceId);
+    }
+    return deviceId;
+  }
+
+  // Save camera permission status
+  saveCameraPermission(granted) {
+    const permissions = this.getStoredPermissions();
+    permissions[this.deviceId] = {
+      camera: granted,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(this.permissionKey, JSON.stringify(permissions));
+  }
+
+  // Get stored permissions
+  getStoredPermissions() {
+    try {
+      const stored = localStorage.getItem(this.permissionKey);
+      return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+      return {};
+    }
+  }
+
+  // Check if camera permission was previously granted
+  hasStoredCameraPermission() {
+    const permissions = this.getStoredPermissions();
+    const devicePerms = permissions[this.deviceId];
+    if (!devicePerms) return false;
+    
+    // Check if permission is still valid (not older than 30 days)
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    return devicePerms.camera && devicePerms.timestamp > thirtyDaysAgo;
+  }
+
+  // Clear stored camera permission
+  clearStoredPermission() {
+    const permissions = this.getStoredPermissions();
+    delete permissions[this.deviceId];
+    localStorage.setItem(this.permissionKey, JSON.stringify(permissions));
+  }
+
+  // Get permission status for UI display
+  getPermissionStatus() {
+    if (this.hasStoredCameraPermission()) {
+      return 'granted';
+    } else if (this.currentStream) {
+      return 'active';
+    } else {
+      return 'denied';
+    }
+  }
+
+  // Update UI based on permission status
+  updatePermissionUI() {
+    const status = this.getPermissionStatus();
+    const video = this.video;
+    
+    if (status === 'granted' || status === 'active') {
+      video.classList.add('permission-granted');
+      video.classList.remove('permission-denied');
+    } else {
+      video.classList.add('permission-denied');
+      video.classList.remove('permission-granted');
+    }
+  }
+
+  // Show permission request button
+  showPermissionRequest() {
+    const video = this.video;
+    const permissionBtn = document.createElement('button');
+    permissionBtn.className = 'camera-permission-btn';
+    permissionBtn.textContent = 'Enable Camera';
+    permissionBtn.onclick = () => this.requestPermission();
+    
+    video.parentNode.appendChild(permissionBtn);
   }
 
   // Initialize camera system
@@ -30,15 +115,20 @@ class CameraManager {
 
     this.setupEventListeners();
     
-    try {
-      await this.startCamera();
-      await this.setupSwitchCamera();
-      this.updateReticleVisibility();
-      return true;
-    } catch (err) {
-      console.error("Camera setup failed:", err);
-      return false;
+    // Check if we have stored permission and auto-start camera
+    if (this.hasStoredCameraPermission()) {
+      try {
+        await this.startCamera();
+        await this.setupSwitchCamera();
+        this.updateReticleVisibility();
+        return true;
+      } catch (err) {
+        // If auto-start fails, clear the stored permission
+        this.saveCameraPermission(false);
+      }
     }
+    
+    return false;
   }
 
   // Setup camera event listeners
@@ -67,7 +157,6 @@ class CameraManager {
   // Start camera stream
   async startCamera() {
     if (paymentManager.isPaymentRequired()) {
-      console.log('Camera access blocked - payment setup required');
       return;
     }
 
@@ -80,7 +169,6 @@ class CameraManager {
         try {
           stream = await navigator.mediaDevices.getUserMedia(this.getSafariConstraints());
         } catch (err) {
-          console.log("Safari constraints failed, trying basic:", err);
           stream = await navigator.mediaDevices.getUserMedia(this.getBasicConstraints());
         }
       } else {
@@ -103,8 +191,11 @@ class CameraManager {
       this.hideError();
       this.updateReticleVisibility();
       
+      // Save successful camera permission
+      this.saveCameraPermission(true);
+      
     } catch (err) {
-      console.error("Camera error:", err);
+      this.saveCameraPermission(false);
       this.handleCameraError(err);
     }
   }
@@ -428,26 +519,15 @@ class CameraManager {
     return errorDiv;
   }
 
-  // Request camera permission (Safari)
+  // Request camera permission with persistence
   async requestPermission() {
     try {
-      console.log('🎥 Requesting camera permission...');
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      });
-      
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      this.saveCameraPermission(true);
       stream.getTracks().forEach(track => track.stop());
-      
-      console.log('✅ Camera permission granted');
       return true;
     } catch (error) {
-      console.error('❌ Camera permission denied:', error);
-      
-      if (error.name === 'NotAllowedError') {
-        alert('Please allow camera access in Safari:\n1. Click Safari menu → Settings → Websites → Camera\n2. Set this site to "Allow"');
-      }
-      
+      this.saveCameraPermission(false);
       return false;
     }
   }

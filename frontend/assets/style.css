@@ -1818,3 +1818,31 @@ input[type="checkbox"]:checked + .mode-label {
   text-align: center;
   padding: 20px;
 }
+
+/* Camera permission UI */
+.camera-permission-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 10;
+}
+
+.camera-permission-btn:hover {
+  background: #0056b3;
+}
+
+#video-feed.permission-denied {
+  opacity: 0.5;
+}
+
+#video-feed.permission-granted {
+  opacity: 1;
+}

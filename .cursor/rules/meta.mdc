@@ -1,4 +1,13 @@
+---
+alwaysApply: false
+---
+
+Be maximally simple & straightford as appropriate
+
 Only generate rules here in .mdc files, not markdown
+for edits to the run scripts, make launch.json identical
+
+Show don't tell for example show code and code chunks rather than just saying you did itOnly generate rules here in .mdc files, not markdown
 for edits to the run scripts, make launch.json identical
 
 Show don't tell for example show code and code chunks rather than just saying you did it

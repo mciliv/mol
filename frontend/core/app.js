@@ -32,13 +32,12 @@ class MolecularApp {
     // Initialize camera system
     await cameraManager.initialize();
 
-    // Safari-specific camera permission request
-    if (cameraManager.isSafari) {
-      console.log('🍎 Safari detected - requesting camera permission early');
-    setTimeout(() => {
+    // Safari-specific camera permission request (only if not already granted)
+    if (cameraManager.isSafari && !cameraManager.hasStoredCameraPermission()) {
+      setTimeout(() => {
         cameraManager.requestPermission();
       }, 1000);
-  }
+    }
   
     console.log('✅ Molecular analysis app initialized');
   }
