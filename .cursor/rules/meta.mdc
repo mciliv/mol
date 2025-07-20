@@ -1,1 +1,2 @@
 Only generate rules here in .mdc files, not markdown
+for edits to the run scripts, make launch.json identical

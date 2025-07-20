@@ -1476,73 +1476,29 @@ input[type="checkbox"]:checked + .mode-label {
 }
 
 .main-app-interface.payment-required {
-  opacity: 0.3;
-  filter: grayscale(0.5) blur(1px);
-  pointer-events: none;
-  user-select: none;
+  /* Remove blur and opacity effects - just show normally */
+  opacity: 1;
+  filter: none;
+  pointer-events: auto;
+  user-select: auto;
 }
 
 /* Payment Required State Enhancements */
 .main-app-interface.payment-required::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 212, 255, 0.05) 0%,
-    rgba(0, 153, 204, 0.05) 50%,
-    rgba(15, 52, 96, 0.05) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
+  /* Remove overlay effect */
+  display: none;
 }
 
-/* Subtle hint overlay for payment required state */
+/* Remove hint overlay since we show direct messages now */
 .main-app-interface.payment-required .top-bar::after {
-  content: '🔬 Complete payment above to analyze molecules';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 212, 255, 0.9);
-  color: #000000;
-  padding: 8px 16px;
-  border-radius: 0 0 8px 8px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-  z-index: 2;
-  animation: pulseHint 2s ease-in-out infinite;
+  /* Remove payment hint overlay */
+  display: none;
 }
 
-@keyframes pulseHint {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 1; }
-}
-
-/* Ensure camera preview shows but is clearly disabled */
-.main-app-interface.payment-required .camera-container {
-  position: relative;
-}
-
+/* Remove camera overlay since we show direct messages now */
 .main-app-interface.payment-required .camera-container::before {
-  content: '📷 Camera requires payment setup';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: rgba(255, 255, 255, 0.9);
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  z-index: 3;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Remove camera payment overlay */
+  display: none;
 }
 
 /* Popdown Content */
@@ -1764,16 +1720,6 @@ input[type="checkbox"]:checked + .mode-label {
   
   .popdown-form {
     padding: 16px;
-  }
-
-  .main-app-interface.payment-required .top-bar::after {
-    font-size: 11px;
-    padding: 6px 12px;
-  }
-  
-  .main-app-interface.payment-required .camera-container::before {
-    font-size: 12px;
-    padding: 8px 16px;
   }
 }
 

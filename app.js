@@ -127,8 +127,22 @@ class MolecularApp {
 
     // 🔴 BREAKPOINT: Set breakpoint here to debug payment check
     if (!this.hasPaymentSetup) {
-      console.log('💳 Payment not set up, showing payment popdown');
-      this.showPaymentPopdown();
+      console.log('💳 Payment not set up, showing simple message');
+      
+      // Create a simple message instead of analysis
+      const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
+      messageColumn.innerHTML = `
+        <div class="molecule-container">
+          <div class="molecule-info">
+            <h3>Payment Required</h3>
+            <p>See payment setup above</p>
+            <div class="analysis-note">Complete payment setup to analyze molecules</div>
+          </div>
+        </div>
+      `;
+      
+      // Clear the input
+      this.objectInput.value = "";
       return;
     }
 
@@ -298,6 +312,17 @@ class MolecularApp {
   // Handle click on uploaded image
   async handleImageClick(evt, img) {
     if (!await paymentManager.checkPaymentMethod()) {
+      // Show simple message instead of popdown
+      const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
+      messageColumn.innerHTML = `
+        <div class="molecule-container">
+          <div class="molecule-info">
+            <h3>Payment Required</h3>
+            <p>See payment setup above</p>
+            <div class="analysis-note">Complete payment setup to analyze molecules from images</div>
+          </div>
+        </div>
+      `;
       return;
     }
 

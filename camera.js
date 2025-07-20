@@ -148,7 +148,18 @@ class CameraManager {
 
   // Handle camera interaction (click/tap)
   async handleInteraction(evt) {
-    if (!paymentManager.checkPaymentMethod()) {
+    if (!await paymentManager.checkPaymentMethod()) {
+      // Show simple message instead of popdown
+      const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
+      messageColumn.innerHTML = `
+        <div class="molecule-container">
+          <div class="molecule-info">
+            <h3>Payment Required</h3>
+            <p>See payment setup above</p>
+            <div class="analysis-note">Complete payment setup to analyze molecules via camera</div>
+          </div>
+        </div>
+      `;
       return;
     }
 

@@ -3,44 +3,279 @@
   "compounds": [
     {
       "name": "🚀 Full App Debug",
-      "configurations": ["Dev Server", "Chrome"],
-      "stopAll": true
+      "configurations": ["🔧 Dev Server (with tests)", "🌐 Chrome Browser"],
+      "stopAll": true,
+      "presentation": {
+        "hidden": false,
+        "group": "development"
+      }
     }
   ],
   "configurations": [
+    // ==================== DEVELOPMENT ====================
     {
       "type": "node",
       "request": "launch",
-      "name": "Dev Server",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "name": "🔧 Dev Server (with tests)",
+      "program": "${workspaceFolder}/run",
+      "args": ["dev"],
       "console": "integratedTerminal",
-      "restart": true
+      "restart": true,
+      "presentation": {
+        "hidden": false,
+        "group": "development",
+        "order": 1
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "⚡ Unsafe Dev (no tests)",
+      "program": "${workspaceFolder}/run",
+      "args": ["unsafe"],
+      "console": "integratedTerminal",
+      "restart": true,
+      "presentation": {
+        "hidden": false,
+        "group": "development",
+        "order": 2
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🏭 Production Server",
+      "program": "${workspaceFolder}/run",
+      "args": ["server"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "development",
+        "order": 3
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🐛 Debug Server",
+      "program": "${workspaceFolder}/run",
+      "args": ["debug"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "development",
+        "order": 4
+      }
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "🔗 Attach to Running Server",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": ".",
+      "presentation": {
+        "hidden": false,
+        "group": "development",
+        "order": 5
+      }
     },
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Chrome",
+      "name": "🌐 Chrome Browser",
       "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}"
+      "webRoot": "${workspaceFolder}",
+      "presentation": {
+        "hidden": false,
+        "group": "development",
+        "order": 6
+      }
+    },
+
+    // ==================== TESTING ====================
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🧪 All Tests",
+      "program": "${workspaceFolder}/run",
+      "args": ["test"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "testing",
+        "order": 1
+      }
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Tests",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["test"],
-      "console": "integratedTerminal"
+      "name": "⚙️ Unit Tests",
+      "program": "${workspaceFolder}/run",
+      "args": ["unit"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "testing",
+        "order": 2
+      }
     },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🔗 Integration Tests",
+      "program": "${workspaceFolder}/run",
+      "args": ["integration"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "testing",
+        "order": 3
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🖥️ System Tests",
+      "program": "${workspaceFolder}/run",
+      "args": ["system"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "testing",
+        "order": 4
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "👀 Watch Tests",
+      "program": "${workspaceFolder}/run",
+      "args": ["watch"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "testing",
+        "order": 5
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "📋 Fixture Tests",
+      "program": "${workspaceFolder}/run",
+      "args": ["fixtures"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "testing",
+        "order": 6
+      }
+    },
+
+    // ==================== PYTHON TESTING ====================
     {
       "type": "debugpy",
       "request": "launch",
-      "name": "Python Tests",
+      "name": "🐍 Python Tests",
       "module": "pytest",
       "args": ["tests/", "-v"],
       "console": "integratedTerminal",
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
+      },
+      "presentation": {
+        "hidden": false,
+        "group": "python",
+        "order": 1
+      }
+    },
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "🐛 Python Tests (Debug)",
+      "module": "debugpy",
+      "args": ["--listen", "5678", "--wait-for-client", "-m", "pytest", "tests/", "-v", "-s"],
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "presentation": {
+        "hidden": false,
+        "group": "python",
+        "order": 2
+      }
+    },
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "🐍 Debug Current Python File",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "presentation": {
+        "hidden": false,
+        "group": "python",
+        "order": 3
+      }
+    },
+
+    // ==================== DEPLOYMENT ====================
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🚢 Ship (Complete Workflow)",
+      "program": "${workspaceFolder}/run",
+      "args": ["ship"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "deployment",
+        "order": 1
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "☁️ Deploy (Legacy)",
+      "program": "${workspaceFolder}/run",
+      "args": ["deploy"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "deployment",
+        "order": 2
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "☁️ Deploy Now (Gen2)",
+      "program": "${workspaceFolder}/run",
+      "args": ["deploy:now"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "deployment",
+        "order": 3
+      }
+    },
+
+    // ==================== UTILITIES ====================
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🧹 Cleanup Processes",
+      "program": "${workspaceFolder}/run",
+      "args": ["cleanup"],
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "utilities",
+        "order": 1
       }
     }
   ]
