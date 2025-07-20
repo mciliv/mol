@@ -1,6 +1,7 @@
 // app.js - Core molecular analysis application
 import { paymentManager } from '../components/payment.js';
 import { cameraManager } from '../components/camera.js';
+import { cameraHandler } from '../components/camera-handler.js';
 import { uiManager } from '../components/ui-utils.js';
 
 class MolecularApp {
@@ -47,21 +48,8 @@ class MolecularApp {
     // Setup text analysis with debugging support
     this.setupTextAnalysis();
 
-    // Photo upload handling
-    const photoUpload = document.getElementById("photo-upload");
-    if (photoUpload) {
-      photoUpload.addEventListener("change", (e) => this.handlePhotoUpload(e));
-  }
-  
-    // URL analysis
-    const photoUrl = document.getElementById("photo-url");
-    const urlAnalyze = document.getElementById("url-analyze");
-    if (photoUrl && urlAnalyze) {
-      photoUrl.addEventListener("keyup", (e) => {
-        if (e.key === "Enter") this.handleUrlAnalysis();
-      });
-      urlAnalyze.addEventListener("click", () => this.handleUrlAnalysis());
-      }
+    // Setup camera handler event listeners
+    cameraHandler.setupEventListeners();
       
     // Mode switching based on user interaction
     const video = document.getElementById("video-feed");
@@ -70,6 +58,11 @@ class MolecularApp {
       video.addEventListener("touchstart", () => uiManager.switchToCameraMode());
   }
   
+    // Photo mode switching
+    const photoUpload = document.getElementById("photo-upload");
+    const photoUrl = document.getElementById("photo-url");
+    const urlAnalyze = document.getElementById("url-analyze");
+    
     if (photoUpload) {
       photoUpload.addEventListener("change", () => uiManager.switchToPhotoMode());
     }
@@ -78,10 +71,16 @@ class MolecularApp {
     }
     if (urlAnalyze) {
       urlAnalyze.addEventListener("click", () => uiManager.switchToPhotoMode());
-  }
+    }
   
     // Text input clears mode selection
     this.objectInput.addEventListener("focus", () => uiManager.clearModeSelection());
+
+    // Listen for image analysis completion
+    document.addEventListener('imageAnalysisComplete', (e) => {
+      const { output, icon, objectName, useQuotes, croppedImageData } = e.detail;
+      this.processAnalysisResult(output, icon, objectName, useQuotes, croppedImageData);
+    });
   }
   
   // Handle Enter key press for text analysis
@@ -198,212 +197,7 @@ class MolecularApp {
     }
   }
 
-  // Handle photo upload analysis
-  async handlePhotoUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
-      return;
-    }
-
-    await this.displayUploadedImage(file);
-  }
-
-  // Handle URL-based image analysis
-  async handleUrlAnalysis() {
-    const photoUrl = document.getElementById("photo-url");
-    const url = photoUrl.value.trim();
-    
-    if (!url) {
-      alert("Please enter an image URL");
-      return;
-    }
-
-    try {
-      new URL(url);
-    } catch {
-      alert("Please enter a valid URL");
-      return;
-    }
-
-    try {
-      const imageBase64 = await uiManager.urlToBase64(url);
-      const byteCharacters = atob(imageBase64);
-      const byteNumbers = new Array(byteCharacters.length);
-      
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "image/jpeg" });
-      const file = new File([blob], "url-image.jpg", { type: "image/jpeg" });
-
-      await this.displayUploadedImage(file);
-      photoUrl.value = "";
-      
-    } catch (err) {
-      this.createClosableErrorMessage(`Error loading image from URL: ${err.message}`);
-    }
-  }
-
-  // Display uploaded image for interactive analysis
-  async displayUploadedImage(file) {
-    const photoOptions = document.getElementById("photo-options");
-    photoOptions.innerHTML = "";
-
-    const imageContainer = document.createElement("div");
-    imageContainer.className = "uploaded-image-container";
-
-    const img = document.createElement("img");
-    const isMobile = cameraManager.isMobile;
-    
-    // Add mobile reticle if needed
-    if (isMobile) {
-      const crosshair = document.createElement("div");
-      crosshair.className = "crosshair";
-      const beforeLine = document.createElement("div");
-      beforeLine.className = "crosshair-line vertical";
-      const afterLine = document.createElement("div");
-      afterLine.className = "crosshair-line horizontal";
-      crosshair.appendChild(beforeLine);
-      crosshair.appendChild(afterLine);
-      imageContainer.appendChild(crosshair);
-    }
-
-    const instructionText = document.createElement("div");
-    instructionText.className = "instruction-text";
-    instructionText.textContent = isMobile
-      ? "Center object in circle & tap, or type name above"
-      : "Click on object or type name above";
-
-    const closeButton = document.createElement("button");
-    closeButton.className = "close-button";
-    closeButton.innerHTML = '<img src="close.svg" alt="Close" width="24" height="24" />';
-    closeButton.onclick = () => {
-      photoOptions.innerHTML = "";
-      const template = document.getElementById("photo-upload-template");
-      const clone = template.content.cloneNode(true);
-      photoOptions.appendChild(clone);
-
-      const newPhotoUpload = photoOptions.querySelector("#photo-upload");
-      newPhotoUpload.addEventListener("change", (e) => this.handlePhotoUpload(e));
-    };
-
-    try {
-      const imageBase64 = await uiManager.fileToBase64(file);
-      img.src = `data:${file.type};base64,${imageBase64}`;
-      img.dataset.base64 = imageBase64;
-      img.addEventListener("click", (e) => this.handleImageClick(e, img));
-      
-    } catch (error) {
-      this.createClosableErrorMessage(`Error processing image: ${error.message}`);
-      return;
-    }
-
-    imageContainer.appendChild(img);
-    imageContainer.appendChild(instructionText);
-    imageContainer.appendChild(closeButton);
-    photoOptions.appendChild(imageContainer);
-  }
-
-  // Handle click on uploaded image
-  async handleImageClick(evt, img) {
-    if (!await paymentManager.checkPaymentMethod()) {
-      // Show simple message instead of popdown
-      const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
-      messageColumn.innerHTML = `
-        <div class="molecule-container">
-          <div class="molecule-info">
-            <h3>Payment Required</h3>
-            <p>See payment setup above</p>
-            <div class="analysis-note">Complete payment setup to analyze molecules from images</div>
-          </div>
-        </div>
-      `;
-      return;
-    }
-
-    const rect = img.getBoundingClientRect();
-    const clickX = evt.clientX - rect.left;
-    const clickY = evt.clientY - rect.top;
-
-    const relativeX = clickX / rect.width;
-    const relativeY = clickY / rect.height;
-
-    const imageBase64 = img.dataset.base64;
-
-    // Create crop canvas
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    const tempImg = new Image();
-    tempImg.onload = async () => {
-      canvas.width = tempImg.width;
-      canvas.height = tempImg.height;
-      ctx.drawImage(tempImg, 0, 0);
-
-      const cropSize = Math.min(tempImg.width, tempImg.height) * 0.1;
-      const cropX = Math.max(0, relativeX * tempImg.width - cropSize / 2);
-      const cropY = Math.max(0, relativeY * tempImg.height - cropSize / 2);
-
-      const cropCanvas = document.createElement("canvas");
-      cropCanvas.width = cropSize;
-      cropCanvas.height = cropSize;
-      const cropCtx = cropCanvas.getContext("2d");
-      cropCtx.imageSmoothingEnabled = false;
-
-      cropCtx.drawImage(canvas, cropX, cropY, cropSize, cropSize, 0, 0, cropSize, cropSize);
-
-      const middleX = Math.floor(cropSize / 2);
-      const middleY = Math.floor(cropSize / 2);
-      const boxSize = Math.max(8, Math.floor(cropSize * 0.1));
-      
-      cropCtx.save();
-      cropCtx.strokeStyle = "#ff0000";
-      cropCtx.lineWidth = Math.max(2, Math.floor(cropSize * 0.02));
-      cropCtx.strokeRect(middleX - boxSize / 2, middleY - boxSize / 2, boxSize, boxSize);
-      cropCtx.restore();
-
-      const croppedBase64 = cropCanvas.toDataURL("image/jpeg", 0.9).split(",")[1];
-      const loadingColumn = uiManager.createLoadingColumn("Analyzing...", croppedBase64);
-
-      try {
-        const response = await fetch("/image-molecules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageBase64,
-          croppedImageBase64: croppedBase64,
-          x: relativeX * tempImg.width,
-          y: relativeY * tempImg.height,
-          cropMiddleX: middleX,
-          cropMiddleY: middleY,
-          cropSize: cropSize,
-        }),
-        });
-
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const { output } = await response.json();
-
-          loadingColumn.remove();
-        this.updateScrollHandles();
-
-        const objectName = output.object || "Uploaded image";
-        this.processAnalysisResult(output, "Photo", objectName, false, croppedBase64);
-        await paymentManager.incrementUsage();
-        
-    } catch (err) {
-        loadingColumn.remove();
-        this.updateScrollHandles();
-        this.createClosableErrorMessage(`Error: ${err.message}`);
-      }
-    };
-
-    tempImg.src = `data:image/jpeg;base64,${imageBase64}`;
-    }
 
   // Process analysis results and display molecules
   processAnalysisResult(output, icon, objectName, useQuotes = false, croppedImageData = null) {
