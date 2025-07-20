@@ -12,3 +12,4 @@ sdf_files
 *.jpg
 .venv
 certs/
+.env
