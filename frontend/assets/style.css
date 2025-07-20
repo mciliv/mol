@@ -182,7 +182,7 @@ input[type="checkbox"]:checked + .mode-label {
 
 /* When camera mode is active, show as flex */
 .camera-container.active {
-  display: flex;
+  display: flex !important;
 }
 
 /* Photo options container */
@@ -197,7 +197,7 @@ input[type="checkbox"]:checked + .mode-label {
 
 /* When photo mode is active, show as flex */
 .photo-options.active {
-  display: flex;
+  display: flex !important;
 }
 
 #video-feed {
