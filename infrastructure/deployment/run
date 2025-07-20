@@ -5,36 +5,36 @@ case "$1" in
   "dev"|"start")
     echo "🧹 Cleaning up any existing development processes..."
     # Kill any existing node processes running our server
-    pkill -f "node.*server.js" 2>/dev/null || true
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
     pkill -f "nodemon" 2>/dev/null || true
     
     # Wait a moment for cleanup
     sleep 1
     
     echo "🚀 Starting development server..."
-    npx jest --testPathPattern=unit.test.js --verbose --silent && nodemon server.js
+    npx jest --testPathPattern=unit.test.js --verbose --silent && nodemon backend/api/server.js
     ;;
   "server")
     echo "🧹 Cleaning up any existing server processes..."
-    pkill -f "node.*server.js" 2>/dev/null || true
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
     sleep 1
     echo "🚀 Starting production server..."
-    node server.js
+    node backend/api/server.js
     ;;
   "debug")
     echo "🧹 Cleaning up any existing debug processes..."
-    pkill -f "node.*server.js" 2>/dev/null || true
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
     sleep 1
     echo "🐛 Starting server with debugger..."
-    node --inspect server.js
+    node --inspect backend/api/server.js
     ;;
   "unsafe")
     echo "🧹 Cleaning up any existing processes..."
-    pkill -f "node.*server.js" 2>/dev/null || true
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
     pkill -f "nodemon" 2>/dev/null || true
     sleep 1
     echo "🚀 Starting unsafe development server (no tests)..."
-    nodemon server.js
+    nodemon backend/api/server.js
     ;;
   
   # Testing
@@ -54,10 +54,10 @@ case "$1" in
     npx jest --watch
     ;;
   "pytest")
-    python -m pytest tests/ -v
+    python -m pytest testing/ -v
     ;;
   "pytest:debug")
-    python -m debugpy --listen 5678 --wait-for-client -m pytest tests/ -v -s
+    python -m debugpy --listen 5678 --wait-for-client -m pytest testing/ -v -s
     ;;
   "fixtures")
     npx jest --testPathPattern=tests/fixtures
@@ -85,7 +85,7 @@ case "$1" in
     
     # Run pre-deployment tests
     echo "🧪 Running pre-deployment tests..."
-    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v
+    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest testing/ -v
     
     if [ $? -ne 0 ]; then
       echo "❌ Tests failed - aborting deployment"
@@ -109,16 +109,16 @@ case "$1" in
     echo "🌐 Function deployed to Google Cloud Functions"
     ;;
   "deploy")
-    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .
+    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest testing/ -v && gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .
     ;;
   "deploy:now")
-    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest tests/ -v && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
+    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest testing/ -v && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
     ;;
   
   # Utilities
   "cleanup")
     echo "🧹 Cleaning up all development processes and ports..."
-    pkill -f "node.*server.js" 2>/dev/null || true
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
     pkill -f "nodemon" 2>/dev/null || true
     
     # Try to free up the common ports

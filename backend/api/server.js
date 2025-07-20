@@ -7,13 +7,13 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const HttpsServer = require("./https-server");
-const AtomPredictor = require("./AtomPredictor");
-const MolecularProcessor = require("./molecular-processor");
+const AtomPredictor = require("../services/AtomPredictor");
+const MolecularProcessor = require("../services/molecular-processor");
 const {
   ImageMoleculeSchema,
   TextMoleculeSchema,
   SdfGenerationSchema,
-} = require("./schemas");
+} = require("../schemas/schemas");
 
 // ==================== CONFIGURATION ====================
 const app = express();
@@ -167,8 +167,10 @@ if (false && process.env.NODE_ENV === "development") {
   startLiveReload(35729);
 }
 
-app.use(express.static(__dirname));
-app.use("/sdf_files", express.static(path.join(__dirname, "sdf_files")));
+app.use(express.static(path.join(__dirname, "..", "..", "frontend", "core")));
+app.use("/assets", express.static(path.join(__dirname, "..", "..", "frontend", "assets")));
+app.use("/components", express.static(path.join(__dirname, "..", "..", "frontend", "components")));
+app.use("/sdf_files", express.static(path.join(__dirname, "..", "..", "data", "sdf_files")));
 
 // ==================== PAYMENT ROUTES ====================
 

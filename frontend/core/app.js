@@ -1,7 +1,7 @@
 // app.js - Core molecular analysis application
-import { paymentManager } from './payment.js';
-import { cameraManager } from './camera.js';
-import { uiManager } from './ui-utils.js';
+import { paymentManager } from '../components/payment.js';
+import { cameraManager } from '../components/camera.js';
+import { uiManager } from '../components/ui-utils.js';
 
 class MolecularApp {
   constructor() {

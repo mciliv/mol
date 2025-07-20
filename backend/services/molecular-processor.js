@@ -3,8 +3,8 @@ const fs = require("fs");
 const path = require("path");
 
 class MolecularProcessor {
-  constructor(sdfDir = "sdf_files") {
-    this.sdfDir = path.join(__dirname, sdfDir);
+  constructor(sdfDir = "data/sdf_files") {
+    this.sdfDir = path.join(__dirname, "..", "..", sdfDir);
     this.ensureSdfDirectory();
   }
 
@@ -65,7 +65,7 @@ class MolecularProcessor {
   async generateSmilesSDF(chemical) {
     return new Promise((resolve, reject) => {
       const pythonProcess = spawn("python", [
-        "sdf.py",
+        "../chemistry/processors/sdf.py",
         chemical,
         "--dir",
         this.sdfDir,

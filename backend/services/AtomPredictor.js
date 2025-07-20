@@ -2,7 +2,7 @@ const { OpenAI } = require("openai");
 const {
   ObjectIdentificationSchema,
   CHEMICAL_REPRESENTATIONS,
-} = require("./schemas");
+} = require("../schemas/schemas");
 
 class AtomPredictor {
   constructor(apiKey) {

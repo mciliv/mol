@@ -12,7 +12,7 @@
   "version": "1.0.0",
   "main": "function.js",
   "directories": {
-    "test": "tests"
+    "test": "../testing"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
   "jest": {
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
-      "<rootDir>/tests/setup.js"
+      "<rootDir>/../testing/fixtures/setup.js"
     ]
   },
   "devDependencies": {

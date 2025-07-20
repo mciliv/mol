@@ -13,7 +13,7 @@
     />
     <meta name="format-detection" content="telephone=no" />
     <title>Atomizer - Molecular Analysis</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../assets/style.css" />
   </head>
   <body>
     <div class="app-container">
@@ -143,13 +143,13 @@
           <div class="mode-selector">
             <input type="checkbox" id="camera-mode" />
             <label for="camera-mode" class="mode-label">
-              <img src="camera.svg" alt="Camera" width="16" height="16" />
+                              <img src="../assets/camera.svg" alt="Camera" width="16" height="16" />
               <span>Camera</span>
             </label>
 
             <input type="checkbox" id="photo-mode" />
             <label for="photo-mode" class="mode-label">
-              <img src="photo-upload.svg" alt="Photo upload" width="16" height="16" />
+                              <img src="../assets/photo-upload.svg" alt="Photo upload" width="16" height="16" />
               <span>Photo</span>
             </label>
           </div>
@@ -217,7 +217,7 @@
                 aria-label="Upload photo for molecular analysis"
               />
               <label for="photo-upload" class="upload-label">
-                <img src="photo-upload.svg" alt="Photo upload" width="24" height="24" />
+                <img src="../assets/photo-upload.svg" alt="Photo upload" width="24" height="24" />
                 <svg
                   class="upload-text"
                   width="80"
@@ -303,7 +303,7 @@
           aria-label="Upload photo for molecular analysis"
         />
         <label for="photo-upload" class="upload-label">
-          <img src="photo-upload.svg" alt="Photo upload" width="24" height="24" />
+          <img src="../assets/photo-upload.svg" alt="Photo upload" width="24" height="24" />
           <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
             <text
               x="40"
@@ -390,10 +390,10 @@
       </div>
     </template>
 
-    <script type="module" src="payment.js"></script>
-    <script type="module" src="camera.js"></script>
-    <script type="module" src="ui-utils.js"></script>
-    <script src="debug-events.js"></script>
+    <script type="module" src="../components/payment.js"></script>
+    <script type="module" src="../components/camera.js"></script>
+    <script type="module" src="../components/ui-utils.js"></script>
+    <script src="../components/debug-events.js"></script>
     <script type="module" src="app.js"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>

@@ -5,13 +5,13 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const AtomPredictor = require("./AtomPredictor");
-const MolecularProcessor = require("./molecular-processor");
+const AtomPredictor = require("../services/AtomPredictor");
+const MolecularProcessor = require("../services/molecular-processor");
 const {
   ImageMoleculeSchema,
   TextMoleculeSchema,
   SdfGenerationSchema,
-} = require("./schemas");
+} = require("../schemas/schemas");
 
 // Initialize Express app
 const app = express();
