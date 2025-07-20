@@ -1,6 +1,7 @@
 // camera.js - Camera management and interaction module
 
 import { paymentManager } from './payment.js';
+import { uiManager } from './ui-utils.js';
 
 class CameraManager {
   constructor() {
@@ -170,7 +171,54 @@ class CameraManager {
     }
 
     this.showCropOutline(evt);
-    return this.captureAndAnalyze(evt);
+    
+    try {
+      // Capture and analyze the image
+      const captureData = await this.captureAndAnalyze(evt);
+      
+      // Create loading column
+      const loadingColumn = uiManager.createLoadingColumn("Analyzing...", captureData.croppedBase64);
+      
+      // Send to server for analysis
+      const response = await fetch("/image-molecules", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64: captureData.imageBase64,
+          croppedImageBase64: captureData.croppedBase64,
+          x: captureData.coordinates.x,
+          y: captureData.coordinates.y,
+          cropMiddleX: captureData.coordinates.cropMiddleX,
+          cropMiddleY: captureData.coordinates.cropMiddleY,
+          cropSize: captureData.coordinates.cropSize,
+        }),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const { output } = await response.json();
+
+      // Remove loading column
+      loadingColumn.remove();
+      
+      // Emit analysis result event for app to handle
+      const event = new CustomEvent('imageAnalysisComplete', {
+        detail: { 
+          output, 
+          icon: "📷", 
+          objectName: output.object || "Camera capture", 
+          useQuotes: false, 
+          croppedImageData: captureData.croppedBase64 
+        }
+      });
+      document.dispatchEvent(event);
+      
+      // Increment usage
+      await paymentManager.incrementUsage();
+      
+    } catch (error) {
+      console.error('Camera analysis error:', error);
+      this.createClosableErrorMessage(`Analysis failed: ${error.message}`);
+    }
   }
 
   // Check if tap is within mobile reticle
@@ -342,6 +390,13 @@ class CameraManager {
     if (msgBox) {
       msgBox.hidden = true;
     }
+  }
+
+  // Create closable error message
+  createClosableErrorMessage(message) {
+    const snapshots = document.querySelector(".snapshots-container");
+    const errorDiv = uiManager.createErrorMessage(message, snapshots);
+    return errorDiv;
   }
 
   // Request camera permission (Safari)
