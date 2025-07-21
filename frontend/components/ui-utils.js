@@ -79,6 +79,71 @@ class UIManager {
     return errorDiv;
   }
 
+  // Create closable error message
+  createClosableErrorMessage(message) {
+    const gldiv = document.getElementById("gldiv");
+    if (!gldiv) return null;
+
+    const errorColumn = document.createElement("div");
+    errorColumn.className = "object-column error-column";
+
+    const header = document.createElement("div");
+    header.className = "object-header";
+    header.innerHTML = `
+      <div class="object-title-container">
+        <div class="object-icon">⚠️</div>
+        <div class="object-name">Error</div>
+      </div>
+      <button class="object-close" onclick="this.parentElement.parentElement.remove(); window.updateScrollHandles && window.updateScrollHandles();">
+        <img src="close.svg" alt="Close" width="16" height="16" />
+      </button>
+    `;
+
+    const errorContent = document.createElement("div");
+    errorContent.className = "error-content";
+    errorContent.textContent = message;
+
+    errorColumn.appendChild(header);
+    errorColumn.appendChild(errorContent);
+    gldiv.appendChild(errorColumn);
+
+    if (window.updateScrollHandles) {
+      window.updateScrollHandles();
+    }
+
+    return errorColumn;
+  }
+
+  // Create a simple column
+  createColumn(message, className = "") {
+    const gldiv = document.getElementById("gldiv");
+    if (!gldiv) return null;
+
+    const column = document.createElement("div");
+    column.className = `object-column ${className}`;
+
+    const header = document.createElement("div");
+    header.className = "object-header";
+    header.innerHTML = `
+      <div class="object-title-container">
+        <div class="object-icon">ℹ️</div>
+        <div class="object-name">${message}</div>
+      </div>
+      <button class="object-close" onclick="this.parentElement.parentElement.remove(); window.updateScrollHandles && window.updateScrollHandles();">
+        <img src="close.svg" alt="Close" width="16" height="16" />
+      </button>
+    `;
+
+    column.appendChild(header);
+    gldiv.appendChild(column);
+
+    if (window.updateScrollHandles) {
+      window.updateScrollHandles();
+    }
+
+    return column;
+  }
+
   // Create loading column for analysis
   createLoadingColumn(message, croppedImageBase64 = null) {
     const gldiv = document.getElementById("gldiv");

@@ -209,8 +209,8 @@ class MolecularApp {
   async generateSDFs(smiles, objectName, description = null, chemicals = null, croppedImageData = null) {
     if (smiles.length === 0 && !description) {
       this.createClosableErrorMessage("No valid molecules found for visualization");
-    return;
-  }
+      return;
+    }
 
     try {
       let sdfPaths = [];
