@@ -1,8 +1,8 @@
-// tests/smoke.test.js - Quick smoke tests for pre-development validation
+// test/integration/smoke.test.js - Quick smoke tests for pre-development validation
 // These tests run in under 5 seconds to catch basic issues before starting development
 
 const request = require("supertest");
-const app = require("../server");
+const app = require("../../backend/api/server");
 const fs = require("fs");
 const path = require("path");
 
@@ -185,7 +185,7 @@ describe("Smoke Tests", () => {
 
   describe("Schema Validation", () => {
     test("should have valid schemas defined", () => {
-      const schemas = require("../schemas");
+      const schemas = require("../../backend/schemas/schemas");
 
       expect(schemas.ImageMoleculeSchema).toBeDefined();
       expect(schemas.TextMoleculeSchema).toBeDefined();
@@ -197,7 +197,7 @@ describe("Smoke Tests", () => {
         ImageMoleculeSchema,
         TextMoleculeSchema,
         SdfGenerationSchema,
-      } = require("../schemas");
+      } = require("../../backend/schemas/schemas");
 
       // Test that schemas can be imported and used
       expect(typeof ImageMoleculeSchema.safeParse).toBe("function");

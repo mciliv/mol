@@ -1,7 +1,7 @@
-// tests/integration.test.js - Integration tests using separated test functionality
+// test/fixtures/integration.existing.js - Integration tests using separated test functionality
 
 const request = require("supertest");
-const app = require("../server");
+const app = require("../../backend/api/server");
 const {
   TEST_MOLECULES,
   TEST_OBJECTS,

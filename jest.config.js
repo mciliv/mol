@@ -1,9 +1,9 @@
 module.exports = {
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/testing/fixtures/setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/test/fixtures/setup.js'],
   testMatch: [
-    '<rootDir>/testing/**/*.test.js',
-    '<rootDir>/testing/**/test_*.py'
+    '<rootDir>/test/**/*.test.js',
+    '<rootDir>/test/**/test_*.py'
   ],
   moduleDirectories: ['node_modules'],
   testPathIgnorePatterns: ['/node_modules/'],

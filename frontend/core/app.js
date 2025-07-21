@@ -8,6 +8,10 @@ class MolecularApp {
     this.snapshots = null;
     this.objectInput = null;
     this.viewers = [];
+    this.isProcessing = false;
+    this.hasPaymentSetup = false;
+    this.currentAnalysisType = null;
+    this.lastAnalysis = null;
   }
 
   async initialize() {
@@ -85,11 +89,12 @@ class MolecularApp {
       
       // 🔴 BREAKPOINT: Set breakpoint here to debug text analysis trigger
       console.log('🚀 Text analysis triggered from Enter key');
+      const paymentPopdown = document.getElementById('payment-popdown');
       console.log('📊 App state before analysis:', {
         isProcessing: this.isProcessing,
         hasPaymentSetup: this.hasPaymentSetup,
         inputValue: this.objectInput.value,
-        paymentVisible: this.paymentPopdown.style.display !== 'none'
+        paymentVisible: paymentPopdown ? paymentPopdown.style.display !== 'none' : false
       });
       
       await this.handleTextAnalysis();
@@ -140,7 +145,7 @@ class MolecularApp {
     console.log('🏁 Starting processing with type:', this.currentAnalysisType);
     
     try {
-      this.hidePaymentPopdown();
+      paymentManager.hidePaymentPopdown();
       this.showProcessing();
       
       console.log('🌐 Preparing API call for text analysis');
@@ -346,12 +351,7 @@ class MolecularApp {
   // Render 3D molecule visualization
   async render(sdfFile, container) {
     try {
-      const urlParts = sdfFile.split("/");
-      const filename = urlParts.pop();
-      const encodedFilename = encodeURIComponent(filename);
-      const encodedPath = urlParts.join("/") + "/" + encodedFilename;
-
-      const response = await fetch(encodedPath);
+      const response = await fetch(sdfFile);
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}`);
       }
@@ -374,6 +374,28 @@ class MolecularApp {
       container.className += " error-text";
       return null;
     }
+  }
+
+  // Show processing indicator
+  showProcessing() {
+    const processingIndicator = document.getElementById('processing-indicator');
+    if (processingIndicator) {
+      processingIndicator.style.display = 'block';
+    }
+  }
+
+  // Hide processing indicator
+  hideProcessing() {
+    const processingIndicator = document.getElementById('processing-indicator');
+    if (processingIndicator) {
+      processingIndicator.style.display = 'none';
+    }
+  }
+
+  // Handle errors
+  handleError(error) {
+    console.error('Error in molecular analysis:', error);
+    this.createClosableErrorMessage(`Analysis failed: ${error.message}`);
   }
 
   // Create error message

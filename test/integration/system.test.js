@@ -1,8 +1,8 @@
-// tests/system.test.js - System tests for end-to-end functionality
+// test/integration/system.test.js - System tests for end-to-end functionality
 // These tests validate the entire system working together (2-5 minutes)
 
 const request = require("supertest");
-const app = require("../server");
+const app = require("../../backend/api/server");
 const fs = require("fs");
 const path = require("path");
 const { JSDOM } = require("jsdom");

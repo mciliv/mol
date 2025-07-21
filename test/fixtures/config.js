@@ -1,4 +1,4 @@
-// tests/config.js - Test configuration and environment setup
+// test/fixtures/config.js - Test configuration and environment setup
 const path = require("path");
 
 // Test environment configuration

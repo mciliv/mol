@@ -1,4 +1,4 @@
-// tests/utils.js - Test utilities and helper functions
+// test/fixtures/utils.js - Test utilities and helper functions
 const fs = require("fs");
 const path = require("path");
 const { TEST_CONFIG, TEST_ENDPOINTS, TEST_FIXTURES } = require("./config");

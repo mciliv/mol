@@ -32,28 +32,28 @@ case "$1" in
     nodemon backend/api/server.js
     ;;
   "test")
-    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles
+    npx jest --testPathPattern=test/unit/unit.test.js --verbose --silent && npx jest --testPathPattern=test/integration/integration.test.js --verbose && npx jest --testPathPattern=test/integration/system.test.js --verbose --detectOpenHandles
     ;;
   "unit")
-    npx jest --testPathPattern=unit.test.js --verbose --silent
+    npx jest --testPathPattern=test/unit/ --verbose --silent
     ;;
   "integration")
-    npx jest --testPathPattern=integration.test.js --verbose
+    npx jest --testPathPattern=test/integration/ --verbose
     ;;
   "system")
-    npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles
+    npx jest --testPathPattern=test/integration/system.test.js --verbose --detectOpenHandles
     ;;
   "watch")
     npx jest --watch
     ;;
   "pytest")
-    python -m pytest testing/ -v
+    python -m pytest test/ -v
     ;;
   "pytest:debug")
-    python -m debugpy --listen 5678 --wait-for-client -m pytest testing/ -v -s
+    python -m debugpy --listen 5678 --wait-for-client -m pytest test/ -v -s
     ;;
   "fixtures")
-    npx jest --testPathPattern=tests/fixtures
+    npx jest --testPathPattern=test/fixtures
     ;;
   "ship")
     echo "🚢 Starting complete workflow (ship)..."
@@ -68,7 +68,7 @@ case "$1" in
     echo "💾 Committing changes..."
     git commit -m "$commit_message"
     echo "🧪 Running pre-deployment tests..."
-    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest testing/ -v
+    npx jest --testPathPattern=test/unit/unit.test.js --verbose --silent && npx jest --testPathPattern=test/integration/integration.test.js --verbose && npx jest --testPathPattern=test/integration/system.test.js --verbose --detectOpenHandles && python -m pytest test/ -v
     if [ $? -ne 0 ]; then
       echo "❌ Tests failed - aborting deployment"
       exit 1
@@ -85,10 +85,10 @@ case "$1" in
     echo "🌐 Function deployed to Google Cloud Functions"
     ;;
   "deploy")
-    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest testing/ -v && gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .
+    npx jest --testPathPattern=test/unit/unit.test.js --verbose --silent && npx jest --testPathPattern=test/integration/integration.test.js --verbose && npx jest --testPathPattern=test/integration/system.test.js --verbose --detectOpenHandles && python -m pytest test/ -v && gcloud functions deploy molecular-analysis --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --entry-point molecularAnalysis --source .
     ;;
   "deploy:now")
-    npx jest --testPathPattern=unit.test.js --verbose --silent && npx jest --testPathPattern=integration.test.js --verbose && npx jest --testPathPattern=system.test.js --verbose --detectOpenHandles && python -m pytest testing/ -v && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
+    npx jest --testPathPattern=test/unit/unit.test.js --verbose --silent && npx jest --testPathPattern=test/integration/integration.test.js --verbose && npx jest --testPathPattern=test/integration/system.test.js --verbose --detectOpenHandles && python -m pytest test/ -v && gcloud functions deploy molecular-analysis --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated --memory 1GB --timeout 540s --region us-central1 --entry-point molecularAnalysis --source . --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
     ;;
   "cleanup")
     echo "🧹 Cleaning up all development processes and ports..."

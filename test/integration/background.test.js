@@ -1,4 +1,4 @@
-// tests/background.test.js - Background integration tests during development
+// test/integration/background.test.js - Background integration tests during development
 // These tests run longer scenarios to catch integration issues while developing
 
 const request = require("supertest");
@@ -16,7 +16,7 @@ describe("Background Integration Tests", () => {
   let fileManager;
 
   beforeAll(() => {
-    app = require("../server");
+    app = require("../../backend/api/server");
     fileManager = new TestFileManager();
   });
 
@@ -77,7 +77,7 @@ describe("Background Integration Tests", () => {
 
   describe("Schema Validation", () => {
     it("should validate schemas against test data", () => {
-      const schemas = require("../schemas");
+      const schemas = require("../../backend/schemas/schemas");
 
       // Test SMILES array schema
       const validSmilesData = { smiles: ["O", "CCO"] };
@@ -102,7 +102,7 @@ describe("Background Integration Tests", () => {
     });
 
     it("should reject invalid schema data", () => {
-      const schemas = require("../schemas");
+      const schemas = require("../../backend/schemas/schemas");
 
       // Invalid SMILES data
       expect(() =>

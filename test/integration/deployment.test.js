@@ -1,4 +1,4 @@
-// tests/deployment.test.js - Comprehensive pre-deployment test suite
+// test/integration/deployment.test.js - Comprehensive pre-deployment test suite
 // These tests validate the entire system before deployment
 
 const request = require("supertest");
@@ -17,7 +17,7 @@ describe("Pre-Deployment Validation", () => {
   let fileManager;
 
   beforeAll(async () => {
-    app = require("../server");
+    app = require("../../backend/api/server");
     fileManager = new TestFileManager();
   }, 30000);
 
@@ -122,7 +122,7 @@ describe("Pre-Deployment Validation", () => {
 
   describe("Schema Validation Coverage", () => {
     it("should validate all schema types thoroughly", () => {
-      const schemas = require("../schemas");
+      const schemas = require("../../backend/schemas/schemas");
 
       // Test valid data for all schemas
       const validTests = [

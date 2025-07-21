@@ -1,16 +1,16 @@
-// tests/unit.test.js - Unit tests for individual components
+// test/unit/unit.test.js - Unit tests for individual components
 // These tests run quickly (< 5 seconds) and validate individual functions and modules
 
 const request = require("supertest");
 const fs = require("fs");
 const path = require("path");
-const AtomPredictor = require("../AtomPredictor");
-const MolecularProcessor = require("../molecular-processor");
+const AtomPredictor = require("../../backend/services/AtomPredictor");
+const MolecularProcessor = require("../../backend/services/molecular-processor");
 const {
   ImageMoleculeSchema,
   TextMoleculeSchema,
   SdfGenerationSchema,
-} = require("../schemas");
+} = require("../../backend/schemas/schemas");
 
 // Mock OpenAI API
 jest.mock("openai", () => ({
@@ -56,7 +56,7 @@ let app;
 beforeAll(() => {
   // Load server for all tests
   try {
-    app = require("../server");
+    app = require("../../backend/api/server");
   } catch (error) {
     console.error("Failed to load server:", error.message);
     throw error;
