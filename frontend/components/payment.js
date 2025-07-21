@@ -40,6 +40,7 @@ class PaymentManager {
     const cardInfo = localStorage.getItem('molCardInfo');
     
     if (!deviceToken || !cardInfo) {
+      console.log('No payment method found - showing payment popdown');
       this.showPaymentPopdown();
       return false;
     }
@@ -69,15 +70,27 @@ class PaymentManager {
   }
 
   showPaymentPopdown() {
+    console.log('🔄 Showing payment popdown...');
     const popdown = document.getElementById('payment-popdown');
     const mainInterface = document.getElementById('main-app-interface');
     
-    popdown.style.display = 'block';
-    mainInterface.classList.add('payment-required');
+    console.log('📊 Elements found:', { popdown: !!popdown, mainInterface: !!mainInterface });
     
-    setTimeout(() => {
-      popdown.classList.add('show');
-    }, 10);
+    if (popdown) {
+      popdown.style.display = 'block';
+      popdown.classList.remove('hidden');
+      
+      setTimeout(() => {
+        popdown.classList.add('show');
+        console.log('✅ Payment popdown should now be visible');
+      }, 10);
+    } else {
+      console.error('❌ Payment popdown element not found!');
+    }
+    
+    if (mainInterface) {
+      mainInterface.classList.add('payment-required');
+    }
     
     this.initializePaymentSetup();
   }
@@ -86,11 +99,19 @@ class PaymentManager {
     const popdown = document.getElementById('payment-popdown');
     const mainInterface = document.getElementById('main-app-interface');
     
-    popdown.classList.remove('show');
-    mainInterface.classList.remove('payment-required');
+    if (popdown) {
+      popdown.classList.remove('show');
+    }
+    
+    if (mainInterface) {
+      mainInterface.classList.remove('payment-required');
+    }
     
     setTimeout(() => {
-      popdown.style.display = 'none';
+      if (popdown) {
+        popdown.style.display = 'none';
+        popdown.classList.add('hidden');
+      }
     }, 400);
   }
 
@@ -228,6 +249,14 @@ class PaymentManager {
   getDeveloperAccount() {
     const developerUser = localStorage.getItem('molDeveloperUser');
     return developerUser ? JSON.parse(developerUser) : null;
+  }
+  
+  // Function to clear payment setup for testing
+  clearPaymentSetup() {
+    localStorage.removeItem('molDeviceToken');
+    localStorage.removeItem('molCardInfo');
+    localStorage.removeItem('molDeveloperUser');
+    console.log('🧹 Payment setup cleared for testing');
   }
 }
 

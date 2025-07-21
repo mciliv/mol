@@ -25,12 +25,19 @@ class MolecularApp {
 
     this.setupEventListeners();
 
-    await paymentManager.checkInitialPaymentSetup();
+    // Clear localStorage for testing payment setup (remove this in production)
+    // localStorage.clear();
     
-    if (!paymentManager.isDeveloperAccount()) {
+    // Check payment setup first
+    const hasPayment = await paymentManager.checkInitialPaymentSetup();
+    
+    // Only setup developer account if no payment method exists
+    if (!hasPayment && !paymentManager.isDeveloperAccount()) {
+      console.log('🔧 Setting up developer account as fallback');
       paymentManager.setupDeveloperAccount();
     }
     
+    // Show developer account indicator if using developer account
     if (paymentManager.isDeveloperAccount()) {
       const devAccountIndicator = document.getElementById('dev-account-indicator');
       if (devAccountIndicator) {
@@ -53,6 +60,39 @@ class MolecularApp {
     this.setupTextAnalysis();
 
     cameraHandler.setupEventListeners();
+    
+    // Payment setup link event listener
+    const paymentSetupLink = document.getElementById('payment-setup-link');
+    if (paymentSetupLink) {
+      paymentSetupLink.addEventListener('click', () => {
+        paymentManager.showPaymentPopdown();
+      });
+    }
+    
+    // Clear payment button event listener
+    const clearPaymentBtn = document.getElementById('clear-payment-btn');
+    if (clearPaymentBtn) {
+      clearPaymentBtn.addEventListener('click', () => {
+        paymentManager.clearPaymentSetup();
+        location.reload(); // Reload to test payment setup flow
+      });
+    }
+    
+    // Payment close button event listener
+    const paymentCloseBtn = document.getElementById('payment-close-btn');
+    if (paymentCloseBtn) {
+      paymentCloseBtn.addEventListener('click', () => {
+        paymentManager.hidePaymentPopdown();
+      });
+    }
+    
+    // Continue to analysis button event listener
+    const startAnalyzingBtn = document.getElementById('start-analyzing-btn');
+    if (startAnalyzingBtn) {
+      startAnalyzingBtn.addEventListener('click', () => {
+        paymentManager.hidePaymentPopdown();
+      });
+    }
       
     const video = document.getElementById("video-feed");
     if (video) {
