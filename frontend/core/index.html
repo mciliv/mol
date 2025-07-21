@@ -126,12 +126,21 @@
       <div class="main-app-interface" id="main-app-interface">
         <!-- Always visible text input bar -->
         <div class="top-bar">
-          <input
-            id="object-input"
-            type="text"
-            placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter..."
-            class="text-input"
-          />
+          <div class="input-container">
+            <input
+              id="object-input"
+              type="text"
+              placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter..."
+              class="text-input"
+            />
+            <!-- Payment setup link for testing -->
+            <button id="payment-setup-link" class="payment-setup-link">
+              Payment Setup
+            </button>
+            <button id="clear-payment-btn" class="clear-payment-btn">
+              Clear Payment
+            </button>
+          </div>
           <div class="account-link hidden" id="account-status">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -139,13 +148,6 @@
             </svg>
             <span id="account-name">Account</span>
           </div>
-          <!-- Payment setup link for testing -->
-          <button id="payment-setup-link" class="payment-setup-link" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(0, 212, 255, 0.1); color: #00d4ff; border: 1px solid #00d4ff; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
-            Payment Setup
-          </button>
-          <button id="clear-payment-btn" class="clear-payment-btn" style="position: absolute; left: 140px; top: 50%; transform: translateY(-50%); background: rgba(255, 0, 0, 0.1); color: #ff4444; border: 1px solid #ff4444; padding: 8px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
-            Clear Payment
-          </button>
         </div>
 
         <!-- Developer account indicator -->

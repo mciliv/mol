@@ -48,12 +48,20 @@ body {
 .top-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: 20px;
   background: rgba(0, 0, 0, 0.95);
   z-index: 1000;
   position: relative;
   overflow: hidden;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 800px;
 }
 
 .account-link {
@@ -95,9 +103,43 @@ body {
   font-size: 15px;
   font-weight: 400;
   line-height: 1.4;
-  width: 100%;
-  max-width: 600px;
+  flex: 1;
   display: block;
+}
+
+.payment-setup-link {
+  background: rgba(0, 212, 255, 0.1);
+  color: #00d4ff;
+  border: 1px solid #00d4ff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.payment-setup-link:hover {
+  background: rgba(0, 212, 255, 0.2);
+  color: #0099cc;
+}
+
+.clear-payment-btn {
+  background: rgba(255, 0, 0, 0.1);
+  color: #ff4444;
+  border: 1px solid #ff4444;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.clear-payment-btn:hover {
+  background: rgba(255, 0, 0, 0.2);
+  color: #cc0000;
+}
   outline: none;
   transition: all 0.2s ease;
   border-radius: 8px;
@@ -515,7 +557,16 @@ input[type="checkbox"]:checked + .mode-label {
   .text-input {
     font-size: 16px;
     padding: 14px 16px;
-    margin-right: 50px; /* Adjust for smaller account button */
+  }
+  
+  .input-container {
+    gap: 8px;
+  }
+  
+  .payment-setup-link,
+  .clear-payment-btn {
+    padding: 6px 8px;
+    font-size: 11px;
   }
 
   .mode-selector {
@@ -664,7 +715,16 @@ input[type="checkbox"]:checked + .mode-label {
   .text-input {
     padding: 12px 14px;
     font-size: 16px;
-    margin-right: 44px;
+  }
+  
+  .input-container {
+    gap: 4px;
+  }
+  
+  .payment-setup-link,
+  .clear-payment-btn {
+    padding: 4px 5px;
+    font-size: 9px;
   }
   
   .account-link {
