@@ -1,5 +1,3 @@
-// payment.js - Payment and account management module
-
 class PaymentManager {
   constructor() {
     this.stripe = null;
@@ -8,13 +6,11 @@ class PaymentManager {
     this.setupInProgress = false;
   }
 
-  // Check if we're in local development mode (DEPRECATED - use developer account instead)
   isLocalDevelopment() {
     console.warn('isLocalDevelopment() is deprecated - use developer account instead');
     return false;
   }
 
-  // Check if current user is the developer account
   isDeveloperAccount() {
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
@@ -25,7 +21,6 @@ class PaymentManager {
     
     try {
       const card = JSON.parse(cardInfo);
-      // Check for developer account indicators
       return card.brand === 'Development' || 
              card.last4 === '0000' ||
              deviceToken.includes('local_dev_token') ||
@@ -35,9 +30,7 @@ class PaymentManager {
     }
   }
 
-  // Initialize payment setup
   async checkInitialPaymentSetup() {
-    // Skip payment setup for developer account
     if (this.isDeveloperAccount()) {
       console.log('Developer account detected - skipping payment setup');
       return true;
@@ -75,7 +68,6 @@ class PaymentManager {
     }
   }
 
-  // Show payment popdown
   showPaymentPopdown() {
     const popdown = document.getElementById('payment-popdown');
     const mainInterface = document.getElementById('main-app-interface');
@@ -90,7 +82,6 @@ class PaymentManager {
     this.initializePaymentSetup();
   }
 
-  // Hide payment popdown
   hidePaymentPopdown() {
     const popdown = document.getElementById('payment-popdown');
     const mainInterface = document.getElementById('main-app-interface');
@@ -103,7 +94,6 @@ class PaymentManager {
     }, 400);
   }
 
-  // Update account status display
   updateAccountStatus(user) {
     const accountStatus = document.getElementById('account-status');
     const accountName = document.getElementById('account-name');
@@ -117,9 +107,7 @@ class PaymentManager {
     accountStatus.style.display = 'flex';
   }
 
-  // Check if payment is required
   isPaymentRequired() {
-    // Skip payment requirement for developer account
     if (this.isDeveloperAccount()) {
       return false;
     }
@@ -128,9 +116,7 @@ class PaymentManager {
     return paymentPopdown && paymentPopdown.classList.contains('show');
   }
 
-  // Check payment method validity
   async checkPaymentMethod() {
-    // Skip payment check for developer account
     if (this.isDeveloperAccount()) {
       return true;
     }
@@ -170,7 +156,6 @@ class PaymentManager {
     }
   }
 
-  // Increment usage counter
   async incrementUsage() {
     const deviceToken = localStorage.getItem('molDeviceToken');
     if (!deviceToken) return;
@@ -198,31 +183,25 @@ class PaymentManager {
     }
   }
 
-  // Reset local development user (DEPRECATED)
   resetLocalDevUser() {
     console.warn('resetLocalDevUser() is deprecated - use developer account instead');
     this.setupDeveloperAccount();
   }
 
-  // Initialize payment setup UI
   initializePaymentSetup() {
-    // Payment setup logic would go here
     console.log('Payment setup initialized');
   }
 
-  // Setup local development user (DEPRECATED)
   setupLocalDevUser() {
     console.warn('setupLocalDevUser() is deprecated - use developer account instead');
     this.setupDeveloperAccount();
   }
 
-  // Get local development user info (DEPRECATED)
   getLocalDevUser() {
     console.warn('getLocalDevUser() is deprecated - use developer account instead');
     return this.getDeveloperAccount();
   }
 
-  // Setup developer account (your account)
   setupDeveloperAccount() {
     const developerUser = {
       name: 'Developer',
@@ -236,19 +215,16 @@ class PaymentManager {
       }
     };
 
-    // Store developer account data
     localStorage.setItem('molDeviceToken', developerUser.device_token);
     localStorage.setItem('molCardInfo', JSON.stringify(developerUser.card_info));
     localStorage.setItem('molDeveloperUser', JSON.stringify(developerUser));
 
-    // Update UI to show developer account
     this.updateAccountStatus(developerUser);
     
     console.log('Developer account setup complete');
     return developerUser;
   }
 
-  // Get developer account info
   getDeveloperAccount() {
     const developerUser = localStorage.getItem('molDeveloperUser');
     return developerUser ? JSON.parse(developerUser) : null;

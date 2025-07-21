@@ -1,4 +1,3 @@
-// app.js - Core molecular analysis application
 import { paymentManager } from '../components/payment.js';
 import { cameraManager } from '../components/camera.js';
 import { cameraHandler } from '../components/camera-handler.js';
@@ -11,30 +10,23 @@ class MolecularApp {
     this.viewers = [];
   }
 
-  // Initialize the application
   async initialize() {
-    // Get DOM elements
     this.snapshots = document.querySelector(".snapshots-container");
     this.objectInput = document.getElementById("object-input");
 
-    // Initialize modules
     uiManager.initialize();
     uiManager.setupDebuggingFunctions();
     uiManager.clearDevelopmentStates();
     uiManager.showMainApp();
 
-    // Setup main event listeners
     this.setupEventListeners();
 
-    // Initialize payment system
     await paymentManager.checkInitialPaymentSetup();
     
-    // Setup developer account (your account) if not already set up
     if (!paymentManager.isDeveloperAccount()) {
       paymentManager.setupDeveloperAccount();
     }
     
-    // Show developer account indicator if using developer account
     if (paymentManager.isDeveloperAccount()) {
       const devAccountIndicator = document.getElementById('dev-account-indicator');
       if (devAccountIndicator) {
@@ -42,10 +34,8 @@ class MolecularApp {
       }
     }
       
-    // Initialize camera system
     await cameraManager.initialize();
 
-    // Safari-specific camera permission request (only if not already granted)
     if (cameraManager.isSafari && !cameraManager.hasStoredCameraPermission()) {
       setTimeout(() => {
         cameraManager.requestPermission();
@@ -55,22 +45,17 @@ class MolecularApp {
     console.log('✅ Molecular analysis app initialized');
   }
 
-  // Setup main application event listeners
   setupEventListeners() {
-    // Setup text analysis with debugging support
     this.setupTextAnalysis();
 
-    // Setup camera handler event listeners
     cameraHandler.setupEventListeners();
       
-    // Mode switching based on user interaction
     const video = document.getElementById("video-feed");
     if (video) {
       video.addEventListener("click", () => uiManager.switchToCameraMode());
       video.addEventListener("touchstart", () => uiManager.switchToCameraMode());
   }
   
-    // Photo mode switching
     const photoUpload = document.getElementById("photo-upload");
     const photoUrl = document.getElementById("photo-url");
     const urlAnalyze = document.getElementById("url-analyze");
@@ -85,10 +70,8 @@ class MolecularApp {
       urlAnalyze.addEventListener("click", () => uiManager.switchToPhotoMode());
     }
   
-    // Text input clears mode selection
     this.objectInput.addEventListener("focus", () => uiManager.clearModeSelection());
 
-    // Listen for image analysis completion
     document.addEventListener('imageAnalysisComplete', (e) => {
       const { output, icon, objectName, useQuotes, croppedImageData } = e.detail;
       this.processAnalysisResult(output, icon, objectName, useQuotes, croppedImageData);
@@ -113,9 +96,7 @@ class MolecularApp {
     });
   }
 
-  // Main text analysis handler
   async handleTextAnalysis() {
-    // 🔴 BREAKPOINT: Set breakpoint here to debug main analysis flow
     console.log('🔬 Starting handleTextAnalysis');
     console.log('📊 Current state:', {
       isProcessing: this.isProcessing,
@@ -136,11 +117,9 @@ class MolecularApp {
       return;
     }
 
-    // 🔴 BREAKPOINT: Set breakpoint here to debug payment check
     if (!this.hasPaymentSetup) {
       console.log('💳 Payment not set up, showing simple message');
       
-      // Create a simple message instead of analysis
       const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
       messageColumn.innerHTML = `
         <div class="molecule-container">
@@ -152,12 +131,10 @@ class MolecularApp {
         </div>
       `;
       
-      // Clear the input
       this.objectInput.value = "";
       return;
     }
 
-    // 🔴 BREAKPOINT: Set breakpoint here to debug processing start
     this.isProcessing = true;
     this.currentAnalysisType = 'text';
     console.log('🏁 Starting processing with type:', this.currentAnalysisType);
@@ -166,7 +143,6 @@ class MolecularApp {
       this.hidePaymentPopdown();
       this.showProcessing();
       
-      // 🔴 BREAKPOINT: Set breakpoint here to debug API call preparation
       console.log('🌐 Preparing API call for text analysis');
       const response = await fetch("/analyze-text", {
         method: "POST",
@@ -174,7 +150,6 @@ class MolecularApp {
         body: JSON.stringify({ text: inputValue }),
       });
 
-      // 🔴 BREAKPOINT: Set breakpoint here to debug API response
       console.log('📡 API response received:', {
         status: response.status,
         statusText: response.statusText,
@@ -188,21 +163,17 @@ class MolecularApp {
       }
 
       const result = await response.json();
-      // 🔴 BREAKPOINT: Set breakpoint here to debug API result processing
       console.log('📋 API result:', result);
       
       this.lastAnalysis = result;
       this.displayResults(result);
       
-      // Clear the input
       this.objectInput.value = "";
       
     } catch (error) {
-      // 🔴 BREAKPOINT: Set breakpoint here to debug errors
       console.error('💥 Error in handleTextAnalysis:', error);
       this.handleError(error);
     } finally {
-      // 🔴 BREAKPOINT: Set breakpoint here to debug cleanup
       console.log('🧹 Cleaning up processing state');
       this.isProcessing = false;
       this.hideProcessing();

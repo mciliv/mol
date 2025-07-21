@@ -1,5 +1,3 @@
-// camera.js - Camera management and interaction module
-
 import { paymentManager } from './payment.js';
 import { uiManager } from './ui-utils.js';
 
@@ -9,12 +7,10 @@ class CameraManager {
     this.currentStream = null;
     this.facingMode = "environment";
     
-    // Permission persistence
     this.permissionKey = 'mol_camera_permission';
     this.deviceId = this.getDeviceId();
   }
 
-  // Generate or retrieve device ID for permission persistence
   getDeviceId() {
     let deviceId = localStorage.getItem('mol_device_id');
     if (!deviceId) {
@@ -24,7 +20,6 @@ class CameraManager {
     return deviceId;
   }
 
-  // Save camera permission status
   saveCameraPermission(granted) {
     const permissions = this.getStoredPermissions();
     permissions[this.deviceId] = {

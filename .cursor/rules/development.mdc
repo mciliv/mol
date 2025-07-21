@@ -1,0 +1,25 @@
+---
+alwaysApply: false
+---
+# Development Workflow Patterns
+
+Procedure:
+∆
+check tests for accuracy
+pass all tests
+refresh app after changes
+git
+    commit, push after acceptance of changes w descriptive commit messages
+    `git status` to see if there are remaining uncommitted changes
+
+    ## Post-Acceptance Commands
+    ```bash
+    # After accepting changes, run these commands:
+    git add .
+    git commit -m "Brief description of changes made"
+    git push origin main
+    git status  # Check if there are remaining changes
+    ```
+Proceed with next feature or improvement
+
+No code comments
