@@ -202,17 +202,23 @@ class UIManager {
     }
   }
 
-  // Remove development blur/payment states (for HTTPS)
+  // Remove development blur/payment states (for HTTPS) - but preserve valid payment modal
   clearDevelopmentStates() {
     if (location.protocol === 'https:') {
       console.log('🔒 HTTPS detected - clearing payment blur states');
       
       setTimeout(() => {
         const mainInterface = document.getElementById('main-app-interface');
-        const paymentPopdown = document.getElementById('payment-modal');
+        const paymentModal = document.getElementById('payment-modal');
         
         if (mainInterface) {
-          mainInterface.classList.remove('payment-required');
+          // Only clear payment-required if modal is not legitimately shown
+          const modalIsShown = paymentModal && paymentModal.classList.contains('show');
+          
+          if (!modalIsShown) {
+            mainInterface.classList.remove('payment-required');
+          }
+          
           mainInterface.style.filter = 'none';
           mainInterface.style.opacity = '1';
           mainInterface.style.pointerEvents = 'auto';
@@ -220,12 +226,8 @@ class UIManager {
           mainInterface.style.display = 'block';
         }
         
-        if (paymentPopdown) {
-          paymentPopdown.style.display = 'none';
-        }
-        
-        console.log('✅ HTTPS blur states cleared');
-      }, 500);
+        console.log('✅ HTTPS blur states cleared (payment modal preserved)');
+      }, 100); // Reduced timeout to minimize flash
     }
   }
 

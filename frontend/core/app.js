@@ -20,7 +20,6 @@ class MolecularApp {
 
     uiManager.initialize();
     uiManager.setupDebuggingFunctions();
-    uiManager.clearDevelopmentStates();
     uiManager.showMainApp();
 
     this.setupEventListeners();
@@ -35,6 +34,9 @@ class MolecularApp {
     console.log('🔧 Checking payment setup for user');
     const setupResult = await paymentManager.checkInitialPaymentSetup();
     this.hasPaymentSetup = setupResult;
+    
+    // Clear development states AFTER payment setup check to avoid conflicts
+    uiManager.clearDevelopmentStates();
     
     // Update account status after checking payment setup
     const deviceToken = localStorage.getItem('molDeviceToken');
