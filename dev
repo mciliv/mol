@@ -1,2 +1,8 @@
 #!/bin/bash
-./run dev 
+
+echo "🧹 Cleaning up any existing development processes..."
+pkill -f "node.*backend/api/server.js" 2>/dev/null || true
+pkill -f "nodemon" 2>/dev/null || true
+sleep 1
+echo "🚀 Starting development server..."
+npx jest --testPathPattern=unit.test.js --verbose --silent && nodemon backend/api/server.js 
