@@ -11,6 +11,17 @@
   "name": "mol",
   "version": "1.0.0",
   "main": "function.js",
+  "scripts": {
+    "dev": "cd ../.. && ./dev",
+    "test": "cd ../.. && ./test-run",
+    "test:unit": "cd ../.. && ./test-run unit",
+    "test:integration": "cd ../.. && ./test-run integration",
+    "test:system": "cd ../.. && ./test-run system",
+    "test:watch": "cd ../.. && ./test-run watch",
+    "test:pytest": "cd ../.. && ./test-run pytest",
+    "ship": "cd ../.. && ./ship",
+    "cleanup": "cd ../.. && ./cleanup"
+  },
   "directories": {
     "test": "../testing"
   },
