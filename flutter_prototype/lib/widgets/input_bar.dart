@@ -40,7 +40,7 @@ class _InputBarState extends State<InputBar> {
               
               SizedBox(width: 16),
               
-              // Account button
+              // Account button with original credit card SVG
               _buildAccountButton(paymentService),
             ],
           ),
@@ -61,10 +61,12 @@ class _InputBarState extends State<InputBar> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.credit_card,
-              size: 16,
-              color: _getAccountButtonColor(paymentService),
+            // Original credit card SVG icon
+            CustomPaint(
+              size: Size(16, 16),
+              painter: CreditCardIconPainter(
+                color: _getAccountButtonColor(paymentService),
+              ),
             ),
             SizedBox(width: 8),
             Text(
@@ -148,4 +150,40 @@ class _InputBarState extends State<InputBar> {
     _textController.dispose();
     super.dispose();
   }
+}
+
+// Custom painter for credit card icon matching original SVG
+class CreditCardIconPainter extends CustomPainter {
+  final Color color;
+  
+  CreditCardIconPainter({required this.color});
+  
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final scale = size.width / 24.0;
+    
+    // Credit card: rect x="2" y="4" width="20" height="16" rx="2"
+    canvas.drawRRect(
+      RRect.fromLTRBR(
+        2 * scale, 4 * scale, 22 * scale, 20 * scale,
+        Radius.circular(2 * scale)
+      ),
+      paint,
+    );
+    
+    // Card stripe: line x1="2" y1="10" x2="22" y2="10"
+    canvas.drawLine(
+      Offset(2 * scale, 10 * scale),
+      Offset(22 * scale, 10 * scale),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CreditCardIconPainter oldDelegate) => color != oldDelegate.color;
 } 
