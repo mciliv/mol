@@ -708,6 +708,11 @@ input[type="checkbox"]:checked + .mode-label {
     margin-right: 80px; /* Increased margin for mobile to maintain separation */
   }
   
+  /* Adjust margin when modal is showing on mobile */
+  .main-app-interface.modal-showing .text-input {
+    margin-right: 80px; /* Maintain proper spacing from account status */
+  }
+  
   .input-container {
     gap: 4px;
   }
@@ -1550,9 +1555,28 @@ input[type="checkbox"]:checked + .mode-label {
   margin-top: 0;
 }
 
-/* Add top margin when modal is showing */
+/* Dynamic top margin when modal is showing - will be set via JavaScript */
 .main-app-interface.modal-showing {
-  margin-top: 200px; /* Compact modal height */
+  margin-top: var(--modal-height, 200px);
+  transition: margin-top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Responsive adjustments for modal spacing */
+@media (max-width: 768px) {
+  .main-app-interface.modal-showing {
+    margin-top: calc(var(--modal-height, 200px) + 10px); /* Extra padding on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .main-app-interface.modal-showing {
+    margin-top: calc(var(--modal-height, 200px) + 15px); /* More padding on very small screens */
+  }
+}
+
+/* Adjust text input positioning when modal is showing */
+.main-app-interface.modal-showing .text-input {
+  margin-right: 100px; /* Reduced margin when modal is active */
 }
 
 .main-app-interface.payment-required {
@@ -1719,6 +1743,7 @@ input[type="checkbox"]:checked + .mode-label {
 
 .form-actions {
   margin-top: 20px;
+  order: 3;
 }
 
 /* Setup button */

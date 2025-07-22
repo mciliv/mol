@@ -5,6 +5,11 @@ class PaymentManager {
     this.cardElement = null;
     this.paymentRequest = null;
     this.setupInProgress = false;
+    this.resizeTimeout = null;
+    
+    // Bind resize handler
+    this.handleResize = this.handleResize.bind(this);
+    window.addEventListener('resize', this.handleResize);
   }
 
   isLocalDevelopment() {
@@ -68,6 +73,11 @@ class PaymentManager {
       setTimeout(() => {
         modal.classList.add('show');
         console.log('✅ Payment modal should now be visible');
+        
+        // Calculate and set dynamic modal height after animation
+        setTimeout(() => {
+          this.updateModalSpacing();
+        }, 50);
       }, 10);
     } else {
       console.error('❌ Payment modal element not found!');
@@ -79,6 +89,25 @@ class PaymentManager {
     }
     
     this.initializePaymentSetup();
+  }
+
+  updateModalSpacing() {
+    const modal = document.getElementById('payment-modal');
+    const mainInterface = document.getElementById('main-app-interface');
+    
+    if (modal && mainInterface) {
+      // Get the actual height of the modal
+      const modalRect = modal.getBoundingClientRect();
+      const modalHeight = modalRect.height;
+      
+      // Add some padding below the modal (20px)
+      const totalOffset = modalHeight + 20;
+      
+      // Set CSS custom property for dynamic spacing
+      document.documentElement.style.setProperty('--modal-height', `${totalOffset}px`);
+      
+      console.log(`📏 Modal height: ${modalHeight}px, Total offset: ${totalOffset}px`);
+    }
   }
 
   hidePaymentModal() {
@@ -105,6 +134,9 @@ class PaymentManager {
     if (mainInterface) {
       mainInterface.classList.remove('payment-required');
       mainInterface.classList.remove('modal-showing');
+      
+      // Reset the modal height CSS variable
+      document.documentElement.style.removeProperty('--modal-height');
     }
     
     console.log('✅ Payment modal hidden');
@@ -170,6 +202,11 @@ class PaymentManager {
       setTimeout(() => {
         modal.classList.add('show');
         console.log('✅ Card management modal should now be visible');
+        
+        // Calculate and set dynamic modal height after animation
+        setTimeout(() => {
+          this.updateCardModalSpacing();
+        }, 50);
       }, 10);
     } else {
       console.error('❌ Card management modal element not found!');
@@ -180,6 +217,48 @@ class PaymentManager {
     }
     
     this.loadUserCards();
+  }
+
+  updateCardModalSpacing() {
+    const modal = document.getElementById('card-management-modal');
+    const mainInterface = document.getElementById('main-app-interface');
+    
+    if (modal && mainInterface) {
+      // Get the actual height of the card management modal
+      const modalRect = modal.getBoundingClientRect();
+      const modalHeight = modalRect.height;
+      
+      // Add some padding below the modal (20px)
+      const totalOffset = modalHeight + 20;
+      
+      // Set CSS custom property for dynamic spacing
+      document.documentElement.style.setProperty('--modal-height', `${totalOffset}px`);
+      
+      console.log(`📏 Card modal height: ${modalHeight}px, Total offset: ${totalOffset}px`);
+    }
+  }
+
+  handleResize() {
+    // Debounce resize events to avoid excessive calculations
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
+    
+    this.resizeTimeout = setTimeout(() => {
+      const mainInterface = document.getElementById('main-app-interface');
+      
+      if (mainInterface && mainInterface.classList.contains('modal-showing')) {
+        // Check which modal is currently showing and update spacing
+        const paymentModal = document.getElementById('payment-modal');
+        const cardModal = document.getElementById('card-management-modal');
+        
+        if (paymentModal && paymentModal.classList.contains('show')) {
+          this.updateModalSpacing();
+        } else if (cardModal && cardModal.classList.contains('show')) {
+          this.updateCardModalSpacing();
+        }
+      }
+    }, 150); // 150ms debounce
   }
 
   hideCardManagementModal() {
@@ -205,6 +284,9 @@ class PaymentManager {
     
     if (mainInterface) {
       mainInterface.classList.remove('modal-showing');
+      
+      // Reset the modal height CSS variable
+      document.documentElement.style.removeProperty('--modal-height');
     }
     
     console.log('✅ Card management modal hidden');
