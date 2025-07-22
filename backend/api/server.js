@@ -20,6 +20,20 @@ const app = express();
 const DEFAULT_PORT = 8080;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
 
+// Utility function to get local IP address
+const getLocalIPAddress = () => {
+  const os = require("os");
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === "IPv4" && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return "127.0.0.1";
+};
+
 // Utility to attempt cleanup of processes using our ports
 const attemptPortCleanup = async (port) => {
   try {
@@ -524,11 +538,10 @@ if (!isServerless && !isTestMode) {
         }
       }
 
+      const localIP = getLocalIPAddress();
       httpServer = app.listen(actualPort, "0.0.0.0", () => {
         console.log(`✅ HTTP server running on http://localhost:${actualPort}`);
-        console.log(
-          `📱 Mobile access: http://$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1):${actualPort}`,
-        );
+        console.log(`📱 Mobile access: http://${localIP}:${actualPort}`);
       });
     } catch (error) {
       console.error(`❌ Failed to start server: ${error.message}`);
