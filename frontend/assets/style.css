@@ -1791,6 +1791,371 @@ input[type="checkbox"]:checked + .mode-label {
   opacity: 0; 
 }
 
+/* Card Management Modal */
+.card-management-modal {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  width: 90%;
+  max-width: 600px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(10px);
+  display: none;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.card-management-modal.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.card-management-modal .modal-container {
+  padding: 20px;
+}
+
+.card-management-modal .modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.card-management-modal .modal-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.card-management-modal .modal-title svg {
+  color: #00d4ff;
+  flex-shrink: 0;
+}
+
+.card-management-modal .payment-close-btn {
+  position: absolute;
+  top: -5px;
+  right: 0;
+  background: none;
+  border: none;
+  color: #00d4ff;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 5px;
+  transition: opacity 0.3s ease;
+}
+
+.card-management-modal .payment-close-btn:hover {
+  opacity: 0.7;
+}
+
+/* Current Cards Section */
+.current-cards h3 {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.cards-list {
+  margin-bottom: 20px;
+}
+
+.card-item {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.card-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.card-item.default {
+  border-color: rgba(0, 255, 136, 0.4);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-brand-number {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-brand {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.card-number {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.card-expiry {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
+.default-badge {
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: #00d4ff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn-text:hover {
+  background: rgba(0, 212, 255, 0.1);
+  color: #ffffff;
+}
+
+.btn-text.delete-card-btn {
+  color: #ff6b6b;
+}
+
+.btn-text.delete-card-btn:hover {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff8a8a;
+}
+
+/* Card Actions Section */
+.card-actions {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(0, 212, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-secondary svg {
+  color: #00d4ff;
+  flex-shrink: 0;
+}
+
+/* No Cards State */
+.no-cards {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.no-cards p {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+/* Edit Card Form */
+.edit-card-form {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 20px;
+}
+
+.edit-card-form h3 {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.edit-card-form .modal-form {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.edit-card-form .form-group {
+  margin-bottom: 16px;
+}
+
+.edit-card-form .form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 6px;
+}
+
+.edit-card-form .card-element {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.edit-card-form .card-element:focus-within {
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+}
+
+.edit-card-form #edit-user-name {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+  color: #ffffff;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.edit-card-form #edit-user-name:focus {
+  outline: none;
+  border-color: #00d4ff;
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.edit-card-form #edit-user-name::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.edit-card-form .form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.edit-card-form .btn-primary {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-card-form .btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.edit-card-form .btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.edit-card-form .btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 20px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .card-management-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .card-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .card-actions {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  
+  .edit-card-form .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .edit-card-form .btn-primary,
+  .edit-card-form .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-management-modal .modal-container {
+    padding: 16px;
+  }
+  
+  .card-brand-number {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
 /* Error message styles */
 .error-message-container {
   background: rgba(255, 0, 0, 0.1);

@@ -360,6 +360,163 @@ app.post("/setup-payment-method", async (req, res) => {
   }
 });
 
+// Update payment method endpoint
+app.post("/update-payment-method", async (req, res) => {
+  try {
+    const { device_token, payment_method, name } = req.body;
+    
+    if (!device_token || !payment_method) {
+      return res.status(400).json({ error: "Device token and payment method required" });
+    }
+    
+    if (!userService) {
+      return res.status(503).json({ error: "User service not available" });
+    }
+    
+    const user = await userService.getUserByDeviceToken(device_token);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Update user in database
+    await userService.updateUser(device_token, {
+      paymentMethodId: payment_method,
+      name: name || user.name
+    });
+    
+    // In production, you would:
+    // 1. Update payment method in Stripe
+    // 2. Handle 3D Secure if needed
+    
+    res.json({
+      success: true,
+      message: "Payment method updated successfully"
+    });
+    
+  } catch (error) {
+    console.error("Payment update error:", error);
+    res.status(500).json({ error: "Failed to update payment method" });
+  }
+});
+
+// Get payment methods endpoint
+app.get("/get-payment-methods", async (req, res) => {
+  try {
+    const { device_token } = req.query;
+    
+    if (!device_token) {
+      return res.status(400).json({ error: "Device token required" });
+    }
+    
+    if (!userService) {
+      return res.status(503).json({ error: "User service not available" });
+    }
+    
+    const user = await userService.getUserByDeviceToken(device_token);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // In production, you would:
+    // 1. Fetch payment methods from Stripe
+    // 2. Return masked card details
+    
+    // For demo, return mock card data
+    const cardInfo = {
+      id: user.payment_method_id || 'pm_demo',
+      last4: '4242',
+      brand: 'visa',
+      exp_month: 12,
+      exp_year: 2025,
+      is_default: true
+    };
+    
+    res.json({
+      payment_methods: [cardInfo],
+      default_method: cardInfo.id
+    });
+    
+  } catch (error) {
+    console.error("Get payment methods error:", error);
+    res.status(500).json({ error: "Failed to get payment methods" });
+  }
+});
+
+// Delete payment method endpoint
+app.delete("/delete-payment-method", async (req, res) => {
+  try {
+    const { device_token, payment_method_id } = req.body;
+    
+    if (!device_token || !payment_method_id) {
+      return res.status(400).json({ error: "Device token and payment method ID required" });
+    }
+    
+    if (!userService) {
+      return res.status(503).json({ error: "User service not available" });
+    }
+    
+    const user = await userService.getUserByDeviceToken(device_token);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // In production, you would:
+    // 1. Detach payment method from Stripe customer
+    // 2. Update database accordingly
+    
+    // For demo, just clear the payment method
+    await userService.updateUser(device_token, {
+      paymentMethodId: null
+    });
+    
+    res.json({
+      success: true,
+      message: "Payment method deleted successfully"
+    });
+    
+  } catch (error) {
+    console.error("Delete payment method error:", error);
+    res.status(500).json({ error: "Failed to delete payment method" });
+  }
+});
+
+// Set default payment method endpoint
+app.post("/set-default-payment-method", async (req, res) => {
+  try {
+    const { device_token, payment_method_id } = req.body;
+    
+    if (!device_token || !payment_method_id) {
+      return res.status(400).json({ error: "Device token and payment method ID required" });
+    }
+    
+    if (!userService) {
+      return res.status(503).json({ error: "User service not available" });
+    }
+    
+    const user = await userService.getUserByDeviceToken(device_token);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // In production, you would:
+    // 1. Set default payment method in Stripe
+    // 2. Update database accordingly
+    
+    await userService.updateUser(device_token, {
+      paymentMethodId: payment_method_id
+    });
+    
+    res.json({
+      success: true,
+      message: "Default payment method updated successfully"
+    });
+    
+  } catch (error) {
+    console.error("Set default payment method error:", error);
+    res.status(500).json({ error: "Failed to set default payment method" });
+  }
+});
+
 // Validate payment method endpoint
 app.post("/validate-payment", async (req, res) => {
   try {

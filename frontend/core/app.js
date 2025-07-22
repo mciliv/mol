@@ -131,6 +131,36 @@ class MolecularApp {
         paymentManager.hidePaymentModal();
       });
     }
+
+    // Card Management Modal Event Listeners
+    const cardManagementCloseBtn = document.getElementById('card-management-close-btn');
+    if (cardManagementCloseBtn) {
+      cardManagementCloseBtn.addEventListener('click', () => {
+        paymentManager.hideCardManagementModal();
+      });
+    }
+
+    const addNewCardBtn = document.getElementById('add-new-card-btn');
+    if (addNewCardBtn) {
+      addNewCardBtn.addEventListener('click', () => {
+        paymentManager.showAddCardForm();
+      });
+    }
+
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener('click', () => {
+        paymentManager.cancelCardEdit();
+      });
+    }
+
+    const cardEditForm = document.getElementById('card-edit-form');
+    if (cardEditForm) {
+      cardEditForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await paymentManager.saveCardChanges();
+      });
+    }
       
     const video = document.getElementById("video-feed");
     if (video) {

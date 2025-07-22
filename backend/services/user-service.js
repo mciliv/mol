@@ -100,6 +100,65 @@ class UserService {
     }
   }
 
+  // Update user information
+  async updateUser(deviceToken, updateData) {
+    const client = await this.pool.connect();
+    try {
+      const {
+        paymentMethodId,
+        deviceInfo,
+        name
+      } = updateData;
+
+      const updates = [];
+      const values = [];
+      let paramCount = 0;
+
+      if (paymentMethodId !== undefined) {
+        updates.push(`payment_method_id = $${++paramCount}`);
+        values.push(paymentMethodId);
+      }
+      
+      if (deviceInfo !== undefined) {
+        updates.push(`device_info = $${++paramCount}`);
+        values.push(deviceInfo);
+      }
+      
+      if (name !== undefined) {
+        updates.push(`name = $${++paramCount}`);
+        values.push(name);
+      }
+
+      if (updates.length === 0) {
+        throw new Error('No update data provided');
+      }
+
+      // Always update last_used
+      updates.push(`last_used = NOW()`);
+      values.push(deviceToken);
+
+      const result = await client.query(`
+        UPDATE users 
+        SET ${updates.join(', ')}
+        WHERE device_token = $${++paramCount} AND is_active = true
+        RETURNING *;
+      `, values);
+
+      if (result.rows.length === 0) {
+        throw new Error('User not found');
+      }
+
+      const user = result.rows[0];
+      console.log(`✅ Updated user: ${user.name || 'Anonymous'} with device ${deviceToken.substring(0, 8)}...`);
+      return user;
+    } catch (error) {
+      console.error('🔴 Failed to update user:', error.message);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   // Increment usage counter for a user
   async incrementUsage(deviceToken) {
     const client = await this.pool.connect();
