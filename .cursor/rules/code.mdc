@@ -10,7 +10,7 @@ Don't create extranous files
 ## After every response
 check tests for accuracy
 pass all tests
-run/refresh app in dedicated terminal after changes
+run/refresh app
 if acceptance of changes:
 ```bash
 # After accepting changes, run these commands:
