@@ -1464,6 +1464,26 @@ input[type="checkbox"]:checked + .mode-label {
   box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
 }
 
+/* Modal Backdrop for Clear Separation */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* Payment Modal from Top - Compact Size */
 .payment-modal {
   position: fixed;
@@ -1473,13 +1493,13 @@ input[type="checkbox"]:checked + .mode-label {
   width: 90%;
   max-width: 500px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border: 1px solid rgba(0, 212, 255, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.4);
   border-radius: 0 0 12px 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   z-index: 1000;
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   backdrop-filter: blur(10px);
-  display: none; /* Hidden by default */
+  display: none;
 }
 
 .payment-modal.show {
@@ -1800,8 +1820,9 @@ input[type="checkbox"]:checked + .mode-label {
   width: 90%;
   max-width: 500px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: 1px solid rgba(0, 212, 255, 0.4);
   border-radius: 0 0 12px 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   z-index: 1000;
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   backdrop-filter: blur(10px);

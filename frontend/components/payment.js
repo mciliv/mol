@@ -48,9 +48,17 @@ class PaymentManager {
   showPaymentModal() {
     console.log('🔄 Showing payment modal...');
     const modal = document.getElementById('payment-modal');
+    const backdrop = document.getElementById('modal-backdrop');
     const mainInterface = document.getElementById('main-app-interface');
     
     console.log('📊 Elements found:', { modal: !!modal, mainInterface: !!mainInterface });
+    
+    if (backdrop) {
+      backdrop.classList.remove('hidden');
+      setTimeout(() => {
+        backdrop.classList.add('show');
+      }, 10);
+    }
     
     if (modal) {
       modal.style.display = 'block';
@@ -75,7 +83,15 @@ class PaymentManager {
   hidePaymentModal() {
     console.log('🔄 Hiding payment modal...');
     const modal = document.getElementById('payment-modal');
+    const backdrop = document.getElementById('modal-backdrop');
     const mainInterface = document.getElementById('main-app-interface');
+    
+    if (backdrop) {
+      backdrop.classList.remove('show');
+      setTimeout(() => {
+        backdrop.classList.add('hidden');
+      }, 300);
+    }
     
     if (modal) {
       modal.classList.remove('show');
@@ -136,7 +152,15 @@ class PaymentManager {
   showCardManagementModal() {
     console.log('🔄 Showing card management modal...');
     const modal = document.getElementById('card-management-modal');
+    const backdrop = document.getElementById('modal-backdrop');
     const mainInterface = document.getElementById('main-app-interface');
+    
+    if (backdrop) {
+      backdrop.classList.remove('hidden');
+      setTimeout(() => {
+        backdrop.classList.add('show');
+      }, 10);
+    }
     
     if (modal) {
       modal.style.display = 'block';
@@ -160,7 +184,15 @@ class PaymentManager {
   hideCardManagementModal() {
     console.log('🔄 Hiding card management modal...');
     const modal = document.getElementById('card-management-modal');
+    const backdrop = document.getElementById('modal-backdrop');
     const mainInterface = document.getElementById('main-app-interface');
+    
+    if (backdrop) {
+      backdrop.classList.remove('show');
+      setTimeout(() => {
+        backdrop.classList.add('hidden');
+      }, 300);
+    }
     
     if (modal) {
       modal.classList.remove('show');

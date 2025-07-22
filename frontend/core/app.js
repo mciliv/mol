@@ -161,6 +161,20 @@ class MolecularApp {
         await paymentManager.saveCardChanges();
       });
     }
+
+    // Modal backdrop click to close
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    if (modalBackdrop) {
+      modalBackdrop.addEventListener('click', () => {
+        // Close any open modal
+        if (!document.getElementById('payment-modal').classList.contains('hidden')) {
+          paymentManager.hidePaymentModal();
+        }
+        if (!document.getElementById('card-management-modal').classList.contains('hidden')) {
+          paymentManager.hideCardManagementModal();
+        }
+      });
+    }
       
     const video = document.getElementById("video-feed");
     if (video) {
