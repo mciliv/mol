@@ -386,6 +386,10 @@ if (!isValid) {
 3. **Enhance error categorization** based on patterns
 4. **Update UI styling** if readability improvements needed
 
+### Fixed Error Patterns:
+- **404 POST /analyze-text**: Missing frontend compatibility endpoint → Added /analyze-text mapping to existing /object-molecules logic
+- **Frontend/Backend API Mismatch**: Frontend expects /analyze-text, backend had /object-molecules → Created compatibility layer
+
 ---
 
 **This system ensures all errors are immediately visible to both AI and humans in a structured, debuggable format.**

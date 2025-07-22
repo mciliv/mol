@@ -467,7 +467,27 @@ app.post("/image-molecules", async (req, res) => {
   }
 });
 
-// Text analysis route
+// Text analysis route (frontend compatibility endpoint)
+app.post("/analyze-text", async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: "No text provided" });
+    }
+
+    // Map to the existing object-molecules logic
+    const result = await atomPredictor.analyzeText(text);
+    res.json({ output: result });
+  } catch (error) {
+    console.error("Text analysis error:", error);
+    res.status(500).json({
+      error: `Analysis failed: ${error.message}`,
+    });
+  }
+});
+
+// Text analysis route (legacy endpoint)
 app.post("/object-molecules", async (req, res) => {
   try {
     // Validate input schema
