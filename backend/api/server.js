@@ -211,8 +211,8 @@ app.use(express.json({ limit: "50mb" }));
 // Database schema will be created by the database setup script
 
 // ==================== DEVELOPMENT MIDDLEWARE ====================
-// Live reload disabled - using external tools if needed
-if (false && process.env.NODE_ENV === "development") {
+// Live reload enabled for local development
+if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined) {
   const livereload = require("livereload");
   const connectLivereload = require("connect-livereload");
   const net = require("net");
@@ -256,7 +256,8 @@ if (false && process.env.NODE_ENV === "development") {
 
       // Only proceed if server starts successfully
       liveReloadServer.server.once("listening", () => {
-        liveReloadServer.watch(__dirname);
+        const frontendPath = path.join(__dirname, "..", "..", "frontend");
+        liveReloadServer.watch(frontendPath);
         app.use(connectLivereload());
 
         liveReloadServer.server.once("connection", () => {
@@ -265,7 +266,8 @@ if (false && process.env.NODE_ENV === "development") {
           }, 100);
         });
 
-        console.log(`LiveReload server started on port ${port}`);
+        console.log(`🔄 LiveReload server started on port ${port}`);
+        console.log(`👀 Watching frontend files: ${frontendPath}`);
       });
     } catch (err) {
       console.log("LiveReload server failed to start:", err.message);

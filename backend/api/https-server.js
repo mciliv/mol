@@ -76,17 +76,21 @@ prompt = no
 C = US
 ST = Development
 L = Local
-O = MolecularReality
+O = MolecularAnalysisApp
+OU = Development
 CN = localhost
 
 [v3_req]
 basicConstraints = CA:FALSE
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+keyUsage = digitalSignature, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth, clientAuth
 subjectAltName = @alt_names
 
 [alt_names]
 DNS.1 = localhost
 DNS.2 = *.localhost
+DNS.3 = mol.local
+DNS.4 = *.mol.local
 IP.1 = 127.0.0.1
 IP.2 = 0.0.0.0
 IP.3 = ${this.localIP}
@@ -97,13 +101,19 @@ IP.4 = ::1
 
       execSync(`openssl genrsa -out ${keyPath} 2048`, { stdio: "pipe" });
       execSync(
-        `openssl req -new -x509 -key ${keyPath} -out ${certPath} -days 365 -config ${configPath}`,
+        `openssl req -new -x509 -key ${keyPath} -out ${certPath} -days 3650 -config ${configPath}`,
         { stdio: "pipe" },
       );
 
       fs.unlinkSync(configPath);
 
       console.log("✅ SSL certificates generated successfully!");
+      console.log("📄 Certificate location:", certPath);
+      console.log("🔒 To avoid 'trust website' prompts, you can:");
+      console.log("   macOS: sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain " + certPath);
+      console.log("   Or open Chrome and click 'Advanced' → 'Proceed to localhost (unsafe)' once");
+      console.log("💡 Certificate valid for 10 years (3650 days)");
+      
       return { key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) };
     } catch (err) {
       console.error("❌ Failed to generate SSL certificates:", err.message);
