@@ -35,8 +35,7 @@ class MolecularApp {
     const setupResult = await paymentManager.checkInitialPaymentSetup();
     this.hasPaymentSetup = setupResult;
     
-    // Clear development states AFTER payment setup check to avoid conflicts
-    uiManager.clearDevelopmentStates();
+    // Note: Removed clearDevelopmentStates to prevent modal interference
     
     // Update account status after checking payment setup
     const deviceToken = localStorage.getItem('molDeviceToken');
@@ -58,27 +57,8 @@ class MolecularApp {
   
     console.log('✅ Molecular analysis app initialized');
     
-    // Auto-enable dev mode for localhost development
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      console.log('🔧 Localhost detected - checking if dev mode should be auto-enabled');
-      
-      const deviceToken = localStorage.getItem('molDeviceToken');
-      const isDeveloperAccount = paymentManager.isDeveloperAccount();
-      
-      if (!deviceToken && !isDeveloperAccount && !paymentEnabled) {
-        console.log('🔧 Auto-enabling developer mode for localhost');
-        paymentManager.setupDeveloperAccount();
-        this.hasPaymentSetup = true;
-        
-        // Hide payment modal if showing
-        const paymentPopdown = document.getElementById('payment-modal');
-        if (paymentPopdown && !paymentPopdown.classList.contains('hidden')) {
-          paymentManager.hidePaymentModal();
-        }
-        
-        console.log('🎉 Developer mode auto-enabled for localhost');
-      }
-    }
+    // Note: Removed auto-enable dev mode to allow payment modal to show for new users
+    // Developer mode can be manually enabled via console: enableDevMode()
   }
 
   setupEventListeners() {
