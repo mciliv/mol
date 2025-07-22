@@ -77,6 +77,30 @@ class MolecularApp {
 
     cameraHandler.setupEventListeners();
     
+    // Add keyboard shortcut for focusing text input (Cmd+K / Ctrl+K)
+    document.addEventListener('keydown', (event) => {
+      // Check if Cmd+K (macOS) or Ctrl+K (Windows/Linux) is pressed
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault(); // Prevent default browser behavior
+        
+        // Focus the text input field
+        const textInput = document.getElementById('object-input');
+        if (textInput) {
+          textInput.focus();
+          // Select all text if there's existing content
+          textInput.select();
+        }
+      }
+    });
+    
+    // Set dynamic placeholder text based on platform
+    const textInput = document.getElementById('object-input');
+    if (textInput) {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const shortcutKey = isMac ? '⌘K' : 'Ctrl+K';
+      textInput.placeholder = `Type any object name (e.g., coffee, aspirin, water) and press Enter... (${shortcutKey} to focus)`;
+    }
+    
 
     
     // Payment close button event listener
