@@ -1,119 +1,25 @@
-# UI Memory Bank - Critical Fixes That Must Never Be Forgotten
+# UI Memory - Critical Fixes
 
-## 🚨 CRITICAL: Card Icon Spacing Issue - PERMANENT FIX
-
-**Problem**: Credit card icon overlaps with text input (reported 3+ times)
-**Root Cause**: AI forgets previous spacing fixes due to context amnesia
-**PERMANENT SOLUTION**: The following CSS rules are MANDATORY and must NEVER be modified:
-
+## Card Icon Spacing (NEVER REVERT)
+**Problem**: Card icon overlaps text input (3x recurring)
+**Fix**: 
 ```css
-/* MANDATORY: Account link positioning and spacing */
-.account-link {
-  position: absolute;
-  right: 15px;
-  gap: 8px; /* NEVER reduce this - ensures icon/text separation */
-  min-width: 100px; /* CRITICAL for proper spacing */
-}
-
-.account-link svg {
-  margin-right: 2px; /* MANDATORY additional icon spacing */
-  width: 16px;
-  height: 16px;
-}
-
-/* MANDATORY: Text input margin to prevent overlap */
-.text-input {
-  margin-right: 160px; /* CRITICAL - prevents card icon overlap */
-}
-
-/* Mobile responsive spacing */
-@media (max-width: 768px) {
-  .text-input {
-    margin-right: 80px; /* Reduced for mobile but still prevents overlap */
-  }
-}
+.account-link { gap: 8px; min-width: 100px; }
+.text-input { margin-right: 160px; } /* mobile: 80px */
 ```
 
-**Historical Context**:
-- Fixed 3+ times due to AI context amnesia
-- Each time the spacing was corrected, AI later forgot and reverted
-- User specifically mentioned this recurring issue
-- Solution: This memory document prevents future reversions
+## Developer Mode UI (PERMANENTLY REMOVED)
+- NO UI elements for developer mode
+- Terminal controlled only
+- All dev-toggle/dev-indicator elements removed
 
-## ✅ Developer Mode UI Removal - PERMANENT DECISION
-
-**Decision**: Developer mode has NO special UI (controlled from terminal only)
-**Implementation**: ALL developer mode UI elements removed from frontend
-**Rationale**: User explicitly stated "should have no special UI as it's controlled from the terminal"
-
-**Removed Elements** (DO NOT re-add):
-- `dev-toggle` UI element
-- `dev-account-indicator` UI element  
-- All CSS rules for developer mode UI
-- All JavaScript for developer mode UI
-
-## ✅ Card Icon Specifications - EXACT REQUIREMENTS
-
-**Icon**: Credit card SVG (NOT generic user icon)
-**Separation**: Icon must be visually separate from text
-**Behavior**: Show "Add Card" when no payment setup, show user name when configured
-**Positioning**: Absolute positioned, right side, never overlapping input
-
-## ✅ UI Guidelines Compliance - ui.mdc Rules
-
-**Hover States** (MANDATORY):
+## Hover States (ui.mdc compliant)
 ```css
-.account-link:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.switch-camera-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.payment-popdown .setup-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-  /* NO box-shadow - violates ui.mdc rules */
-}
+.account-link:hover { background: rgba(255, 255, 255, 0.08); }
+/* NO box-shadow on buttons */
 ```
 
-## 📝 Memory Maintenance Protocol
-
-**For AI**: Before making ANY UI changes:
-1. READ this entire memory bank
-2. Check if proposed change conflicts with recorded fixes
-3. If it conflicts, DO NOT proceed - consult memory instead
-4. If adding new fixes, UPDATE this document
-
-**For Humans**: 
-- Update this document when new persistent issues arise
-- Add solutions that have been forgotten multiple times
-- Include exact CSS/HTML snippets to prevent variations
-
-## 🔄 Live Reload & Development
-
-**Status**: Fixed and working
-**Configuration**: 
-- Watches `frontend/` directory
-- Port 35729/35730 for live reload
-- HTTPS certificate auto-trust script available
-
-**Trust Certificate**: 
-```bash
-./infrastructure/scripts/trust-cert.sh
-```
-
-## 🎯 Next Steps Prevention
-
-**Common Forgetting Patterns to Watch**:
-1. Reverting spacing fixes after working on other components
-2. Re-adding removed developer mode UI elements  
-3. Changing hover states to violate ui.mdc rules
-4. Modifying text-input margin-right (breaks card separation)
-
-**Prevention Strategy**:
-- This memory document serves as permanent context
-- Always reference before UI modifications
-- Update when new persistent issues arise
-- Treat as single source of truth for UI decisions
+## Prevention Protocol
+Before UI changes: READ this file first
+After recurring fix: UPDATE this file
+Never reduce: account-link gap, text-input margin-right

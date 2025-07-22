@@ -1,62 +1,34 @@
-# Code Development Workflow
+# Development Workflow
 
-## Pre-Change Memory Check (MANDATORY)
-Before ANY code changes:
-1. **READ ui-memory.mdc** - check for previous fixes to same area
-2. **Verify no conflicts** with documented permanent solutions  
-3. **Update memory** if adding new persistent fixes
+## Pre-Change Check
+1. Read ui-memory.mdc for existing fixes
+2. Never revert documented solutions
 
-## Guidelines
-No code comments
-Don't create extraneous files
-**NEVER revert documented permanent fixes** (see ui-memory.mdc)
+## Guidelines  
+- No code comments
+- Don't create extraneous files
+- Show code chunks, not descriptions
 
-## Workflow: Every Response
-1. **Memory check** - consult relevant .mdc files
-2. Check tests for accuracy
-3. Pass all tests  
-4. Run/refresh app
-5. **Update memory bank** if new persistent issues discovered
+## Workflow
+1. Memory check (ui-memory.mdc)
+2. Run/refresh app (`./dev`)
+3. Test changes
+4. Commit if accepted
 
-## After Acceptance of Changes
+## After Acceptance
 ```bash
-# Immediate post-acceptance workflow:
 git add .
-git commit -m "Brief description of changes made"
+git commit -m "Brief description"
 git push origin main
-git status  # Check remaining changes
 ```
 
-## Development Server (MANDATORY)
-**Always run in dedicated terminal after changes:**
+## Development Server
 ```bash
-./dev          # Standard development with live reload
-./dev-debug    # Maximum error visibility and logging
+./dev          # Standard with live reload
+./dev-debug    # Maximum error visibility
 ```
 
-**Live reload setup ensures:**
-- Frontend changes auto-refresh browser
-- Real-time error visibility  
-- Proper certificate trust (run `./infrastructure/scripts/trust-cert.sh` once)
-
-## Memory Preservation Strategy
-**Problem**: AI context amnesia causes repeated fixes of same issues
-**Solution**: Document-driven development with persistent .mdc memory
-
-**Critical Memory Files**:
-- `ui-memory.mdc` - UI fixes that keep getting forgotten
-- `dev-mode.mdc` - Developer mode configuration  
-- `meta.mdc` - System-wide configuration
-
-**Before UI Changes**: ALWAYS read ui-memory.mdc first
-**After UI Fixes**: Update memory if issue was recurring
-
-## Testing Integration
-Run tests non-blocking to ensure development server always starts
-If tests fail, continue with server but investigate issues
-
-Proceed with next feature or improvement while maintaining memory context 
-```
-Proceed with next feature or improvement
-run in dedicated terminal after changes
-making sure live reload is setup to refresh 
+## Memory Preservation
+- Document-driven development prevents AI amnesia
+- Update .mdc files for recurring issues
+- Before UI changes: read ui-memory.mdc first 
