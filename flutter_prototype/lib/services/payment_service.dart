@@ -38,13 +38,13 @@ class PaymentService extends ChangeNotifier {
   }
   
   // Show payment section
-  void showPaymentSection() {
+  void showPayment() {
     _showPaymentSection = true;
     notifyListeners(); // UI updates automatically!
   }
   
   // Hide payment section
-  void hidePaymentSection() {
+  void hidePayment() {
     _showPaymentSection = false;
     notifyListeners(); // UI updates automatically!
   }

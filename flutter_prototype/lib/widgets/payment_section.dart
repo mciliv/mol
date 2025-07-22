@@ -50,7 +50,7 @@ class PaymentHeader extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.close, color: Colors.white),
           onPressed: () {
-            context.read<PaymentService>().hidePaymentSection();
+            context.read<PaymentService>().hidePayment();
           },
           padding: EdgeInsets.all(8),
           constraints: BoxConstraints(minWidth: 40, minHeight: 40), // Touch-friendly

@@ -114,7 +114,7 @@ class _PhotoPickerState extends State<PhotoPicker> {
   Future<void> _pickImage(PaymentService paymentService, AnalysisService analysisService) async {
     // Check payment method
     if (!paymentService.canAnalyze()) {
-      paymentService.showPaymentSection();
+      paymentService.showPayment();
       return;
     }
     
@@ -148,7 +148,7 @@ class _PhotoPickerState extends State<PhotoPicker> {
     
     // Check payment method
     if (!paymentService.canAnalyze()) {
-      paymentService.showPaymentSection();
+      paymentService.showPayment();
       return;
     }
     

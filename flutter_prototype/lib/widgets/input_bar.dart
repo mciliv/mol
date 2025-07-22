@@ -99,7 +99,7 @@ class _InputBarState extends State<InputBar> {
   
   void _handleAccountTap(PaymentService paymentService) {
     if (!paymentService.hasPaymentMethod) {
-      paymentService.showPaymentSection();
+      paymentService.showPayment();
     } else {
       // Show account management (placeholder)
       ScaffoldMessenger.of(context).showSnackBar(
@@ -121,7 +121,7 @@ class _InputBarState extends State<InputBar> {
     
     // Check payment method
     if (!paymentService.canAnalyze()) {
-      paymentService.showPaymentSection();
+      paymentService.showPayment();
       return;
     }
     
