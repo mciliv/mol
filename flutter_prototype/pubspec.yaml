@@ -1,0 +1,39 @@
+name: molecular_analyzer
+description: Simplified molecular analysis app in Flutter
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Camera & Image
+  camera: ^0.10.5
+  image_picker: ^1.0.4
+  
+  # Payment Processing
+  stripe_payment: ^1.1.4
+  
+  # HTTP & Storage
+  http: ^1.1.0
+  shared_preferences: ^2.2.2
+  
+  # 3D Molecular Visualization
+  flutter_gl: ^0.0.21
+  vector_math: ^2.1.4
+  
+  # UI Components
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true 
