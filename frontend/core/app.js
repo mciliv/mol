@@ -59,13 +59,7 @@ class MolecularApp {
       }
     }
     
-    // Show developer account indicator if using developer account
-    if (paymentManager.isDeveloperAccount()) {
-      const devAccountIndicator = document.getElementById('dev-account-indicator');
-      if (devAccountIndicator) {
-        devAccountIndicator.classList.remove('hidden');
-      }
-    }
+
       
     await cameraManager.initialize();
 
@@ -93,50 +87,7 @@ class MolecularApp {
       });
     }
     
-    // Payment toggle
-    const devToggle = document.getElementById('dev-toggle');
-    const devModeBtn = document.getElementById('dev-mode-btn');
-    
-    if (devToggle && devModeBtn) {
-      // Show payment toggle on triple click of account link
-      const accountStatus = document.getElementById('account-status');
-      if (accountStatus) {
-        let clickCount = 0;
-        let clickTimer;
-        
-        accountStatus.addEventListener('click', () => {
-          clickCount++;
-          clearTimeout(clickTimer);
-          
-          clickTimer = setTimeout(() => {
-            if (clickCount === 3) {
-              devToggle.style.display = 'flex';
-              console.log('🔧 Payment toggle revealed');
-            }
-            clickCount = 0;
-          }, 500);
-        });
-      }
-      
-      // Toggle payment requirement
-      devModeBtn.addEventListener('click', () => {
-        const isActive = devModeBtn.classList.contains('active');
-        
-        if (isActive) {
-          // Disable payment requirement
-          devModeBtn.classList.remove('active');
-          localStorage.setItem('molPaymentEnabled', 'false');
-          console.log('🔧 Payment requirement disabled');
-        } else {
-          // Enable payment requirement
-          devModeBtn.classList.add('active');
-          localStorage.setItem('molPaymentEnabled', 'true');
-          paymentManager.clearPaymentSetup();
-          paymentManager.showPaymentPopdown();
-          console.log('🔧 Payment requirement enabled - showing payment popdown');
-        }
-      });
-    }
+
     
     // Continue to analysis button event listener
     const startAnalyzingBtn = document.getElementById('start-analyzing-btn');

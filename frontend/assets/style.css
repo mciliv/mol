@@ -114,37 +114,7 @@ body {
   color: #ffb733;
 }
 
-.dev-toggle {
-  display: flex;
-  align-items: center;
-}
 
-.dev-mode-btn {
-  background: rgba(255, 165, 0, 0.1);
-  color: #ffa500;
-  border: 1px solid #ffa500;
-  padding: 8px;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dev-mode-btn:hover {
-  background: rgba(255, 165, 0, 0.2);
-  color: #ff8c00;
-}
-
-.dev-mode-btn.active {
-  background: rgba(255, 165, 0, 0.3);
-  color: #ff8c00;
-  border-color: #ff8c00;
-}
 
 .text-input {
   padding: 14px 20px;
@@ -1927,29 +1897,4 @@ input[type="checkbox"]:checked + .mode-label {
   opacity: 1;
 }
 
-/* Developer account indicator */
-.dev-account-indicator {
-  background: #00d4ff;
-  color: white;
-  padding: 8px 16px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 500;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
-.dev-reset-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.dev-reset-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
