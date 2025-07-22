@@ -1,4 +1,4 @@
-/* Simple, Clean UI for Molecular Analysis App - Following ui.mdc Guidelines */
+/* Refined Simple UI - Compact & Clean */
 
 * {
   box-sizing: border-box;
@@ -8,11 +8,12 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #000000; /* Dark theme standard */
-  color: #ffffff; /* Primary text color */
-  line-height: 1.4; /* Typography standard */
-  letter-spacing: 0.01em; /* Typography standard */
-  font-weight: 400; /* Body text weight */
+  background: #000000;
+  color: #ffffff;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  font-weight: 400;
+  font-size: 14px; /* Base font size - more refined */
 }
 
 .app-container {
@@ -21,34 +22,34 @@ body {
   flex-direction: column;
 }
 
-/* ===== PAYMENT SECTION (Top, Full Width) ===== */
+/* ===== PAYMENT SECTION ===== */
 .payment-section {
-  background: #000000; /* No gradients - keep simple */
-  padding: 30px;
+  background: #000000;
+  padding: 20px; /* Reduced from 30px */
   width: 100%;
 }
 
 .payment-content {
-  max-width: 600px;
+  max-width: 500px; /* Slightly smaller max-width */
   margin: 0 auto;
 }
 
 .payment-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px; /* Reduced from 30px */
   position: relative;
 }
 
 .payment-header h2 {
-  font-size: 24px;
-  margin-bottom: 8px;
+  font-size: 18px; /* Reduced from 24px */
+  margin-bottom: 6px; /* Reduced from 8px */
   color: #ffffff;
-  font-weight: 500; /* Label weight */
+  font-weight: 500;
 }
 
 .payment-header p {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.7); /* Secondary text color */
+  font-size: 14px; /* Reduced from 16px */
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .close-btn {
@@ -56,81 +57,86 @@ body {
   top: 0;
   right: 0;
   background: none;
-  border: none; /* No extraneous lines */
-  color: #ffffff;
-  font-size: 24px;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px; /* Slightly smaller */
   cursor: pointer;
-  padding: 8px;
-  transition: all 0.2s ease; /* Standard transition */
+  padding: 4px 8px; /* Compact padding */
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.12); /* Standard hover state */
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
-/* Payment Form */
 .payment-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px; /* Reduced from larger gaps */
 }
 
 .form-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px; /* Reduced from 8px */
 }
 
 .form-row label {
-  font-weight: 500; /* Label weight */
+  font-weight: 500;
   color: #ffffff;
+  font-size: 13px; /* Smaller labels */
 }
 
 .card-input {
-  background: rgba(255, 255, 255, 0.08); /* Interactive element background */
-  border: none; /* No extraneous lines */
-  border-radius: 8px;
-  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 6px; /* Slightly smaller radius */
+  padding: 10px 12px; /* Much more compact */
   color: #ffffff;
+  font-size: 14px;
+  min-height: 36px; /* Reduced height */
 }
 
 .card-input:focus-within {
-  background: rgba(255, 255, 255, 0.12); /* Hover state */
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .form-row input {
-  background: rgba(255, 255, 255, 0.08); /* Interactive element background */
-  border: none; /* No extraneous lines */
-  border-radius: 8px;
-  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 12px; /* Much more compact */
   color: #ffffff;
-  font-size: 16px;
+  font-size: 14px;
+  min-height: 36px;
 }
 
 .form-row input:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.12); /* Hover state */
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .form-row input::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Secondary text */
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .submit-btn {
-  background: rgba(255, 255, 255, 0.08); /* Interactive element */
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  border-radius: 8px;
-  padding: 16px 24px;
+  border-radius: 6px;
+  padding: 10px 16px; /* Much more compact */
   color: #ffffff;
-  font-weight: 500; /* Button weight */
-  font-size: 16px;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease; /* Standard transition */
-  min-height: 40px; /* Touch-friendly */
+  transition: all 0.2s ease;
+  min-height: 36px; /* Compact button height */
 }
 
 .submit-btn:hover {
-  background: rgba(255, 255, 255, 0.12); /* Standard hover */
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .submit-btn:disabled {
@@ -139,62 +145,55 @@ body {
 }
 
 .error-text {
-  color: rgba(255, 255, 255, 0.7); /* Secondary text for errors */
-  font-size: 14px;
-  min-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px; /* Smaller error text */
+  min-height: 18px;
 }
 
 .btn-loading {
   display: none;
 }
 
-.btn-loading:not(.hidden) {
-  display: inline;
+.hidden {
+  display: none !important;
 }
 
-/* ===== SEPARATOR LINE ===== */
+/* ===== SEPARATOR ===== */
 .separator-line {
-  height: 1px; /* Minimal separator */
+  height: 1px;
   background: rgba(255, 255, 255, 0.08);
-  margin: 0; /* No extra spacing */
+  width: 100%;
 }
 
-/* Show separator only when payment section is visible */
-.payment-section:not(.hidden) + .separator-line {
-  display: block;
-}
-
-.payment-section.hidden + .separator-line {
-  display: none;
-}
-
-/* ===== MAIN APP (Below Payment) ===== */
+/* ===== MAIN APP ===== */
 .main-app {
   flex: 1;
-  padding: 20px;
+  padding: 16px; /* Reduced from larger padding */
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  min-height: 60vh; /* Responsive design standard */
+  gap: 16px; /* Consistent smaller gaps */
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* Input Bar */
 .input-bar {
   display: flex;
-  gap: 16px;
+  gap: 10px; /* Reduced gap */
   align-items: center;
-  background: rgba(255, 255, 255, 0.08); /* Interactive element background */
-  padding: 16px 20px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 8px 12px; /* Much more compact */
+  border-radius: 6px;
 }
 
 .main-input {
   flex: 1;
   background: transparent;
-  border: none; /* No extraneous lines */
-  padding: 16px;
+  border: none;
+  padding: 8px; /* Compact padding */
   color: #ffffff;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .main-input:focus {
@@ -202,41 +201,42 @@ body {
 }
 
 .main-input::placeholder {
-  color: rgba(255, 255, 255, 0.7); /* Secondary text */
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .account-btn {
-  background: rgba(255, 255, 255, 0.08); /* Interactive element */
-  border: none; /* No extraneous lines */
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px; /* Much more compact */
   color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 500; /* Button weight */
-  transition: all 0.2s ease; /* Standard transition */
-  min-height: 40px; /* Touch-friendly */
+  gap: 6px; /* Smaller gap */
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  min-height: 32px; /* Compact height */
 }
 
 .account-btn:hover {
-  background: rgba(255, 255, 255, 0.12); /* Standard hover */
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* Mode Selection */
 .mode-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px; /* Reduced gap */
 }
 
 .mode-tabs {
   display: flex;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.08); /* Interactive element */
-  padding: 8px;
-  border-radius: 8px;
+  gap: 6px; /* Smaller gap */
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px; /* Much more compact */
+  border-radius: 6px;
 }
 
 .mode-tab {
@@ -252,211 +252,142 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.7); /* Secondary text */
-  transition: all 0.2s ease; /* Standard transition */
-  min-height: 40px; /* Touch-friendly */
+  gap: 6px; /* Smaller gap */
+  padding: 6px 10px; /* Compact padding */
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 13px; /* Smaller text */
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .mode-tab input:checked + .tab-content {
-  background: rgba(255, 255, 255, 0.08); /* Active state */
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
-.tab-content:hover {
-  background: rgba(255, 255, 255, 0.12); /* Standard hover */
-  color: #ffffff;
+.tab-content svg {
+  width: 14px; /* Smaller icons */
+  height: 14px;
 }
 
-/* Camera Area */
-.camera-area {
-  display: none;
-  position: relative;
-  background: #000000;
-  border-radius: 8px;
-  overflow: hidden;
-  min-height: 400px;
-}
-
-#camera-mode:checked ~ .camera-area {
+/* Photo Upload */
+.photo-section {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 0; /* Reduced padding */
 }
 
-#video-feed {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* Maintain aspect ratio */
-}
-
-.camera-crosshair {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  border: 1px solid rgba(255, 255, 255, 0.7); /* Minimal border */
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.camera-instruction {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.85); /* Overlay standard */
-  color: #ffffff;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 14px;
+.upload-area {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 16px 12px; /* Compact but usable */
   text-align: center;
-}
-
-/* Photo Area */
-.photo-area {
-  display: none;
-  flex-direction: column;
-  gap: 20px;
-  align-items: center;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.08); /* Interactive element */
-  border-radius: 8px;
-}
-
-#photo-mode:checked ~ .photo-area {
-  display: flex;
-}
-
-.photo-area input[type="file"] {
-  display: none;
-}
-
-.upload-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 40px;
-  border: 1px dashed rgba(255, 255, 255, 0.7); /* Minimal dashed border */
-  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease; /* Standard transition */
-  background: transparent;
-  min-height: 40px; /* Touch-friendly */
+  transition: all 0.2s ease;
 }
 
-.upload-btn:hover {
-  background: rgba(255, 255, 255, 0.12); /* Standard hover */
+.upload-area:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.url-input-area {
+.upload-area svg {
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.upload-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
+
+.url-input-group {
   display: flex;
-  gap: 12px;
-  width: 100%;
-  max-width: 400px;
+  gap: 8px;
+  align-items: center;
 }
 
-.url-input-area input {
+.url-input {
   flex: 1;
-  background: rgba(255, 255, 255, 0.08); /* Interactive element */
-  border: none; /* No extraneous lines */
-  border-radius: 8px;
-  padding: 12px 16px;
-  color: #ffffff;
-}
-
-.url-input-area input:focus {
-  outline: none;
-  background: rgba(255, 255, 255, 0.12); /* Hover state */
-}
-
-.analyze-btn {
-  background: rgba(255, 255, 255, 0.08); /* Interactive element */
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
+  border-radius: 6px;
+  padding: 8px 12px; /* Compact */
   color: #ffffff;
-  font-weight: 500; /* Button weight */
+  font-size: 14px;
+  min-height: 32px;
+}
+
+.url-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.url-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.url-analyze-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.2s ease; /* Standard transition */
-  min-height: 40px; /* Touch-friendly */
+  font-size: 13px;
+  min-height: 32px;
+  transition: all 0.2s ease;
 }
 
-.analyze-btn:hover {
-  background: rgba(255, 255, 255, 0.12); /* Standard hover */
+.url-analyze-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
-/* Results Area */
-.results-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  flex: 1;
+/* Results */
+.results-section {
+  margin-top: 8px; /* Smaller margin */
 }
 
-.snapshots-area {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.08); /* Interactive element */
-  border-radius: 8px;
-  min-height: 100px;
+.results-section h3 {
+  color: #ffffff;
+  font-size: 16px;
+  margin-bottom: 12px;
+  font-weight: 500;
 }
 
-/* Utility Classes */
-.hidden {
-  display: none !important;
+.result-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 12px; /* Compact but readable */
+  margin-bottom: 8px; /* Smaller margin */
+}
+
+.result-item h4 {
+  color: #ffffff;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.result-item p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .payment-section {
-    padding: 20px;
-  }
-  
-  .payment-header h2 {
-    font-size: 20px;
-  }
-  
   .main-app {
-    padding: 16px;
-  }
-  
-  .input-bar {
-    flex-direction: column;
+    padding: 12px;
     gap: 12px;
   }
   
-  .mode-tabs {
-    flex-direction: column;
-  }
-  
-  .url-input-area {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 480px) {
   .payment-section {
     padding: 16px;
   }
   
-  .payment-header h2 {
-    font-size: 18px;
-  }
-  
-  .main-app {
-    padding: 12px;
-  }
-  
-  .account-btn span {
-    display: none; /* Icons only on mobile */
+  body {
+    font-size: 13px; /* Even more compact on mobile */
   }
 } 
