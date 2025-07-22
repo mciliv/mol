@@ -66,6 +66,7 @@ class PaymentManager {
     
     if (mainInterface) {
       mainInterface.classList.add('payment-required');
+      mainInterface.classList.add('modal-showing');
     }
     
     this.initializePaymentSetup();
@@ -86,6 +87,7 @@ class PaymentManager {
     
     if (mainInterface) {
       mainInterface.classList.remove('payment-required');
+      mainInterface.classList.remove('modal-showing');
     }
     
     console.log('✅ Payment modal hidden');

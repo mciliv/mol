@@ -1464,43 +1464,43 @@ input[type="checkbox"]:checked + .mode-label {
   box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
 }
 
-/* Payment Modal from Top */
+/* Payment Modal from Top - Compact Size */
 .payment-modal {
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100vw;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  width: 90%;
+  max-width: 500px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 0 0 12px 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  z-index: 10000;
-  transform: translateY(-100%);
+  z-index: 1000;
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   backdrop-filter: blur(10px);
   display: none; /* Hidden by default */
 }
 
 .payment-modal.show {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .modal-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 20px;
+  padding: 16px;
 }
 
 .modal-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .modal-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 18px;
+  gap: 6px;
+  font-size: 16px;
   font-weight: 600;
   color: #ffffff;
   margin-bottom: 4px;
@@ -1509,10 +1509,12 @@ input[type="checkbox"]:checked + .mode-label {
 .modal-title svg {
   color: #00d4ff;
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 .modal-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
   font-weight: 400;
@@ -1520,11 +1522,17 @@ input[type="checkbox"]:checked + .mode-label {
 
 /* Main App Fade State */
 .main-app-interface {
-  transition: opacity 0.4s ease, filter 0.4s ease;
+  transition: opacity 0.4s ease, filter 0.4s ease, margin-top 0.4s ease;
   opacity: 1;
   filter: none;
   pointer-events: auto;
   user-select: auto;
+  margin-top: 0;
+}
+
+/* Add top margin when modal is showing */
+.main-app-interface.modal-showing {
+  margin-top: 200px; /* Compact modal height */
 }
 
 .main-app-interface.payment-required {
