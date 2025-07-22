@@ -7,7 +7,7 @@ alwaysApply: false
     Don't create extranous files
 check tests for accuracy
 pass all tests
-refresh app after changes
+run/refresh app in dedicated terminal after changes
 if acceptance of changes:
 ```bash
 # After accepting changes, run these commands:

@@ -80,7 +80,7 @@ body {
   white-space: nowrap;
   display: flex !important; /* Always show account status */
   align-items: center;
-  gap: 6px;
+  gap: 8px; /* Increased gap for better separation */
   border: 1px solid transparent;
 }
 
@@ -90,6 +90,9 @@ body {
   display: block;
   flex-shrink: 0;
   color: inherit;
+  width: 16px;
+  height: 16px;
+  margin-right: 2px; /* Additional spacing after icon */
 }
 
 .account-link:hover {
@@ -567,6 +570,11 @@ input[type="checkbox"]:checked + .mode-label {
     min-width: 32px;
     height: 32px;
     justify-content: center;
+    gap: 0; /* Remove gap on mobile since text is hidden */
+  }
+  
+  .account-link svg {
+    margin-right: 0; /* Remove margin on mobile */
   }
 
   .text-input {

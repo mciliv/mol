@@ -70,6 +70,5 @@ fi
 # Run tests first to ensure everything is working
 npm test --prefix infrastructure/config
 
-# Start the development server with nodemon
-cd infrastructure/config
-npx nodemon ../../backend/api/server.js 
+# Start the development server with nodemon from project root
+npx nodemon backend/api/server.js 
