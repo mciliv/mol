@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/analysis_service.dart';
+import 'analysis_service.dart';
 
 class ResultsView extends StatelessWidget {
   @override

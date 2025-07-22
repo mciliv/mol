@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'screens/home_screen.dart';
-import 'services/payment_service.dart';
-import 'services/camera_service.dart';
-import 'services/analysis_service.dart';
-import 'utils/layout_monitor.dart';
+import 'payment_service.dart';
+import 'camera_service.dart';
+import 'analysis_service.dart';
+import 'home_screen.dart';
+import 'layout_monitor.dart';
 
 void main() {
   // Enable layout monitoring in debug mode

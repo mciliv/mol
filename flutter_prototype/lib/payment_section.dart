@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/payment_service.dart';
+import 'payment_service.dart';
 
 class PaymentSection extends StatelessWidget {
   @override

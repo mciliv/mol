@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:io';
-import '../services/payment_service.dart';
-import '../services/analysis_service.dart';
+import 'payment_service.dart';
+import 'analysis_service.dart';
 
 class PhotoPicker extends StatefulWidget {
   @override
@@ -46,9 +47,14 @@ class _PhotoPickerState extends State<PhotoPicker> {
         child: Column(
           mainAxisSize: MainAxisSize.min, // KEY: Prevents overflow
           children: [
-            CustomPaint(
-              size: Size(24, 24),
-              painter: UploadIconPainter(),
+            SvgPicture.asset(
+              'assets/photo-upload.svg',
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(
+                Colors.white.withOpacity(0.7),
+                BlendMode.srcIn,
+              ),
             ),
             SizedBox(height: 12),
             Text(
@@ -96,9 +102,10 @@ class _PhotoPickerState extends State<PhotoPicker> {
               onTap: () => _analyzeUrl(paymentService, analysisService),
               child: Padding(
                 padding: EdgeInsets.all(12),
-                child: CustomPaint(
-                  size: Size(16, 16),
-                  painter: SearchIconPainter(),
+                child: Icon(
+                  Icons.search,
+                  size: 16,
+                  color: Colors.white.withOpacity(0.7),
                 ),
               ),
             ),
@@ -167,76 +174,4 @@ class _PhotoPickerState extends State<PhotoPicker> {
     _urlController.dispose();
     super.dispose();
   }
-}
-
-// Custom painter for upload icon matching original SVG
-class UploadIconPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.7)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final scale = size.width / 24.0;
-    
-    // Cloud base: path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
-    final cloudPath = Path();
-    cloudPath.moveTo(21 * scale, 15 * scale);
-    cloudPath.lineTo(21 * scale, 19 * scale);
-    cloudPath.quadraticBezierTo(21 * scale, 21 * scale, 19 * scale, 21 * scale);
-    cloudPath.lineTo(5 * scale, 21 * scale);
-    cloudPath.quadraticBezierTo(3 * scale, 21 * scale, 3 * scale, 19 * scale);
-    cloudPath.lineTo(3 * scale, 15 * scale);
-    
-    canvas.drawPath(cloudPath, paint);
-    
-    // Upload arrow: polyline points="7,10 12,15 17,10"
-    final arrowPath = Path();
-    arrowPath.moveTo(7 * scale, 10 * scale);
-    arrowPath.lineTo(12 * scale, 15 * scale);
-    arrowPath.lineTo(17 * scale, 10 * scale);
-    
-    canvas.drawPath(arrowPath, paint);
-    
-    // Upload line: line x1="12" y1="15" x2="12" y2="3"
-    canvas.drawLine(
-      Offset(12 * scale, 15 * scale),
-      Offset(12 * scale, 3 * scale),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-// Custom painter for search icon matching original SVG
-class SearchIconPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final scale = size.width / 24.0;
-    
-    // Magnifying glass: circle cx="11" cy="11" r="8"
-    canvas.drawCircle(
-      Offset(11 * scale, 11 * scale),
-      8 * scale,
-      paint,
-    );
-    
-    // Handle: path d="M21 21l-4.35-4.35"
-    canvas.drawLine(
-      Offset(21 * scale, 21 * scale),
-      Offset(16.65 * scale, 16.65 * scale),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 } 

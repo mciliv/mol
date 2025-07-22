@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/home_screen.dart'; // For AnalysisMode enum
+
+enum AnalysisMode { camera, photo, results }
 
 class PaymentService extends ChangeNotifier {
   bool _showPaymentSection = false;

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/payment_service.dart';
-import '../widgets/payment_section.dart';
-import '../widgets/input_bar.dart';
-import '../widgets/mode_selector.dart';
-import '../widgets/photo_picker.dart';
-import '../widgets/results_view.dart';
+import 'payment_service.dart';
+import 'payment_section.dart';
+import 'input_bar.dart';
+import 'mode_selector.dart';
+import 'photo_picker.dart';
+import 'results_view.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -114,6 +114,4 @@ class SimpleCameraView extends StatelessWidget {
       ),
     );
   }
-}
-
-enum AnalysisMode { camera, photo, results } 
+} 
