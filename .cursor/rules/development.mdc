@@ -1,10 +1,13 @@
 ---
+description: Code changes
 alwaysApply: false
 ---
-# Procedure:
-∆
-    No code comments
-    Don't create extranous files
+# Code
+## Guidelines
+No code comments
+Don't create extranous files
+
+## After every response
 check tests for accuracy
 pass all tests
 run/refresh app in dedicated terminal after changes

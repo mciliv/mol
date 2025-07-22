@@ -1,7 +1,6 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
-
 Be maximally simple & straightford as appropriate
 
 Only generate rules here in .mdc files, not markdown

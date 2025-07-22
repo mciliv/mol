@@ -17,22 +17,38 @@ const {
 } = require("../schemas/schemas");
 
 // ==================== DATABASE CONFIGURATION ====================
-const { Pool } = require('pg');
+let pool = null;
+let dbConnected = false;
 
-// Database configuration with local development defaults
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'mol_users',
-  user: process.env.DB_USER || 'mol_user',
-  password: process.env.DB_PASSWORD || 'mol_password',
-  // Connection pool settings
-  max: 20, // maximum number of clients in pool
-  idleTimeoutMillis: 30000, // close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // return error after 2 seconds if connection could not be established
-};
+try {
+  const { Pool } = require('pg');
+  
+  // Database configuration with local development defaults
+  const dbConfig = {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'mol_users',
+    user: process.env.DB_USER || 'mol_user',
+    password: process.env.DB_PASSWORD || 'mol_password',
+    // Connection pool settings
+    max: 20, // maximum number of clients in pool
+    idleTimeoutMillis: 30000, // close idle clients after 30 seconds
+    connectionTimeoutMillis: 2000, // return error after 2 seconds if connection could not be established
+  };
 
-const pool = new Pool(dbConfig);
+  pool = new Pool(dbConfig);
+  
+  // Database connection error handling
+  pool.on('error', (err, client) => {
+    console.error('🔴 Unexpected error on idle client', err);
+    console.log('💡 Database connection will be retried automatically');
+  });
+  
+  console.log('✅ PostgreSQL module loaded successfully');
+} catch (error) {
+  console.log('⚠️ PostgreSQL module not available - running without database');
+  console.log('💡 Install with: npm install pg pg-pool');
+}
 
 // Database connection error handling
 pool.on('error', (err, client) => {
@@ -42,11 +58,17 @@ pool.on('error', (err, client) => {
 
 // Test database connection on startup
 const testDatabaseConnection = async () => {
+  if (!pool) {
+    console.log('⚠️ Database not available - running without persistent user storage');
+    return false;
+  }
+  
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT NOW()');
     client.release();
     console.log('✅ Database connected successfully');
+    dbConnected = true;
     return true;
   } catch (err) {
     console.error('🔴 Database connection failed:', err.message);
@@ -54,6 +76,7 @@ const testDatabaseConnection = async () => {
     if (process.env.NODE_ENV === 'development') {
       console.log('💡 For local development, run: createdb mol_users');
     }
+    dbConnected = false;
     return false;
   }
 };
@@ -149,10 +172,15 @@ const PORT = process.env.PORT || DEFAULT_PORT;
 // Initialize modules
 const atomPredictor = new AtomPredictor(process.env.OPENAI_API_KEY);
 const molecularProcessor = new MolecularProcessor();
-const userService = new UserService(pool);
+const userService = pool ? new UserService(pool) : null;
 
 // Initialize database on startup
 const initializeDatabase = async () => {
+  if (!userService) {
+    console.log('⚠️ User service not available - running without persistent user storage');
+    return;
+  }
+  
   try {
     const dbConnected = await testDatabaseConnection();
     if (dbConnected) {
@@ -275,6 +303,10 @@ app.post("/setup-payment-method", async (req, res) => {
       name: name || null
     };
     
+    if (!userService) {
+      return res.status(503).json({ error: "User service not available" });
+    }
+    
     const user = await userService.createUser(userData);
     
     // In production, you would:
@@ -308,6 +340,10 @@ app.post("/validate-payment", async (req, res) => {
       return res.status(400).json({ error: "Device token required" });
     }
     
+    if (!userService) {
+      return res.status(503).json({ error: "User service not available" });
+    }
+    
     const user = await userService.getUserByDeviceToken(device_token);
 
     if (!user) {
@@ -336,6 +372,10 @@ app.post("/increment-usage", async (req, res) => {
     
     if (!device_token) {
       return res.status(400).json({ error: "Device token required" });
+    }
+    
+    if (!userService) {
+      return res.status(503).json({ error: "User service not available" });
     }
     
     const usage = await userService.incrementUsage(device_token);
