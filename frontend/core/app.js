@@ -71,6 +71,49 @@ class MolecularApp {
       });
     }
     
+    // Developer mode toggle
+    const devToggle = document.getElementById('dev-toggle');
+    const devModeBtn = document.getElementById('dev-mode-btn');
+    
+    if (devToggle && devModeBtn) {
+      // Show dev toggle on triple click of account link
+      const accountStatus = document.getElementById('account-status');
+      if (accountStatus) {
+        let clickCount = 0;
+        let clickTimer;
+        
+        accountStatus.addEventListener('click', () => {
+          clickCount++;
+          clearTimeout(clickTimer);
+          
+          clickTimer = setTimeout(() => {
+            if (clickCount === 3) {
+              devToggle.style.display = 'flex';
+              console.log('🔧 Developer mode toggle revealed');
+            }
+            clickCount = 0;
+          }, 500);
+        });
+      }
+      
+      // Toggle developer mode
+      devModeBtn.addEventListener('click', () => {
+        const isActive = devModeBtn.classList.contains('active');
+        
+        if (isActive) {
+          // Disable developer mode
+          devModeBtn.classList.remove('active');
+          paymentManager.clearPaymentSetup();
+          console.log('🔧 Developer mode disabled');
+        } else {
+          // Enable developer mode
+          devModeBtn.classList.add('active');
+          paymentManager.showPaymentPopdown();
+          console.log('🔧 Developer mode enabled - showing payment popdown');
+        }
+      });
+    }
+    
     // Continue to analysis button event listener
     const startAnalyzingBtn = document.getElementById('start-analyzing-btn');
     if (startAnalyzingBtn) {
