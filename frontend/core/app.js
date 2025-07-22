@@ -28,14 +28,20 @@ class MolecularApp {
     // Clear localStorage for testing payment setup (remove this in production)
     // localStorage.clear();
     
-    // Setup developer account as default (no payment required)
-    if (!paymentManager.isDeveloperAccount()) {
-      console.log('🔧 Setting up developer account as default');
-      paymentManager.setupDeveloperAccount();
+    // Set default payment state (disabled by default)
+    if (!localStorage.getItem('molPaymentEnabled')) {
+      localStorage.setItem('molPaymentEnabled', 'false');
+      console.log('🔧 Payment requirement disabled by default');
     }
     
-    // Skip payment setup check since developer account is default
-    console.log('✅ Developer account active - payment not required');
+    // Check payment setup based on toggle state
+    const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
+    if (paymentEnabled) {
+      console.log('🔧 Payment requirement enabled - checking setup');
+      await paymentManager.checkInitialPaymentSetup();
+    } else {
+      console.log('✅ Payment requirement disabled - no payment needed');
+    }
     
     // Show developer account indicator if using developer account
     if (paymentManager.isDeveloperAccount()) {
@@ -71,12 +77,12 @@ class MolecularApp {
       });
     }
     
-    // Developer mode toggle
+    // Payment toggle
     const devToggle = document.getElementById('dev-toggle');
     const devModeBtn = document.getElementById('dev-mode-btn');
     
     if (devToggle && devModeBtn) {
-      // Show dev toggle on triple click of account link
+      // Show payment toggle on triple click of account link
       const accountStatus = document.getElementById('account-status');
       if (accountStatus) {
         let clickCount = 0;
@@ -89,27 +95,29 @@ class MolecularApp {
           clickTimer = setTimeout(() => {
             if (clickCount === 3) {
               devToggle.style.display = 'flex';
-              console.log('🔧 Developer mode toggle revealed');
+              console.log('🔧 Payment toggle revealed');
             }
             clickCount = 0;
           }, 500);
         });
       }
       
-      // Toggle developer mode
+      // Toggle payment requirement
       devModeBtn.addEventListener('click', () => {
         const isActive = devModeBtn.classList.contains('active');
         
         if (isActive) {
-          // Disable developer mode
+          // Disable payment requirement
           devModeBtn.classList.remove('active');
-          paymentManager.clearPaymentSetup();
-          console.log('🔧 Developer mode disabled');
+          localStorage.setItem('molPaymentEnabled', 'false');
+          console.log('🔧 Payment requirement disabled');
         } else {
-          // Enable developer mode
+          // Enable payment requirement
           devModeBtn.classList.add('active');
+          localStorage.setItem('molPaymentEnabled', 'true');
+          paymentManager.clearPaymentSetup();
           paymentManager.showPaymentPopdown();
-          console.log('🔧 Developer mode enabled - showing payment popdown');
+          console.log('🔧 Payment requirement enabled - showing payment popdown');
         }
       });
     }
