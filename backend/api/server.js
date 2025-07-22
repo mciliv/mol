@@ -9,7 +9,13 @@ const path = require("path");
 const HttpsServer = require("./https-server");
 const AtomPredictor = require("../services/AtomPredictor");
 const MolecularProcessor = require("../services/molecular-processor");
-const UserService = require("../services/user-service");
+// UserService import - only if database is available
+let UserService = null;
+try {
+  UserService = require("../services/user-service");
+} catch (error) {
+  console.log('⚠️ UserService not available - running without user management');
+}
 const {
   ImageMoleculeSchema,
   TextMoleculeSchema,
@@ -50,11 +56,13 @@ try {
   console.log('💡 Install with: npm install pg pg-pool');
 }
 
-// Database connection error handling
-pool.on('error', (err, client) => {
-  console.error('🔴 Unexpected error on idle client', err);
-  console.log('💡 Database connection will be retried automatically');
-});
+// Database connection error handling (only if pool exists)
+if (pool) {
+  pool.on('error', (err, client) => {
+    console.error('🔴 Unexpected error on idle client', err);
+    console.log('💡 Database connection will be retried automatically');
+  });
+}
 
 // Test database connection on startup
 const testDatabaseConnection = async () => {
@@ -172,7 +180,7 @@ const PORT = process.env.PORT || DEFAULT_PORT;
 // Initialize modules
 const atomPredictor = new AtomPredictor(process.env.OPENAI_API_KEY);
 const molecularProcessor = new MolecularProcessor();
-const userService = pool ? new UserService(pool) : null;
+const userService = (pool && UserService) ? new UserService(pool) : null;
 
 // Initialize database on startup
 const initializeDatabase = async () => {
