@@ -31,21 +31,13 @@ class PaymentManager {
   }
 
   async checkInitialPaymentSetup() {
-    // Check if payment is enabled via toggle
-    const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
-    
-    if (!paymentEnabled) {
-      console.log('Payment disabled via toggle - no payment required');
-      return true;
-    }
-
-    // Payment is enabled - check for actual payment method
+    // Check for actual payment method regardless of toggle
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     
     if (!deviceToken || !cardInfo) {
-      console.log('Payment enabled but no method found - showing payment popdown');
-      this.showPaymentPopdown();
+      console.log('No payment method found - showing payment modal for new user');
+      this.showPaymentModal();
       return false;
     }
     
@@ -53,23 +45,23 @@ class PaymentManager {
     return true;
   }
 
-  showPaymentPopdown() {
-    console.log('🔄 Showing payment popdown...');
-    const popdown = document.getElementById('payment-popdown');
+  showPaymentModal() {
+    console.log('🔄 Showing payment modal...');
+    const modal = document.getElementById('payment-modal');
     const mainInterface = document.getElementById('main-app-interface');
     
-    console.log('📊 Elements found:', { popdown: !!popdown, mainInterface: !!mainInterface });
+    console.log('📊 Elements found:', { modal: !!modal, mainInterface: !!mainInterface });
     
-    if (popdown) {
-      popdown.style.display = 'block';
-      popdown.classList.remove('hidden');
+    if (modal) {
+      modal.style.display = 'block';
+      modal.classList.remove('hidden');
       
       setTimeout(() => {
-        popdown.classList.add('show');
-        console.log('✅ Payment popdown should now be visible');
+        modal.classList.add('show');
+        console.log('✅ Payment modal should now be visible');
       }, 10);
     } else {
-      console.error('❌ Payment popdown element not found!');
+      console.error('❌ Payment modal element not found!');
     }
     
     if (mainInterface) {
@@ -79,16 +71,16 @@ class PaymentManager {
     this.initializePaymentSetup();
   }
 
-  hidePaymentPopdown() {
-    console.log('🔄 Hiding payment popdown...');
-    const popdown = document.getElementById('payment-popdown');
+  hidePaymentModal() {
+    console.log('🔄 Hiding payment modal...');
+    const modal = document.getElementById('payment-modal');
     const mainInterface = document.getElementById('main-app-interface');
     
-    if (popdown) {
-      popdown.classList.remove('show');
+    if (modal) {
+      modal.classList.remove('show');
       setTimeout(() => {
-        popdown.style.display = 'none';
-        popdown.classList.add('hidden');
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
       }, 300);
     }
     
@@ -96,7 +88,7 @@ class PaymentManager {
       mainInterface.classList.remove('payment-required');
     }
     
-    console.log('✅ Payment popdown hidden');
+    console.log('✅ Payment modal hidden');
   }
 
 
@@ -118,17 +110,17 @@ class PaymentManager {
         accountStatus.style.color = '#ffa500'; // Orange when not set up
       }
       
-      // Add click handler to show payment popdown when no payment set up
+      // Add click handler to show payment modal when no payment set up
       const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
       if (paymentEnabled) {
         const deviceToken = localStorage.getItem('molDeviceToken');
         const cardInfo = localStorage.getItem('molCardInfo');
         
         if (!deviceToken || !cardInfo) {
-          // No payment set up - make it clickable to show popdown
+          // No payment set up - make it clickable to show modal
           accountStatus.style.cursor = 'pointer';
           accountStatus.onclick = () => {
-            this.showPaymentPopdown();
+            this.showPaymentModal();
           };
         } else {
           // Payment set up - remove click handler
@@ -147,8 +139,8 @@ class PaymentManager {
       return false;
     }
     
-    const paymentPopdown = document.getElementById('payment-popdown');
-    return paymentPopdown && paymentPopdown.classList.contains('show');
+    const paymentModal = document.getElementById('payment-modal');
+    return paymentModal && paymentModal.classList.contains('show');
   }
 
   async checkPaymentMethod() {
@@ -163,7 +155,7 @@ class PaymentManager {
     const cardInfo = localStorage.getItem('molCardInfo');
     
     if (!deviceToken || !cardInfo) {
-      this.showPaymentPopdown();
+      this.showPaymentModal();
       return false;
     }
     
@@ -177,7 +169,7 @@ class PaymentManager {
       if (!response.ok) {
         localStorage.removeItem('molDeviceToken');
         localStorage.removeItem('molCardInfo');
-        this.showPaymentPopdown();
+        this.showPaymentModal();
         return false;
       }
       

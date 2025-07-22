@@ -166,12 +166,12 @@ function testCompleteFlow() {
 function testPaymentBlocking() {
   console.log('\n🚫 Test 6: Payment Blocking Check');
   
-  // Check if payment popdown is visible
-  const paymentPopdown = document.getElementById('payment-popdown');
+  // Check if payment modal is visible
+  const paymentPopdown = document.getElementById('payment-modal');
   if (paymentPopdown) {
     const isVisible = paymentPopdown.style.display !== 'none' && 
                      !paymentPopdown.classList.contains('hidden');
-    console.log('📊 Payment popdown visible:', isVisible);
+    console.log('📊 Payment modal visible:', isVisible);
     
     if (isVisible) {
       console.log('🚫 Analysis blocked by payment requirement');

@@ -209,7 +209,7 @@ class UIManager {
       
       setTimeout(() => {
         const mainInterface = document.getElementById('main-app-interface');
-        const paymentPopdown = document.getElementById('payment-popdown');
+        const paymentPopdown = document.getElementById('payment-modal');
         
         if (mainInterface) {
           mainInterface.classList.remove('payment-required');
@@ -297,7 +297,7 @@ class UIManager {
     // Payment bypass toggle
     window.bypassPayment = () => {
       const mainInterface = document.getElementById('main-app-interface');
-      const paymentPopdown = document.getElementById('payment-popdown');
+      const paymentPopdown = document.getElementById('payment-modal');
       
       if (mainInterface.classList.contains('payment-required')) {
         console.log('🔧 Bypassing payment requirements');
@@ -335,10 +335,10 @@ class UIManager {
           console.log('✅ App payment setup status updated');
         }
         
-        // Hide payment popdown
-        const paymentPopdown = document.getElementById('payment-popdown');
+        // Hide payment modal
+        const paymentPopdown = document.getElementById('payment-modal');
         if (paymentPopdown) {
-          paymentManager.hidePaymentPopdown();
+          paymentManager.hidePaymentModal();
         }
         
         console.log('🎉 Developer mode enabled - you can now analyze molecules');
@@ -351,7 +351,7 @@ class UIManager {
     window.showBothSections = () => {
       console.log('🔧 Showing both payment and app interface clearly');
       const mainInterface = document.getElementById('main-app-interface');
-      const paymentPopdown = document.getElementById('payment-popdown');
+      const paymentPopdown = document.getElementById('payment-modal');
       
       if (paymentPopdown) {
         paymentPopdown.style.display = 'block';
@@ -392,7 +392,7 @@ class UIManager {
     window.checkElements = () => {
       console.log('📋 Element Check:');
       console.log('main-app-interface:', document.getElementById('main-app-interface'));
-      console.log('payment-popdown:', document.getElementById('payment-popdown'));
+      console.log('payment-modal:', document.getElementById('payment-modal'));
       console.log('app-container:', document.querySelector('.app-container'));
       console.log('top-bar:', document.querySelector('.top-bar'));
     };

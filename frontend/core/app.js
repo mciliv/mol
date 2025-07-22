@@ -28,38 +28,20 @@ class MolecularApp {
     // Clear localStorage for testing payment setup (remove this in production)
     // localStorage.clear();
     
-    // Set default payment state (disabled by default)
-    if (!localStorage.getItem('molPaymentEnabled')) {
-      localStorage.setItem('molPaymentEnabled', 'false');
-      console.log('🔧 Payment requirement disabled by default');
-    }
-    
     // Always show account status with appropriate state
     paymentManager.updateAccountStatus(null);
     
-    // Check payment setup based on toggle state
-    const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
-    if (paymentEnabled) {
-      console.log('🔧 Payment requirement enabled - checking setup');
-      const setupResult = await paymentManager.checkInitialPaymentSetup();
-      this.hasPaymentSetup = setupResult;
-      
-      // Update account status after checking payment setup
-      const deviceToken = localStorage.getItem('molDeviceToken');
-      const cardInfo = localStorage.getItem('molCardInfo');
-      if (deviceToken && cardInfo) {
-        const card = JSON.parse(cardInfo);
-        paymentManager.updateAccountStatus({ name: card.name });
-      }
-    } else {
-      console.log('✅ Payment requirement disabled - no payment needed');
-      this.hasPaymentSetup = true; // Payment disabled means setup is not required
-      
-      // Show account status but indicate payment disabled
-      const accountName = document.getElementById('account-name');
-      if (accountName) {
-        accountName.textContent = 'Payment Off';
-      }
+    // Check payment setup for all users (new users need to see the modal)
+    console.log('🔧 Checking payment setup for user');
+    const setupResult = await paymentManager.checkInitialPaymentSetup();
+    this.hasPaymentSetup = setupResult;
+    
+    // Update account status after checking payment setup
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    const cardInfo = localStorage.getItem('molCardInfo');
+    if (deviceToken && cardInfo) {
+      const card = JSON.parse(cardInfo);
+      paymentManager.updateAccountStatus({ name: card.name });
     }
     
 
@@ -86,10 +68,10 @@ class MolecularApp {
         paymentManager.setupDeveloperAccount();
         this.hasPaymentSetup = true;
         
-        // Hide payment popdown if showing
-        const paymentPopdown = document.getElementById('payment-popdown');
+        // Hide payment modal if showing
+        const paymentPopdown = document.getElementById('payment-modal');
         if (paymentPopdown && !paymentPopdown.classList.contains('hidden')) {
-          paymentManager.hidePaymentPopdown();
+          paymentManager.hidePaymentModal();
         }
         
         console.log('🎉 Developer mode auto-enabled for localhost');
@@ -132,7 +114,7 @@ class MolecularApp {
     const paymentCloseBtn = document.getElementById('payment-close-btn');
     if (paymentCloseBtn) {
       paymentCloseBtn.addEventListener('click', () => {
-        paymentManager.hidePaymentPopdown();
+        paymentManager.hidePaymentModal();
       });
     }
     
@@ -142,7 +124,7 @@ class MolecularApp {
     const startAnalyzingBtn = document.getElementById('start-analyzing-btn');
     if (startAnalyzingBtn) {
       startAnalyzingBtn.addEventListener('click', () => {
-        paymentManager.hidePaymentPopdown();
+        paymentManager.hidePaymentModal();
       });
     }
       
@@ -181,7 +163,7 @@ class MolecularApp {
       
       // 🔴 BREAKPOINT: Set breakpoint here to debug text analysis trigger
       console.log('🚀 Text analysis triggered from Enter key');
-      const paymentPopdown = document.getElementById('payment-popdown');
+      const paymentPopdown = document.getElementById('payment-modal');
       console.log('📊 App state before analysis:', {
         isProcessing: this.isProcessing,
         hasPaymentSetup: this.hasPaymentSetup,
@@ -237,7 +219,7 @@ class MolecularApp {
     console.log('🏁 Starting processing with type:', this.currentAnalysisType);
     
     try {
-      paymentManager.hidePaymentPopdown();
+      paymentManager.hidePaymentModal();
       this.showProcessing();
       
       console.log('🌐 Preparing API call for text analysis');

@@ -19,8 +19,8 @@ window.inspectAppState = () => {
     objectInputFocused: document.activeElement?.id === 'object-input',
     
     // UI state
-    paymentPopdown: document.getElementById('payment-popdown'),
-    paymentDisplay: getComputedStyle(document.getElementById('payment-popdown') || {}).display,
+    paymentPopdown: document.getElementById('payment-modal'),
+    paymentDisplay: getComputedStyle(document.getElementById('payment-modal') || {}).display,
     mainApp: document.getElementById('main-app-interface'),
     mainAppDisplay: getComputedStyle(document.getElementById('main-app-interface') || {}).display,
     

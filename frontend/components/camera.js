@@ -275,7 +275,7 @@ class CameraManager {
     
     if (!paymentCheck) {
       console.log('🚫 Payment required - showing message');
-      // Show simple message instead of popdown
+      // Show simple message instead of modal
       const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
       messageColumn.innerHTML = `
         <div class="molecule-container">

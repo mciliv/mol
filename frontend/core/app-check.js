@@ -44,7 +44,7 @@ class AppChecker {
       'video-feed',
       'object-input',
       'snapshots-container',
-      'payment-popdown',
+      'payment-modal',
 
       'account-status',
       'account-name'
@@ -221,7 +221,7 @@ class AppChecker {
 
   checkUIComponents() {
     const components = [
-      { name: 'Payment Popdown', selector: '#payment-popdown', shouldExist: true },
+      { name: 'Payment Popdown', selector: '#payment-modal', shouldExist: true },
 
       { name: 'Camera Container', selector: '#camera-container', shouldExist: true },
       { name: 'Photo Options', selector: '#photo-options', shouldExist: true }
