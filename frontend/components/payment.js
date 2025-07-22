@@ -31,11 +31,13 @@ class PaymentManager {
   }
 
   async checkInitialPaymentSetup() {
+    // Developer account is default - no payment required
     if (this.isDeveloperAccount()) {
-      console.log('Developer account detected - skipping payment setup');
+      console.log('Developer account detected - payment not required');
       return true;
     }
 
+    // For non-developer accounts, check payment setup
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     

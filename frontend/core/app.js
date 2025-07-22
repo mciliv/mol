@@ -28,14 +28,14 @@ class MolecularApp {
     // Clear localStorage for testing payment setup (remove this in production)
     // localStorage.clear();
     
-    // Check payment setup first
-    const hasPayment = await paymentManager.checkInitialPaymentSetup();
-    
-    // Only setup developer account if no payment method exists
-    if (!hasPayment && !paymentManager.isDeveloperAccount()) {
-      console.log('🔧 Setting up developer account as fallback');
+    // Setup developer account as default (no payment required)
+    if (!paymentManager.isDeveloperAccount()) {
+      console.log('🔧 Setting up developer account as default');
       paymentManager.setupDeveloperAccount();
     }
+    
+    // Skip payment setup check since developer account is default
+    console.log('✅ Developer account active - payment not required');
     
     // Show developer account indicator if using developer account
     if (paymentManager.isDeveloperAccount()) {
