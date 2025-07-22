@@ -19,21 +19,28 @@ class _PhotoPickerState extends State<PhotoPicker> {
     return Consumer2<PaymentService, AnalysisService>(
       builder: (context, paymentService, analysisService, child) {
         return Container(
-          padding: EdgeInsets.all(40),
+          width: double.infinity,
+          padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08), // Interactive element background
+            color: Colors.white.withOpacity(0.08),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          // FLATTENED STRUCTURE - Row instead of Column to prevent overflow
+          child: Row(
             children: [
-              // Upload button with original cloud upload SVG
-              _buildUploadButton(paymentService, analysisService),
+              // Upload button - compact
+              Expanded(
+                flex: 1,
+                child: _buildUploadButton(paymentService, analysisService),
+              ),
               
-              SizedBox(height: 20),
+              SizedBox(width: 20),
               
-              // URL input section with original search SVG
-              _buildUrlSection(paymentService, analysisService),
+              // URL input section - compact
+              Expanded(
+                flex: 2,
+                child: _buildUrlSection(paymentService, analysisService),
+              ),
             ],
           ),
         );
@@ -45,28 +52,29 @@ class _PhotoPickerState extends State<PhotoPicker> {
     return GestureDetector(
       onTap: () => _pickImage(paymentService, analysisService),
       child: Container(
-        padding: EdgeInsets.all(40),
+        height: 100, // Fixed height prevents overflow
         decoration: BoxDecoration(
           border: Border.all(
             color: Colors.white.withOpacity(0.7),
             style: BorderStyle.solid,
-            width: 1, // Minimal border per ui.mdc
+            width: 1,
           ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // KEY: Prevents overflow
           children: [
-            // Original cloud upload SVG icon
             CustomPaint(
               size: Size(24, 24),
               painter: UploadIconPainter(),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 8),
             Text(
               'Upload',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -77,41 +85,56 @@ class _PhotoPickerState extends State<PhotoPicker> {
   }
   
   Widget _buildUrlSection(PaymentService paymentService, AnalysisService analysisService) {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _urlController,
-            decoration: InputDecoration(
-              hintText: 'Image URL...',
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            style: TextStyle(color: Colors.white),
-            onSubmitted: (_) => _analyzeUrl(paymentService, analysisService),
-          ),
-        ),
-        SizedBox(width: 12),
-        GestureDetector(
-          onTap: () => _analyzeUrl(paymentService, analysisService),
-          child: Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: CustomPaint(
-              size: Size(16, 16),
-              painter: SearchIconPainter(),
+    return Container(
+      height: 100, // Fixed height prevents overflow
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Or paste image URL:',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 12,
             ),
           ),
-        ),
-      ],
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _urlController,
+                  decoration: InputDecoration(
+                    hintText: 'Image URL...',
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                  onSubmitted: (_) => _analyzeUrl(paymentService, analysisService),
+                ),
+              ),
+              SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _analyzeUrl(paymentService, analysisService),
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: CustomPaint(
+                    size: Size(16, 16),
+                    painter: SearchIconPainter(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
   
   Future<void> _pickImage(PaymentService paymentService, AnalysisService analysisService) async {
-    // Check payment method
     if (!paymentService.canAnalyze()) {
       paymentService.showPayment();
       return;
@@ -145,7 +168,6 @@ class _PhotoPickerState extends State<PhotoPicker> {
     final url = _urlController.text.trim();
     if (url.isEmpty) return;
     
-    // Check payment method
     if (!paymentService.canAnalyze()) {
       paymentService.showPayment();
       return;
