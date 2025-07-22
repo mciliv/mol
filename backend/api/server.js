@@ -9,11 +9,54 @@ const path = require("path");
 const HttpsServer = require("./https-server");
 const AtomPredictor = require("../services/AtomPredictor");
 const MolecularProcessor = require("../services/molecular-processor");
+const UserService = require("../services/user-service");
 const {
   ImageMoleculeSchema,
   TextMoleculeSchema,
   SdfGenerationSchema,
 } = require("../schemas/schemas");
+
+// ==================== DATABASE CONFIGURATION ====================
+const { Pool } = require('pg');
+
+// Database configuration with local development defaults
+const dbConfig = {
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'mol_users',
+  user: process.env.DB_USER || 'mol_user',
+  password: process.env.DB_PASSWORD || 'mol_password',
+  // Connection pool settings
+  max: 20, // maximum number of clients in pool
+  idleTimeoutMillis: 30000, // close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // return error after 2 seconds if connection could not be established
+};
+
+const pool = new Pool(dbConfig);
+
+// Database connection error handling
+pool.on('error', (err, client) => {
+  console.error('🔴 Unexpected error on idle client', err);
+  console.log('💡 Database connection will be retried automatically');
+});
+
+// Test database connection on startup
+const testDatabaseConnection = async () => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT NOW()');
+    client.release();
+    console.log('✅ Database connected successfully');
+    return true;
+  } catch (err) {
+    console.error('🔴 Database connection failed:', err.message);
+    console.log('💡 Make sure PostgreSQL is running and credentials are correct');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('💡 For local development, run: createdb mol_users');
+    }
+    return false;
+  }
+};
 
 // ==================== CONFIGURATION ====================
 const app = express();
@@ -106,13 +149,30 @@ const PORT = process.env.PORT || DEFAULT_PORT;
 // Initialize modules
 const atomPredictor = new AtomPredictor(process.env.OPENAI_API_KEY);
 const molecularProcessor = new MolecularProcessor();
+const userService = new UserService(pool);
+
+// Initialize database on startup
+const initializeDatabase = async () => {
+  try {
+    const dbConnected = await testDatabaseConnection();
+    if (dbConnected) {
+      await userService.initializeTables();
+      console.log('✅ Database initialized successfully');
+    } else {
+      console.log('⚠️ Database not connected - running without persistent user storage');
+    }
+  } catch (error) {
+    console.error('🔴 Database initialization failed:', error.message);
+    console.log('💡 Server will continue but user data will not persist');
+  }
+};
 
 // ==================== MIDDLEWARE ====================
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
-// In-memory user storage (for demo - replace with database in production)
-const users = new Map(); // deviceToken -> user data
+// User data now stored in PostgreSQL instead of in-memory
+// Database schema will be created by the database setup script
 
 // ==================== DEVELOPMENT MIDDLEWARE ====================
 // Live reload disabled - using external tools if needed
@@ -207,26 +267,21 @@ app.post("/setup-payment-method", async (req, res) => {
     // Generate device token
     const deviceToken = Buffer.from(`${device_info}-${Date.now()}-${Math.random()}`).toString('base64').replace(/[+/=]/g, '');
     
-    // Store user info (in production, this would go to a database)
+    // Create user in database
     const userData = {
       deviceToken,
       paymentMethodId: payment_method,
       deviceInfo: device_info,
-      name: name || null,
-      usage: 0,
-      createdAt: new Date(),
-      lastUsed: new Date()
+      name: name || null
     };
     
-    users.set(deviceToken, userData);
+    const user = await userService.createUser(userData);
     
     // In production, you would:
     // 1. Create customer in Stripe
     // 2. Attach payment method to customer
     // 3. Handle 3D Secure if needed
     // For demo, we'll just return success
-    
-    console.log(`✅ New user setup: ${name || 'Anonymous'} with device ${deviceToken.substring(0, 8)}...`);
     
     res.json({
       success: true,
@@ -236,12 +291,16 @@ app.post("/setup-payment-method", async (req, res) => {
     
   } catch (error) {
     console.error("Payment setup error:", error);
-    res.status(500).json({ error: "Failed to setup payment method" });
+    if (error.message === 'Device token already exists') {
+      res.status(409).json({ error: "Device already registered" });
+    } else {
+      res.status(500).json({ error: "Failed to setup payment method" });
+    }
   }
 });
 
 // Validate payment method endpoint
-app.post("/validate-payment", (req, res) => {
+app.post("/validate-payment", async (req, res) => {
   try {
     const { device_token } = req.body;
     
@@ -249,20 +308,18 @@ app.post("/validate-payment", (req, res) => {
       return res.status(400).json({ error: "Device token required" });
     }
     
-    const user = users.get(device_token);
+    const user = await userService.getUserByDeviceToken(device_token);
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
-    // Update last used
-    user.lastUsed = new Date();
     
     res.json({
       valid: true,
       user: {
         name: user.name,
         usage: user.usage,
-        device_token: user.deviceToken
+        device_token: user.device_token
       }
     });
     
@@ -273,7 +330,7 @@ app.post("/validate-payment", (req, res) => {
 });
 
 // Increment usage endpoint
-app.post("/increment-usage", (req, res) => {
+app.post("/increment-usage", async (req, res) => {
   try {
     const { device_token } = req.body;
     
@@ -281,23 +338,19 @@ app.post("/increment-usage", (req, res) => {
       return res.status(400).json({ error: "Device token required" });
     }
     
-    const user = users.get(device_token);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    
-    user.usage++;
-    user.lastUsed = new Date();
-    
-    console.log(`📊 Usage: ${user.name || 'Anonymous'} - ${user.usage} analyses`);
+    const usage = await userService.incrementUsage(device_token);
     
     res.json({
-      usage: user.usage
+      usage: usage
     });
     
   } catch (error) {
     console.error("Usage increment error:", error);
-    res.status(500).json({ error: "Failed to increment usage" });
+    if (error.message === 'User not found') {
+      res.status(404).json({ error: "User not found" });
+    } else {
+      res.status(500).json({ error: "Failed to increment usage" });
+    }
   }
 });
 
@@ -572,6 +625,9 @@ if (!isServerless && !isTestMode) {
           process.exit(1);
         }
       });
+
+      // Initialize database after server starts
+      initializeDatabase();
     })
     .catch((error) => {
       console.error(`❌ Failed to start server: ${error.message}`);
