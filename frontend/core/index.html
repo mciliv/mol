@@ -403,6 +403,7 @@
     <script type="module" src="../components/camera-handler.js"></script>
     <script type="module" src="../components/ui-utils.js"></script>
     <script src="../components/debug-events.js"></script>
+    <script src="../components/error-handler.js"></script>
     <script type="module" src="app.js"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
@@ -415,5 +416,15 @@
     <!-- Camera click testing script -->
     <script src="../../test-camera-click.js"></script>
     <!-- LiveReload disabled - using nodemon for server restarts -->
+  <!-- Error Reporting Panel -->
+  <div id="error-panel" class="error-panel hidden">
+    <div class="error-header">
+      <h3>System Errors</h3>
+      <button id="clear-errors" class="clear-btn">Clear</button>
+      <button id="toggle-errors" class="toggle-btn">Hide</button>
+    </div>
+    <div id="error-list" class="error-list"></div>
+  </div>
+
   </body>
 </html>

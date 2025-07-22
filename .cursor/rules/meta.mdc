@@ -102,6 +102,11 @@ Show don't tell - show code and code chunks rather than just saying you did it
 **Requirements**: Always commit after acceptance, push to main, memory check before changes
 
 ### Error Handling
+**Pattern**: Centralized error reporting for AI and human readability
+**Implementation**: Error panel UI + structured console logs + backend logging
+**Requirements**: Always visible, AI-parseable JSON, non-blocking display
+
+### Database Error Handling
 **Pattern**: Graceful degradation with user feedback
 **Implementation**: PostgreSQL optional, database warnings, continue without DB
 
@@ -144,7 +149,7 @@ IF (architectural decision made) THEN
 - **UI Elements Documented**: 5 (Account, Developer Mode, Input, Camera, Live Reload)
 - **Persistent Issues Resolved**: 1 (Card icon spacing)
 - **System Patterns**: 3 (Memory, Workflow, Error Handling)
-- **Auto-Generated .mdc Files**: 3 (ui-memory, auto-rule-generator, payment-system)
+- **Auto-Generated .mdc Files**: 4 (ui-memory, auto-rule-generator, payment-system, error-reporting)
 - **Last Updated**: Every conversation with UI/system changes
 
 ## 🎯 Next Auto-Captures
@@ -154,6 +159,7 @@ IF (architectural decision made) THEN
 - Any user feedback about existing elements
 - Any architectural decisions
 - Any recurring error patterns
+- Error reporting integration points (AUTO-GENERATED: error-reporting.mdc)
 
 ---
 

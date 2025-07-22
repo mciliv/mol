@@ -207,6 +207,25 @@ const initializeDatabase = async () => {
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
+// ==================== ERROR LOGGING ENDPOINT ====================
+app.post('/api/log-error', (req, res) => {
+  const error = req.body;
+  
+  // Log to console for AI reading - STRUCTURED FORMAT
+  console.error('🚨 FRONTEND ERROR:', JSON.stringify({
+    timestamp: error.timestamp,
+    type: error.type,
+    message: error.message,
+    source: error.source,
+    userAgent: req.get('User-Agent'),
+    ip: req.ip || req.connection.remoteAddress
+  }, null, 2));
+  
+  // Optionally log to file or database here
+  
+  res.status(200).json({ status: 'logged' });
+});
+
 // User data now stored in PostgreSQL instead of in-memory
 // Database schema will be created by the database setup script
 
