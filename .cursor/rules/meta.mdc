@@ -2,6 +2,7 @@
 
 ## Core Philosophy
 Maximally simple & straightforward
+Only generate new files when necessary or modularizing
 Only generate rules in .mdc files, not markdown
 Show code chunks rather than descriptions
 

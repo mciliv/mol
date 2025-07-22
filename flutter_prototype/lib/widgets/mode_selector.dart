@@ -42,11 +42,11 @@ class ModeSelector extends StatelessWidget {
     );
   }
 
-  // Original camera SVG from HTML: camera body with lens
+  // Original camera icon: simple lens (two concentric circles)
   Widget _buildCameraIcon() {
     return CustomPaint(
       size: Size(16, 16),
-      painter: CameraIconPainter(),
+      painter: CameraLensIconPainter(),
     );
   }
 
@@ -108,8 +108,8 @@ class ModeSelector extends StatelessWidget {
   }
 }
 
-// Custom painter for camera icon matching original SVG
-class CameraIconPainter extends CustomPainter {
+// Simple camera lens icon - matches original camera.svg
+class CameraLensIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -117,29 +117,24 @@ class CameraIconPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    final path = Path();
-    
-    // Scale factor to fit 16x16 canvas from 24x24 viewBox
+    final fillPaint = Paint()
+      ..color = Colors.white.withOpacity(0.8)
+      ..style = PaintingStyle.fill;
+
     final scale = size.width / 24.0;
+    final center = Offset(12 * scale, 12 * scale);
     
-    // Camera body: M14.5 4h-5L7 6H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3l-2.5-2z
-    path.moveTo(14.5 * scale, 4 * scale);
-    path.lineTo(9.5 * scale, 4 * scale);
-    path.lineTo(7 * scale, 6 * scale);
-    path.lineTo(4 * scale, 6 * scale);
-    path.addRRect(RRect.fromLTRBR(
-      2 * scale, 6 * scale, 22 * scale, 17 * scale,
-      Radius.circular(2 * scale)
-    ));
-    path.moveTo(19 * scale, 6 * scale);
-    path.lineTo(16.5 * scale, 4 * scale);
-    
-    canvas.drawPath(path, paint);
-    
-    // Camera lens: circle cx="12" cy="13" r="3"
+    // Inner lens (filled circle): cx="12" cy="12" r="5" fill="#ffffff" opacity="0.8"
     canvas.drawCircle(
-      Offset(12 * scale, 13 * scale),
-      3 * scale,
+      center,
+      5 * scale,
+      fillPaint,
+    );
+    
+    // Outer lens ring (stroke circle): cx="12" cy="12" r="9" stroke="#ffffff" fill="none"
+    canvas.drawCircle(
+      center,
+      9 * scale,
       paint,
     );
   }
