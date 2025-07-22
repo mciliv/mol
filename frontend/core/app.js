@@ -57,8 +57,30 @@ class MolecularApp {
   
     console.log('✅ Molecular analysis app initialized');
     
-    // Note: Removed auto-enable dev mode to allow payment modal to show for new users
-    // Developer mode can be manually enabled via console: enableDevMode()
+    // Auto-enable dev mode for localhost development (but only if no payment setup AND no existing dev account)
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      console.log('🔧 Localhost detected - checking if dev mode should be auto-enabled');
+      
+      const deviceToken = localStorage.getItem('molDeviceToken');
+      const isDeveloperAccount = paymentManager.isDeveloperAccount();
+      
+      // Only auto-enable if no existing setup at all
+      if (!deviceToken && !isDeveloperAccount) {
+        console.log('🔧 Auto-enabling developer mode for localhost (no existing setup found)');
+        paymentManager.setupDeveloperAccount();
+        this.hasPaymentSetup = true;
+        
+        // Hide payment modal if showing
+        const paymentModal = document.getElementById('payment-modal');
+        if (paymentModal && !paymentModal.classList.contains('hidden')) {
+          paymentManager.hidePaymentModal();
+        }
+        
+        console.log('🎉 Developer mode auto-enabled for localhost');
+      } else {
+        console.log('✅ Existing setup found - not auto-enabling dev mode');
+      }
+    }
   }
 
   setupEventListeners() {

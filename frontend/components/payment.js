@@ -111,46 +111,29 @@ class PaymentManager {
       }
       
       // Add click handler to show payment modal when no payment set up
-      const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
-      if (paymentEnabled) {
-        const deviceToken = localStorage.getItem('molDeviceToken');
-        const cardInfo = localStorage.getItem('molCardInfo');
-        
-        if (!deviceToken || !cardInfo) {
-          // No payment set up - make it clickable to show modal
-          accountStatus.style.cursor = 'pointer';
-          accountStatus.onclick = () => {
-            this.showPaymentModal();
-          };
-        } else {
-          // Payment set up - remove click handler
-          accountStatus.style.cursor = 'default';
-          accountStatus.onclick = null;
-        }
+      const deviceToken = localStorage.getItem('molDeviceToken');
+      const cardInfo = localStorage.getItem('molCardInfo');
+      
+      if (!deviceToken || !cardInfo) {
+        // No payment set up - make it clickable to show modal
+        accountStatus.style.cursor = 'pointer';
+        accountStatus.onclick = () => {
+          this.showPaymentModal();
+        };
+      } else {
+        // Payment set up - remove click handler
+        accountStatus.style.cursor = 'default';
+        accountStatus.onclick = null;
       }
     }
   }
 
   isPaymentRequired() {
-    // Check if payment is enabled via toggle
-    const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
-    
-    if (!paymentEnabled) {
-      return false;
-    }
-    
     const paymentModal = document.getElementById('payment-modal');
     return paymentModal && paymentModal.classList.contains('show');
   }
 
   async checkPaymentMethod() {
-    // Check if payment is enabled via toggle
-    const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
-    
-    if (!paymentEnabled) {
-      return true;
-    }
-    
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     
