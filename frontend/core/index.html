@@ -126,58 +126,48 @@
       <div class="card-management-modal hidden" id="card-management-modal">
         <div class="modal-container">
           <div class="modal-header">
-            <div class="modal-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="4" width="20" height="16" rx="2"/>
-                <line x1="2" y1="10" x2="22" y2="10"/>
-              </svg>
-              <span>Manage Payment Methods</span>
-            </div>
-            <button id="card-management-close-btn" class="payment-close-btn">✕</button>
+            <h2 class="modal-title">Payment Methods</h2>
+            <button id="card-management-close-btn" class="close-btn">✕</button>
           </div>
 
           <div class="modal-content">
-            <!-- Current Cards List -->
-            <div class="current-cards" id="current-cards">
-              <h3>Your Payment Methods</h3>
-              <div class="cards-list" id="cards-list">
-                <!-- Cards will be populated here -->
+            <!-- Current Payment Methods -->
+            <div class="payment-methods-section" id="current-cards">
+              <div class="methods-list" id="cards-list">
+                <!-- Payment methods will be populated here -->
+              </div>
+              
+              <div class="add-method">
+                <button type="button" class="text-button" id="add-new-card-btn">
+                  + Add payment method
+                </button>
               </div>
             </div>
 
-            <!-- Card Actions -->
-            <div class="card-actions">
-              <button type="button" class="btn-secondary" id="add-new-card-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Add New Card
-              </button>
-            </div>
-
-            <!-- Edit Card Form (hidden by default) -->
-            <div class="edit-card-form hidden" id="edit-card-form">
-              <h3 id="edit-card-title">Edit Payment Method</h3>
-              <form id="card-edit-form" class="modal-form">
-                <div class="form-group">
-                  <label for="edit-card-element">New Card Details</label>
-                  <div id="edit-card-element" class="card-element"></div>
-                  <div id="edit-card-errors" class="error-message" role="alert"></div>
+            <!-- Edit Payment Method Form -->
+            <div class="edit-method-form hidden" id="edit-card-form">
+              <h3 class="form-title" id="edit-card-title">Edit Payment Method</h3>
+              
+              <form id="card-edit-form" class="simple-form">
+                <div class="form-field">
+                  <label for="edit-card-element">Card Details</label>
+                  <div id="edit-card-element" class="input-field"></div>
+                  <div id="edit-card-errors" class="error-text" role="alert"></div>
                 </div>
 
-                <div class="form-group optional">
+                <div class="form-field">
                   <label for="edit-user-name">Name (optional)</label>
                   <input type="text" 
                          id="edit-user-name" 
                          name="name" 
                          placeholder="For personalized experience" 
+                         class="text-input"
                          autocomplete="name">
                 </div>
 
                 <div class="form-actions">
-                  <button type="button" class="btn-secondary" id="cancel-edit-btn">Cancel</button>
-                  <button type="submit" class="btn-primary" id="save-card-btn">
+                  <button type="button" class="text-button secondary" id="cancel-edit-btn">Cancel</button>
+                  <button type="submit" class="text-button primary" id="save-card-btn">
                     <span class="btn-text">Save Changes</span>
                     <span class="btn-loading hidden">Saving...</span>
                   </button>

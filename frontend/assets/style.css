@@ -1791,16 +1791,15 @@ input[type="checkbox"]:checked + .mode-label {
   opacity: 0; 
 }
 
-/* Card Management Modal */
+/* Card Management Modal - Text-First Design */
 .card-management-modal {
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%) translateY(-100%);
   width: 90%;
-  max-width: 600px;
+  max-width: 500px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border: 1px solid rgba(0, 212, 255, 0.3);
   border-radius: 0 0 12px 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 1000;
@@ -1816,247 +1815,232 @@ input[type="checkbox"]:checked + .mode-label {
 }
 
 .card-management-modal .modal-container {
-  padding: 20px;
+  padding: 32px 24px;
 }
 
 .card-management-modal .modal-header {
-  text-align: center;
-  margin-bottom: 20px;
-  position: relative;
-}
-
-.card-management-modal .modal-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.card-management-modal .modal-title svg {
-  color: #00d4ff;
-  flex-shrink: 0;
-}
-
-.card-management-modal .payment-close-btn {
-  position: absolute;
-  top: -5px;
-  right: 0;
-  background: none;
-  border: none;
-  color: #00d4ff;
-  cursor: pointer;
-  font-size: 20px;
-  padding: 5px;
-  transition: opacity 0.3s ease;
-}
-
-.card-management-modal .payment-close-btn:hover {
-  opacity: 0.7;
-}
-
-/* Current Cards Section */
-.current-cards h3 {
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.cards-list {
-  margin-bottom: 20px;
-}
-
-.card-item {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.3s ease;
+  margin-bottom: 32px;
 }
 
-.card-item:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(0, 212, 255, 0.3);
-}
-
-.card-item.default {
-  border-color: rgba(0, 255, 136, 0.4);
-  background: rgba(0, 255, 136, 0.05);
-}
-
-.card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.card-brand-number {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.card-brand {
+.card-management-modal .modal-title {
+  font-size: 20px;
   font-weight: 600;
   color: #ffffff;
-  font-size: 14px;
+  margin: 0;
 }
 
-.card-number {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
-  font-family: 'Monaco', 'Menlo', monospace;
-}
-
-.card-expiry {
+.card-management-modal .close-btn {
+  background: none;
+  border: none;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 8px;
+  transition: color 0.3s ease;
 }
 
-.default-badge {
-  background: rgba(0, 255, 136, 0.2);
-  color: #00ff88;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-left: 8px;
+.card-management-modal .close-btn:hover {
+  color: #ffffff;
 }
 
-.card-actions {
+/* Payment Methods List - Clean Text Layout */
+.payment-methods-section {
+  line-height: 1.5;
+}
+
+.methods-list {
+  margin-bottom: 32px;
+}
+
+.payment-method {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease;
 }
 
-.btn-text {
+.payment-method:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.payment-method.default {
+  background-color: rgba(0, 255, 136, 0.03);
+}
+
+.method-info {
+  flex: 1;
+}
+
+.method-primary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.method-brand {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.method-number {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 15px;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+}
+
+.default-label {
+  color: #00ff88;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.method-secondary {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+}
+
+.method-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.action-link {
   background: none;
   border: none;
   color: #00d4ff;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-color: transparent;
   transition: all 0.3s ease;
 }
 
-.btn-text:hover {
-  background: rgba(0, 212, 255, 0.1);
+.action-link:hover {
   color: #ffffff;
+  text-decoration-color: currentColor;
 }
 
-.btn-text.delete-card-btn {
+.action-link.delete {
   color: #ff6b6b;
 }
 
-.btn-text.delete-card-btn:hover {
-  background: rgba(255, 107, 107, 0.1);
+.action-link.delete:hover {
   color: #ff8a8a;
 }
 
-/* Card Actions Section */
-.card-actions {
+/* Add Payment Method */
+.add-method {
   text-align: center;
-  margin-bottom: 20px;
+  padding: 24px 0;
 }
 
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(0, 212, 255, 0.5);
-  transform: translateY(-1px);
-}
-
-.btn-secondary svg {
+.text-button {
+  background: none;
+  border: none;
   color: #00d4ff;
-  flex-shrink: 0;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  text-decoration: none;
 }
 
-/* No Cards State */
-.no-cards {
-  text-align: center;
-  padding: 40px 20px;
+.text-button:hover {
+  background-color: rgba(0, 212, 255, 0.1);
+  color: #ffffff;
+}
+
+.text-button.primary {
+  background-color: rgba(0, 212, 255, 0.15);
+  color: #ffffff;
+}
+
+.text-button.primary:hover {
+  background-color: rgba(0, 212, 255, 0.25);
+}
+
+.text-button.secondary {
   color: rgba(255, 255, 255, 0.7);
 }
 
-.no-cards p {
-  margin-bottom: 20px;
-  font-size: 16px;
-}
-
-/* Edit Card Form */
-.edit-card-form {
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding-top: 20px;
-}
-
-.edit-card-form h3 {
+.text-button.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-state p {
+  color: rgba(255, 255, 255, 0.6);
   font-size: 16px;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+/* Form Styling - Clean Text Focus */
+.edit-method-form {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 32px;
+}
+
+.form-title {
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 16px;
+  color: #ffffff;
+  margin: 0 0 24px 0;
 }
 
-.edit-card-form .modal-form {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.simple-form {
+  line-height: 1.5;
 }
 
-.edit-card-form .form-group {
-  margin-bottom: 16px;
+.form-field {
+  margin-bottom: 24px;
 }
 
-.edit-card-form .form-group label {
+.form-field label {
   display: block;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-.edit-card-form .card-element {
-  background: rgba(255, 255, 255, 0.08);
-  padding: 12px;
-  border-radius: 6px;
+.input-field {
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 12px;
   transition: all 0.3s ease;
 }
 
-.edit-card-form .card-element:focus-within {
+.input-field:focus-within {
   border-color: #00d4ff;
-  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.edit-card-form #edit-user-name {
+.text-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   padding: 12px;
@@ -2066,93 +2050,68 @@ input[type="checkbox"]:checked + .mode-label {
   transition: all 0.3s ease;
 }
 
-.edit-card-form #edit-user-name:focus {
+.text-input:focus {
   outline: none;
   border-color: #00d4ff;
-  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.1);
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.edit-card-form #edit-user-name::placeholder {
+.text-input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.edit-card-form .form-actions {
+.error-text {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: 6px;
+  display: none;
+}
+
+.form-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 32px;
 }
 
-.edit-card-form .btn-primary {
-  background: linear-gradient(135deg, #00d4ff, #0099cc);
-  border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #000000;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.edit-card-form .btn-primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
-}
-
-.edit-card-form .btn-primary:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.edit-card-form .btn-secondary {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 10px 20px;
-}
-
-/* Mobile Responsive */
+/* Mobile Responsive - Maintain Text Focus */
 @media (max-width: 768px) {
   .card-management-modal {
     width: 95%;
     max-height: 90vh;
   }
   
-  .card-item {
+  .payment-method {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    gap: 16px;
   }
   
-  .card-actions {
+  .method-actions {
+    flex-direction: row;
+    align-items: center;
     align-self: stretch;
     justify-content: space-between;
   }
   
-  .edit-card-form .form-actions {
+  .form-actions {
     flex-direction: column-reverse;
   }
   
-  .edit-card-form .btn-primary,
-  .edit-card-form .btn-secondary {
+  .text-button {
     width: 100%;
-    justify-content: center;
+    text-align: center;
   }
 }
 
 @media (max-width: 480px) {
   .card-management-modal .modal-container {
-    padding: 16px;
+    padding: 24px 16px;
   }
   
-  .card-brand-number {
+  .method-primary {
     flex-direction: column;
     align-items: flex-start;
-    gap: 2px;
+    gap: 4px;
   }
 }
 

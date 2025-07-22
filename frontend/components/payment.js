@@ -211,33 +211,35 @@ class PaymentManager {
 
     if (!cards || cards.length === 0) {
       cardsList.innerHTML = `
-        <div class="no-cards">
-          <p>No payment methods found</p>
-          <button type="button" class="btn-primary" onclick="paymentManager.showAddCardForm()">Add Your First Card</button>
+        <div class="empty-state">
+          <p>No payment methods</p>
+          <button type="button" class="text-button primary" onclick="paymentManager.showAddCardForm()">Add your first payment method</button>
         </div>
       `;
       return;
     }
 
     cards.forEach(card => {
-      const cardElement = document.createElement('div');
-      cardElement.className = `card-item ${card.is_default ? 'default' : ''}`;
-      cardElement.innerHTML = `
-        <div class="card-info">
-          <div class="card-brand-number">
-            <span class="card-brand">${this.formatCardBrand(card.brand)}</span>
-            <span class="card-number">•••• ${card.last4}</span>
+      const methodElement = document.createElement('div');
+      methodElement.className = `payment-method ${card.is_default ? 'default' : ''}`;
+      methodElement.innerHTML = `
+        <div class="method-info">
+          <div class="method-primary">
+            <span class="method-brand">${this.formatCardBrand(card.brand)}</span>
+            <span class="method-number">•••• ${card.last4}</span>
+            ${card.is_default ? '<span class="default-label">Default</span>' : ''}
           </div>
-          <div class="card-expiry">${card.exp_month}/${card.exp_year}</div>
-          ${card.is_default ? '<span class="default-badge">Default</span>' : ''}
+          <div class="method-secondary">
+            Expires ${card.exp_month}/${card.exp_year}
+          </div>
         </div>
-        <div class="card-actions">
-          <button type="button" class="btn-text edit-card-btn" onclick="paymentManager.editCard('${card.id}')">Edit</button>
-          ${!card.is_default ? `<button type="button" class="btn-text set-default-btn" onclick="paymentManager.setDefaultCard('${card.id}')">Set Default</button>` : ''}
-          <button type="button" class="btn-text delete-card-btn" onclick="paymentManager.deleteCard('${card.id}')">Delete</button>
+        <div class="method-actions">
+          <button type="button" class="action-link" onclick="paymentManager.editCard('${card.id}')">Edit</button>
+          ${!card.is_default ? `<button type="button" class="action-link" onclick="paymentManager.setDefaultCard('${card.id}')">Set as default</button>` : ''}
+          <button type="button" class="action-link delete" onclick="paymentManager.deleteCard('${card.id}')">Delete</button>
         </div>
       `;
-      cardsList.appendChild(cardElement);
+      cardsList.appendChild(methodElement);
     });
   }
 
