@@ -121,6 +121,30 @@ class MolecularApp {
         paymentManager.hidePaymentModal();
       });
     }
+
+    // Card management close button event listener
+    const cardManagementCloseBtn = document.getElementById('card-management-close-btn');
+    if (cardManagementCloseBtn) {
+      cardManagementCloseBtn.addEventListener('click', () => {
+        paymentManager.hideCardManagementModal();
+      });
+    }
+
+    // Add new card button event listener
+    const addNewCardBtn = document.getElementById('add-new-card-btn');
+    if (addNewCardBtn) {
+      addNewCardBtn.addEventListener('click', () => {
+        paymentManager.showAddCardForm();
+      });
+    }
+
+    // Cancel edit button event listener
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener('click', () => {
+        paymentManager.cancelCardEdit();
+      });
+    }
     
 
     
@@ -129,28 +153,6 @@ class MolecularApp {
     if (startAnalyzingBtn) {
       startAnalyzingBtn.addEventListener('click', () => {
         paymentManager.hidePaymentModal();
-      });
-    }
-
-    // Card Management Modal Event Listeners
-    const cardManagementCloseBtn = document.getElementById('card-management-close-btn');
-    if (cardManagementCloseBtn) {
-      cardManagementCloseBtn.addEventListener('click', () => {
-        paymentManager.hideCardManagementModal();
-      });
-    }
-
-    const addNewCardBtn = document.getElementById('add-new-card-btn');
-    if (addNewCardBtn) {
-      addNewCardBtn.addEventListener('click', () => {
-        paymentManager.showAddCardForm();
-      });
-    }
-
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    if (cancelEditBtn) {
-      cancelEditBtn.addEventListener('click', () => {
-        paymentManager.cancelCardEdit();
       });
     }
 

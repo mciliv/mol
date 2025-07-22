@@ -1484,14 +1484,14 @@ input[type="checkbox"]:checked + .mode-label {
   pointer-events: auto;
 }
 
-/* Payment Modal from Top - Compact Size */
+/* Payment Modal from Top - Full Width */
 .payment-modal {
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%) translateY(-100%);
-  width: 90%;
-  max-width: 500px;
+  width: 95%;
+  max-width: 800px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border: 1px solid rgba(0, 212, 255, 0.4);
   border-radius: 0 0 12px 12px;
@@ -1581,13 +1581,12 @@ input[type="checkbox"]:checked + .mode-label {
   display: none;
 }
 
-/* Popdown Content */
+/* Modal Content - Simple Stack Layout */
 .modal-content {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 32px;
-  align-items: start;
-  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -1624,22 +1623,27 @@ input[type="checkbox"]:checked + .mode-label {
   font-weight: 500;
 }
 
-/* Popdown form */
+/* Modal form */
 .modal-form {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   padding: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  min-width: 320px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .modal-form .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 0;
+  width: 100%;
 }
 
 .modal-form .form-group.optional {
-  margin-bottom: 20px;
+  margin-bottom: 0;
+  order: 2;
 }
 
 .modal-form .form-group label {
@@ -1691,6 +1695,12 @@ input[type="checkbox"]:checked + .mode-label {
   font-size: 12px;
   margin-top: 6px;
   display: none;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.modal-form .error-message:not(:empty) {
+  display: block;
 }
 
 .modal-form .autofill-note {
@@ -1817,8 +1827,8 @@ input[type="checkbox"]:checked + .mode-label {
   top: 0;
   left: 50%;
   transform: translateX(-50%) translateY(-100%);
-  width: 90%;
-  max-width: 500px;
+  width: 95%;
+  max-width: 800px;
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border: 1px solid rgba(0, 212, 255, 0.4);
   border-radius: 0 0 12px 12px;
@@ -1870,6 +1880,20 @@ input[type="checkbox"]:checked + .mode-label {
 /* Payment Methods List - Clean Text Layout */
 .payment-methods-section {
   line-height: 1.5;
+}
+
+/* Edit form error styling */
+.error-text {
+  color: #ff6b6b;
+  font-size: 12px;
+  margin-top: 6px;
+  display: none;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.error-text:not(:empty) {
+  display: block;
 }
 
 .methods-list {

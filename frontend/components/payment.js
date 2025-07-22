@@ -1,6 +1,7 @@
 class PaymentManager {
   constructor() {
     this.stripe = null;
+    this.elements = null;
     this.cardElement = null;
     this.paymentRequest = null;
     this.setupInProgress = false;
@@ -299,6 +300,7 @@ class PaymentManager {
     
     this.currentEditingCardId = null;
     this.setupCardForm('edit-card-element');
+    this.setupEditFormSubmission();
   }
 
   editCard(cardId) {
@@ -312,6 +314,24 @@ class PaymentManager {
     
     this.currentEditingCardId = cardId;
     this.setupCardForm('edit-card-element');
+    this.setupEditFormSubmission();
+  }
+
+  setupEditFormSubmission() {
+    const editForm = document.getElementById('card-edit-form');
+    if (editForm) {
+      // Remove existing event listeners to prevent duplicates
+      editForm.removeEventListener('submit', this.handleEditFormSubmission);
+      
+      // Add new event listener
+      this.handleEditFormSubmission = (event) => {
+        event.preventDefault();
+        this.saveCardChanges();
+      };
+      
+      editForm.addEventListener('submit', this.handleEditFormSubmission);
+      console.log('✅ Edit form submission handler attached');
+    }
   }
 
   async setDefaultCard(cardId) {
@@ -388,27 +408,84 @@ class PaymentManager {
     if (currentCards) currentCards.classList.remove('hidden');
     if (editForm) editForm.classList.add('hidden');
     
+    // Clean up edit elements
+    if (this.editCardElement) {
+      this.editCardElement.destroy();
+      this.editCardElement = null;
+    }
+    this.editElements = null;
+    
+    // Remove form event listener
+    const cardEditForm = document.getElementById('card-edit-form');
+    if (cardEditForm && this.handleEditFormSubmission) {
+      cardEditForm.removeEventListener('submit', this.handleEditFormSubmission);
+    }
+    
+    // Clear any error messages
+    const errorElement = document.getElementById('edit-card-errors');
+    if (errorElement) {
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+    }
+    
     this.currentEditingCardId = null;
   }
 
   setupCardForm(elementId) {
-    // This would integrate with Stripe Elements
-    // For demo purposes, we'll create a simple placeholder
-    const cardElement = document.getElementById(elementId);
-    if (cardElement) {
-      cardElement.innerHTML = `
-        <div style="padding: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
-          <input type="text" placeholder="Card number" style="background: transparent; border: none; color: #fff; width: 100%; margin-bottom: 8px;">
-          <div style="display: flex; gap: 8px;">
-            <input type="text" placeholder="MM/YY" style="background: transparent; border: none; color: #fff; flex: 1;">
-            <input type="text" placeholder="CVC" style="background: transparent; border: none; color: #fff; flex: 1;">
-          </div>
-        </div>
-      `;
+    // Create new Stripe Elements instance for card editing
+    if (!this.stripe) {
+      console.error('Stripe not initialized for card form');
+      return;
+    }
+    
+    const editElements = this.stripe.elements({
+      appearance: {
+        theme: 'night',
+        variables: {
+          colorPrimary: '#00d4ff',
+          colorBackground: 'rgba(255, 255, 255, 0.08)',
+          colorText: '#ffffff',
+          colorDanger: '#ff6b6b',
+          borderRadius: '8px'
+        }
+      }
+    });
+    
+    const editCardElement = editElements.create('payment', {
+      layout: 'tabs'
+    });
+    
+    const container = document.getElementById(elementId);
+    if (container) {
+      container.innerHTML = ''; // Clear existing content
+      editCardElement.mount(`#${elementId}`);
+      
+      // Store reference for form submission
+      this.editElements = editElements;
+      this.editCardElement = editCardElement;
+      
+      // Set up error handling for edit form
+      editCardElement.on('change', (event) => {
+        const errorElement = document.getElementById('edit-card-errors');
+        if (errorElement) {
+          if (event.error) {
+            errorElement.textContent = event.error.message;
+            errorElement.style.display = 'block';
+          } else {
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+          }
+        }
+      });
     }
   }
 
   async saveCardChanges() {
+    if (!this.stripe || !this.editElements) {
+      console.error('Stripe not initialized for card editing');
+      return;
+    }
+
     const deviceToken = localStorage.getItem('molDeviceToken');
     const userName = document.getElementById('edit-user-name').value;
     
@@ -423,10 +500,32 @@ class PaymentManager {
       btnLoading.classList.remove('hidden');
       saveBtn.disabled = true;
 
+      // Trigger form validation and wallet collection
+      const { error: submitError } = await this.editElements.submit();
+      if (submitError) {
+        this.handleEditError(submitError);
+        return;
+      }
+
+      // Create PaymentMethod
+      const { error, paymentMethod } = await this.stripe.createPaymentMethod({
+        elements: this.editElements,
+        params: {
+          billing_details: {
+            name: userName || 'Molecular Analysis User',
+          }
+        }
+      });
+
+      if (error) {
+        this.handleEditError(error);
+        return;
+      }
+
       const endpoint = this.currentEditingCardId ? '/update-payment-method' : '/setup-payment-method';
       const payload = {
         device_token: deviceToken,
-        payment_method: 'pm_demo_' + Date.now(), // Demo payment method
+        payment_method: paymentMethod.id,
         name: userName
       };
 
@@ -440,13 +539,26 @@ class PaymentManager {
         throw new Error(`Failed to save card: ${response.status}`);
       }
 
+      const result = await response.json();
+
+      // Handle 3D Secure if required
+      if (result.requires_action && result.client_secret) {
+        const { error: confirmError } = await this.stripe.confirmCardSetup(
+          result.client_secret
+        );
+        
+        if (confirmError) {
+          throw new Error(confirmError.message);
+        }
+      }
+
       console.log('✅ Card saved successfully');
       this.cancelCardEdit();
       this.loadUserCards();
       
     } catch (error) {
       console.error('Failed to save card:', error);
-      this.showCardError('Failed to save payment method');
+      this.handleEditError(error);
     } finally {
       const saveBtn = document.getElementById('save-card-btn');
       if (saveBtn) {
@@ -458,6 +570,24 @@ class PaymentManager {
         saveBtn.disabled = false;
       }
     }
+  }
+
+  handleEditError(error) {
+    let message = 'An unexpected error occurred.';
+    
+    if (error.type === 'card_error' || error.type === 'validation_error') {
+      message = error.message;
+    } else if (error.message) {
+      message = error.message;
+    }
+    
+    const errorElement = document.getElementById('edit-card-errors');
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+    
+    console.error('Edit card error:', error);
   }
 
   showCardError(message) {
@@ -538,8 +668,239 @@ class PaymentManager {
     this.setupDeveloperAccount();
   }
 
-  initializePaymentSetup() {
-    console.log('Payment setup initialized');
+  async initializePaymentSetup() {
+    console.log('🔄 Initializing Stripe payment setup...');
+    
+    try {
+      // Get Stripe publishable key from server
+      const response = await fetch('/stripe-config');
+      if (!response.ok) {
+        throw new Error('Failed to get Stripe configuration');
+      }
+      
+      const config = await response.json();
+      
+      // Initialize Stripe
+      this.stripe = Stripe(config.publishableKey);
+      console.log('✅ Stripe initialized');
+      
+      // Create Elements instance
+      this.elements = this.stripe.elements({
+        appearance: {
+          theme: 'night',
+          variables: {
+            colorPrimary: '#00d4ff',
+            colorBackground: 'rgba(255, 255, 255, 0.08)',
+            colorText: '#ffffff',
+            colorDanger: '#ff6b6b',
+            borderRadius: '8px'
+          }
+        }
+      });
+      
+      // Create and mount Payment Element
+      this.cardElement = this.elements.create('payment', {
+        layout: 'tabs'
+      });
+      
+      const cardElementContainer = document.getElementById('card-element');
+      if (cardElementContainer) {
+        this.cardElement.mount('#card-element');
+        console.log('✅ Payment Element mounted');
+      }
+      
+      // Set up error handling
+      this.cardElement.on('change', (event) => {
+        this.handleElementChange(event);
+      });
+      
+      // Set up form submission
+      this.setupFormSubmission();
+      
+    } catch (error) {
+      console.error('❌ Failed to initialize Stripe:', error);
+      this.showError('Payment system unavailable. Please try again.');
+    }
+  }
+
+  handleElementChange(event) {
+    const errorElement = document.getElementById('card-errors');
+    if (event.error) {
+      errorElement.textContent = event.error.message;
+      errorElement.style.display = 'block';
+    } else {
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+    }
+  }
+
+  setupFormSubmission() {
+    const form = document.getElementById('card-setup-form');
+    if (form) {
+      form.addEventListener('submit', (event) => {
+        this.handleFormSubmission(event);
+      });
+      console.log('✅ Form submission handler attached');
+    }
+  }
+
+  async handleFormSubmission(event) {
+    event.preventDefault();
+    
+    if (!this.stripe || !this.elements) {
+      console.error('Stripe not initialized');
+      return;
+    }
+    
+    const setupBtn = document.getElementById('setup-btn');
+    const btnText = setupBtn.querySelector('.btn-text');
+    const btnLoading = setupBtn.querySelector('.btn-loading');
+    
+    // Show loading state
+    btnText.classList.add('hidden');
+    btnLoading.classList.remove('hidden');
+    setupBtn.disabled = true;
+    
+    try {
+      // Trigger form validation and wallet collection
+      const { error: submitError } = await this.elements.submit();
+      if (submitError) {
+        this.handleError(submitError);
+        return;
+      }
+      
+      // Create PaymentMethod
+      const { error, paymentMethod } = await this.stripe.createPaymentMethod({
+        elements: this.elements,
+        params: {
+          billing_details: {
+            name: document.getElementById('user-name').value || 'Molecular Analysis User',
+          }
+        }
+      });
+      
+      if (error) {
+        this.handleError(error);
+        return;
+      }
+      
+      console.log('✅ PaymentMethod created:', paymentMethod.id);
+      
+      // Send to server for setup
+      await this.setupPaymentMethodOnServer(paymentMethod);
+      
+    } catch (error) {
+      console.error('Payment setup error:', error);
+      this.handleError(error);
+    } finally {
+      // Reset button state
+      btnText.classList.remove('hidden');
+      btnLoading.classList.add('hidden');
+      setupBtn.disabled = false;
+    }
+  }
+
+  async setupPaymentMethodOnServer(paymentMethod) {
+    try {
+      const response = await fetch('/setup-payment-method', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          payment_method: paymentMethod.id,
+          name: document.getElementById('user-name').value || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      // Handle 3D Secure if required
+      if (result.requires_action && result.client_secret) {
+        const { error: confirmError } = await this.stripe.confirmCardSetup(
+          result.client_secret
+        );
+        
+        if (confirmError) {
+          throw new Error(confirmError.message);
+        }
+      }
+      
+      // Store payment info locally
+      this.storePaymentInfo(paymentMethod);
+      
+      // Show success
+      this.showSuccess();
+      
+    } catch (error) {
+      throw new Error(`Failed to setup payment method: ${error.message}`);
+    }
+  }
+
+  storePaymentInfo(paymentMethod) {
+    const deviceToken = this.generateDeviceToken();
+    const cardInfo = {
+      last4: paymentMethod.card ? paymentMethod.card.last4 : '••••',
+      brand: paymentMethod.card ? paymentMethod.card.brand : 'card',
+      usage: 0,
+      name: document.getElementById('user-name').value || null,
+      setupDate: new Date().toISOString()
+    };
+    
+    localStorage.setItem('molDeviceToken', deviceToken);
+    localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
+    
+    console.log('✅ Payment info stored locally');
+  }
+
+  generateDeviceToken() {
+    return 'mol_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  showSuccess() {
+    const form = document.getElementById('card-setup-form');
+    const success = document.getElementById('setup-success');
+    
+    if (form && success) {
+      form.classList.add('hidden');
+      success.classList.remove('hidden');
+      
+      // Update account status
+      const cardInfo = JSON.parse(localStorage.getItem('molCardInfo'));
+      this.updateAccountStatus({ name: cardInfo.name });
+      
+      console.log('✅ Payment setup completed successfully');
+    }
+  }
+
+  handleError(error) {
+    let message = 'An unexpected error occurred.';
+    
+    if (error.type === 'card_error' || error.type === 'validation_error') {
+      message = error.message;
+    } else if (error.message) {
+      message = error.message;
+    }
+    
+    const errorElement = document.getElementById('card-errors');
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+    
+    console.error('Payment error:', error);
+  }
+
+  showError(message) {
+    const errorElement = document.getElementById('card-errors');
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
   }
 
   setupLocalDevUser() {
