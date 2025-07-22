@@ -710,7 +710,7 @@ input[type="checkbox"]:checked + .mode-label {
   
   /* Adjust margin when modal is showing on mobile */
   .main-app-interface.modal-showing .text-input {
-    margin-right: 80px; /* Maintain proper spacing from account status */
+    margin-right: 90px; /* Maintain proper spacing from account status */
   }
   
   .input-container {
@@ -1555,28 +1555,29 @@ input[type="checkbox"]:checked + .mode-label {
   margin-top: 0;
 }
 
-/* Dynamic top margin when modal is showing - will be set via JavaScript */
+/* Simple fixed positioning when modal is showing */
 .main-app-interface.modal-showing {
-  margin-top: var(--modal-height, 200px);
-  transition: margin-top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  top: 300px; /* Fixed offset for modal */
+  transition: top 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Responsive adjustments for modal spacing */
 @media (max-width: 768px) {
   .main-app-interface.modal-showing {
-    margin-top: calc(var(--modal-height, 200px) + 10px); /* Extra padding on mobile */
+    top: 280px; /* Slightly smaller offset on tablets */
   }
 }
 
 @media (max-width: 480px) {
   .main-app-interface.modal-showing {
-    margin-top: calc(var(--modal-height, 200px) + 15px); /* More padding on very small screens */
+    top: 260px; /* Smaller offset on mobile */
   }
 }
 
 /* Adjust text input positioning when modal is showing */
 .main-app-interface.modal-showing .text-input {
-  margin-right: 100px; /* Reduced margin when modal is active */
+  margin-right: 120px; /* Adequate spacing from account status */
 }
 
 .main-app-interface.payment-required {
