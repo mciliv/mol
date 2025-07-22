@@ -1,12 +1,160 @@
 ---
+title: Meta Requirements - Continuous Documentation System
+description: Self-building requirements repository that captures and refines all persistent UI elements, decisions, and system patterns
 alwaysApply: true
 ---
-Be maximally simple & straightford as appropriate
 
+# Meta Requirements Repository - Living Documentation System
+
+## 🎯 Core Philosophy
+Be maximally simple & straightforward as appropriate
 Only generate rules here in .mdc files, not markdown
-for edits to the run scripts, make launch.json identical
+Show don't tell - show code and code chunks rather than just saying you did it
 
-Show don't tell for example show code and code chunks rather than just saying you did itOnly generate rules here in .mdc files, not markdown
-for edits to the run scripts, make launch.json identical
+## 📋 Auto-Requirements Generation Protocol
 
-Show don't tell for example show code and code chunks rather than just saying you did it
+### When ANY UI element is mentioned or modified:
+1. **Immediately capture** the element specs in this file
+2. **Document the context** - why it exists, what problem it solves
+3. **Record the exact implementation** - CSS, HTML, JS snippets
+4. **Note any user feedback** - especially recurring issues
+5. **Update related .mdc files** with persistent rules
+
+### When ANY persistent issue occurs:
+1. **Log the issue pattern** in the relevant section below
+2. **Document the solution** with exact code
+3. **Create prevention rules** to stop recurrence
+4. **Cross-reference** with other .mdc files
+
+## 🎨 UI Elements Registry - LIVING REQUIREMENTS
+
+### Account/Payment System
+**Current State**: Credit card icon with user name/setup prompt
+**Location**: `frontend/core/index.html` line 136, `frontend/assets/style.css` lines 66-130
+**Requirements**:
+- Credit card SVG icon (NOT generic user icon)
+- Icon visually separate from text input
+- Shows "Add Card" when no payment, user name when setup
+- MANDATORY spacing: `gap: 8px`, `margin-right: 2px` on icon, `margin-right: 160px` on text-input
+- Mobile responsive: `margin-right: 80px` on mobile
+
+**User Feedback History**:
+- ❌ "icons not showing up" → Fixed: removed `hidden` class
+- ❌ "Card icon separate from the text" → Fixed: increased gap to 8px
+- ❌ "Card still not separated to the right" → Fixed: margin-right 160px
+- ❌ "Card icon overlapping w/ the text input (3rd time)" → PERSISTENT ISSUE → Memory system implemented
+
+**Implementation**:
+```css
+.account-link {
+  position: absolute;
+  right: 15px;
+  gap: 8px; /* CRITICAL - never reduce */
+  min-width: 100px;
+}
+.text-input {
+  margin-right: 160px; /* CRITICAL - prevents overlap */
+}
+```
+
+### Developer Mode System
+**Current State**: NO UI (terminal/backend controlled only)
+**Requirements**:
+- Zero frontend UI elements
+- Controlled via `enableDevMode()` function in console
+- Auto-enabled on localhost when no payment setup
+- NO toggle, NO indicator UI elements
+
+**User Decision**: "should have no special UI as it's controlled from the terminal"
+
+### Input System
+**Current State**: Text input with keyboard shortcut support
+**Requirements**:
+- `⌘K`/`Ctrl+K` keyboard shortcut to focus
+- Dynamic placeholder text showing platform-appropriate shortcut
+- Proper spacing from account icon (160px margin-right)
+
+### Camera System
+**Current State**: Working camera with permissions preservation
+**Requirements**:
+- Preserve camera permissions across sessions
+- No re-prompting for camera access
+- Switch camera button with hover states per ui.mdc
+
+### Live Reload System
+**Current State**: Active and working
+**Requirements**:
+- Watches `frontend/` directory
+- Ports 35729/35730
+- HTTPS certificate with trust script
+- Non-blocking on test failures
+
+## 🔧 System Patterns - ARCHITECTURAL REQUIREMENTS
+
+### Memory Preservation Strategy
+**Pattern**: Document-Driven Development prevents AI context amnesia
+**Implementation**: `.mdc` files with `alwaysApply: true` for critical fixes
+**Files**: `ui-memory.mdc`, `dev.mdc`, `meta.mdc` (this file)
+
+### Development Workflow
+**Pattern**: Automatic dev server startup with error visibility
+**Implementation**: `./dev` and `./dev-debug` scripts
+**Requirements**: Always commit after acceptance, push to main, memory check before changes
+
+### Error Handling
+**Pattern**: Graceful degradation with user feedback
+**Implementation**: PostgreSQL optional, database warnings, continue without DB
+
+## 🚀 Meta-Rule Evolution Protocol
+
+### Auto-Enhancement Rules:
+1. **Every UI change** mentioned by user → Update this file immediately
+2. **Every recurring issue** → Create specific prevention rule
+3. **Every user feedback** → Document in relevant section
+4. **Every architectural decision** → Add to system patterns
+5. **Every .mdc file created/modified** → Cross-reference here
+
+### Continuous Refinement:
+- **Weekly review**: Consolidate similar patterns
+- **Pattern detection**: Identify recurring themes for new .mdc files
+- **Requirement evolution**: Update specs based on user feedback
+- **Cross-file sync**: Ensure all .mdc files reference this master doc
+
+### Auto-Generation Triggers:
+```
+IF (user mentions UI element) THEN
+  → Update Meta Requirements Registry
+  → Check for existing .mdc rules
+  → Create new rule if needed
+  → Document decision rationale
+
+IF (recurring issue detected) THEN
+  → Add to persistent issue log
+  → Create prevention rule
+  → Update relevant .mdc files
+  → Reference in meta.mdc
+
+IF (architectural decision made) THEN
+  → Document in system patterns
+  → Create implementation notes
+  → Cross-reference dependent systems
+```
+
+## 📊 Requirement Metrics
+- **UI Elements Documented**: 5 (Account, Developer Mode, Input, Camera, Live Reload)
+- **Persistent Issues Resolved**: 1 (Card icon spacing)
+- **System Patterns**: 3 (Memory, Workflow, Error Handling)
+- **Auto-Generated .mdc Files**: 3 (ui-memory, auto-rule-generator, payment-system)
+- **Last Updated**: Every conversation with UI/system changes
+
+## 🎯 Next Auto-Captures
+**Watch for these patterns to auto-document**:
+- Any new UI components mentioned
+- Any spacing/layout adjustments
+- Any user feedback about existing elements
+- Any architectural decisions
+- Any recurring error patterns
+
+---
+
+**This file continuously evolves - it's not just documentation, it's the living requirements brain of the project.**
