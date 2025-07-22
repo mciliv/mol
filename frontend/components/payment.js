@@ -31,44 +31,9 @@ class PaymentManager {
   }
 
   async checkInitialPaymentSetup() {
-    // Developer account is default - no payment required
-    if (this.isDeveloperAccount()) {
-      console.log('Developer account detected - payment not required');
-      return true;
-    }
-
-    // For non-developer accounts, check payment setup
-    const deviceToken = localStorage.getItem('molDeviceToken');
-    const cardInfo = localStorage.getItem('molCardInfo');
-    
-    if (!deviceToken || !cardInfo) {
-      console.log('No payment method found - showing payment popdown');
-      this.showPaymentPopdown();
-      return false;
-    }
-    
-    try {
-      const response = await fetch('/validate-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ device_token: deviceToken })
-      });
-      
-      if (!response.ok) {
-        localStorage.removeItem('molDeviceToken');
-        localStorage.removeItem('molCardInfo');
-        this.showPaymentPopdown();
-        return false;
-      }
-      
-      const result = await response.json();
-      this.updateAccountStatus(result.user);
-      return true;
-      
-    } catch (error) {
-      console.error('Initial payment check failed:', error);
-      return true;
-    }
+    // Payment bypass - always return true (no payment required)
+    console.log('Payment bypass active - no payment required');
+    return true;
   }
 
   showPaymentPopdown() {
@@ -131,52 +96,13 @@ class PaymentManager {
   }
 
   isPaymentRequired() {
-    if (this.isDeveloperAccount()) {
-      return false;
-    }
-    
-    const paymentPopdown = document.getElementById('payment-popdown');
-    return paymentPopdown && paymentPopdown.classList.contains('show');
+    // Payment bypass - never require payment
+    return false;
   }
 
   async checkPaymentMethod() {
-    if (this.isDeveloperAccount()) {
-      return true;
-    }
-    
-    const deviceToken = localStorage.getItem('molDeviceToken');
-    const cardInfo = localStorage.getItem('molCardInfo');
-    
-    if (!deviceToken || !cardInfo) {
-      this.showPaymentPopdown();
-      return false;
-    }
-    
-    try {
-      const response = await fetch('/validate-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ device_token: deviceToken })
-      });
-      
-      if (!response.ok) {
-        localStorage.removeItem('molDeviceToken');
-        localStorage.removeItem('molCardInfo');
-        this.showPaymentPopdown();
-        return false;
-      }
-      
-      const result = await response.json();
-      const localCardInfo = JSON.parse(cardInfo);
-      localCardInfo.usage = result.user.usage;
-      localStorage.setItem('molCardInfo', JSON.stringify(localCardInfo));
-      
-      return true;
-      
-    } catch (error) {
-      console.error('Payment validation error:', error);
-      return true;
-    }
+    // Payment bypass - always return true
+    return true;
   }
 
   async incrementUsage() {
