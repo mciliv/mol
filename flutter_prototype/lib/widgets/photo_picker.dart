@@ -18,29 +18,19 @@ class _PhotoPickerState extends State<PhotoPicker> {
   Widget build(BuildContext context) {
     return Consumer2<PaymentService, AnalysisService>(
       builder: (context, paymentService, analysisService, child) {
-        return Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          // FLATTENED STRUCTURE - Row instead of Column to prevent overflow
-          child: Row(
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          // FLOWING STRUCTURE - Column instead of rigid Row
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // KEY: Prevents overflow
             children: [
-              // Upload button - compact
-              Expanded(
-                flex: 1,
-                child: _buildUploadButton(paymentService, analysisService),
-              ),
+              // Upload button - clean, no box
+              _buildUploadButton(paymentService, analysisService),
               
-              SizedBox(width: 20),
+              SizedBox(height: 30),
               
-              // URL input section - compact
-              Expanded(
-                flex: 2,
-                child: _buildUrlSection(paymentService, analysisService),
-              ),
+              // URL input section - flowing
+              _buildUrlSection(paymentService, analysisService),
             ],
           ),
         );
@@ -51,30 +41,21 @@ class _PhotoPickerState extends State<PhotoPicker> {
   Widget _buildUploadButton(PaymentService paymentService, AnalysisService analysisService) {
     return GestureDetector(
       onTap: () => _pickImage(paymentService, analysisService),
-      child: Container(
-        height: 100, // Fixed height prevents overflow
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.white.withOpacity(0.7),
-            style: BorderStyle.solid,
-            width: 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
+      child: Padding(
+        padding: EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min, // KEY: Prevents overflow
           children: [
             CustomPaint(
               size: Size(24, 24),
               painter: UploadIconPainter(),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 12),
             Text(
               'Upload',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -85,52 +66,45 @@ class _PhotoPickerState extends State<PhotoPicker> {
   }
   
   Widget _buildUrlSection(PaymentService paymentService, AnalysisService analysisService) {
-    return Container(
-      height: 100, // Fixed height prevents overflow
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Or paste image URL:',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 12,
+    return Column(
+      mainAxisSize: MainAxisSize.min, // KEY: Prevents overflow
+      children: [
+        Text(
+          'Or paste image URL:',
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 14,
+          ),
+        ),
+        SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _urlController,
+                decoration: InputDecoration(
+                  hintText: 'Image URL...',
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                style: TextStyle(color: Colors.white, fontSize: 14),
+                onSubmitted: (_) => _analyzeUrl(paymentService, analysisService),
+              ),
             ),
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _urlController,
-                  decoration: InputDecoration(
-                    hintText: 'Image URL...',
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                  onSubmitted: (_) => _analyzeUrl(paymentService, analysisService),
+            SizedBox(width: 12),
+            GestureDetector(
+              onTap: () => _analyzeUrl(paymentService, analysisService),
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: CustomPaint(
+                  size: Size(16, 16),
+                  painter: SearchIconPainter(),
                 ),
               ),
-              SizedBox(width: 8),
-              GestureDetector(
-                onTap: () => _analyzeUrl(paymentService, analysisService),
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: CustomPaint(
-                    size: Size(16, 16),
-                    painter: SearchIconPainter(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+            ),
+          ],
+        ),
+      ],
     );
   }
   

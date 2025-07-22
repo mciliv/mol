@@ -108,7 +108,7 @@ class ModeSelector extends StatelessWidget {
   }
 }
 
-// Simple camera lens icon - matches original camera.svg
+// Simple camera lens icon - matches original lens.svg
 class CameraLensIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

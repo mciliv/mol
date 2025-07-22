@@ -27,7 +27,7 @@ class HomeScreen extends StatelessWidget {
                     color: Colors.white.withOpacity(0.08),
                   ),
                 
-                // Main App Content - FLATTENED STRUCTURE
+                // Main App Content - CLEAN & FLOWING (not boxy)
                 Expanded(
                   child: SingleChildScrollView(
                     padding: EdgeInsets.all(20),
@@ -41,17 +41,14 @@ class HomeScreen extends StatelessWidget {
                         ModeSelector(),
                         SizedBox(height: 20),
                         
-                        // Mode-specific content - SIMPLIFIED
+                        // Mode-specific content - FLOWING (no fixed heights)
                         _buildModeContent(paymentService),
                         
                         SizedBox(height: 20),
                         
-                        // Results View - CONSTRAINED HEIGHT
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: 200,
-                            maxHeight: 400,
-                          ),
+                        // Results View - MINIMAL CONSTRAINTS
+                        SizedBox(
+                          height: 300, // Sufficient space, not visually constraining
                           child: ResultsView(),
                         ),
                       ],
@@ -66,66 +63,54 @@ class HomeScreen extends StatelessWidget {
     );
   }
   
-  // Flattened mode content - no complex nesting
+  // Clean mode content - no visual boxes
   Widget _buildModeContent(PaymentService paymentService) {
     switch (paymentService.selectedMode) {
       case AnalysisMode.photo:
-        return Container(
-          height: 200, // Fixed height prevents overflow
-          child: PhotoPicker(),
-        );
+        return PhotoPicker();
       case AnalysisMode.camera:
-        return Container(
-          height: 200, // Fixed height prevents overflow
-          child: SimpleCameraView(),
-        );
+        return SimpleCameraView();
       default:
         return SizedBox.shrink();
     }
   }
 }
 
-// Simplified Camera View - no nested columns
+// Clean Camera View - no boxy container
 class SimpleCameraView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.camera_alt,
-              size: 32,
-              color: Colors.white.withOpacity(0.3),
-            ),
-            SizedBox(width: 16),
-            Column(
-              mainAxisSize: MainAxisSize.min, // KEY: Prevents overflow
-              children: [
-                Text(
-                  'Camera View',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
-                    fontSize: 16,
-                  ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 40),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.camera_alt,
+            size: 32,
+            color: Colors.white.withOpacity(0.3),
+          ),
+          SizedBox(width: 16),
+          Column(
+            mainAxisSize: MainAxisSize.min, // KEY: Prevents overflow
+            children: [
+              Text(
+                'Camera View',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 16,
                 ),
-                Text(
-                  'Coming soon',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
-                    fontSize: 12,
-                  ),
+              ),
+              Text(
+                'Coming soon',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.5),
+                  fontSize: 12,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
