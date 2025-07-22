@@ -61,22 +61,7 @@ class MolecularApp {
 
     cameraHandler.setupEventListeners();
     
-    // Payment setup link event listener
-    const paymentSetupLink = document.getElementById('payment-setup-link');
-    if (paymentSetupLink) {
-      paymentSetupLink.addEventListener('click', () => {
-        paymentManager.showPaymentPopdown();
-      });
-    }
-    
-    // Clear payment button event listener
-    const clearPaymentBtn = document.getElementById('clear-payment-btn');
-    if (clearPaymentBtn) {
-      clearPaymentBtn.addEventListener('click', () => {
-        paymentManager.clearPaymentSetup();
-        location.reload(); // Reload to test payment setup flow
-      });
-    }
+
     
     // Payment close button event listener
     const paymentCloseBtn = document.getElementById('payment-close-btn');
