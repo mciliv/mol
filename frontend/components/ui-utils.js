@@ -320,6 +320,33 @@ class UIManager {
       }
     };
 
+    // Enable developer mode
+    window.enableDevMode = () => {
+      console.log('🔧 Enabling developer mode');
+      
+      // Set up developer account
+      if (window.paymentManager) {
+        paymentManager.setupDeveloperAccount();
+        console.log('✅ Developer account set up');
+        
+        // Update app payment setup status
+        if (window.app) {
+          app.hasPaymentSetup = true;
+          console.log('✅ App payment setup status updated');
+        }
+        
+        // Hide payment popdown
+        const paymentPopdown = document.getElementById('payment-popdown');
+        if (paymentPopdown) {
+          paymentManager.hidePaymentPopdown();
+        }
+        
+        console.log('🎉 Developer mode enabled - you can now analyze molecules');
+      } else {
+        console.error('❌ Payment manager not available');
+      }
+    };
+
     // Show both sections clearly
     window.showBothSections = () => {
       console.log('🔧 Showing both payment and app interface clearly');

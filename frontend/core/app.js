@@ -41,7 +41,8 @@ class MolecularApp {
     const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
     if (paymentEnabled) {
       console.log('🔧 Payment requirement enabled - checking setup');
-      await paymentManager.checkInitialPaymentSetup();
+      const setupResult = await paymentManager.checkInitialPaymentSetup();
+      this.hasPaymentSetup = setupResult;
       
       // Update account status after checking payment setup
       const deviceToken = localStorage.getItem('molDeviceToken');
@@ -52,6 +53,8 @@ class MolecularApp {
       }
     } else {
       console.log('✅ Payment requirement disabled - no payment needed');
+      this.hasPaymentSetup = true; // Payment disabled means setup is not required
+      
       // Show account status but indicate payment disabled
       const accountName = document.getElementById('account-name');
       if (accountName) {
@@ -70,6 +73,28 @@ class MolecularApp {
     }
   
     console.log('✅ Molecular analysis app initialized');
+    
+    // Auto-enable dev mode for localhost development
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      console.log('🔧 Localhost detected - checking if dev mode should be auto-enabled');
+      
+      const deviceToken = localStorage.getItem('molDeviceToken');
+      const isDeveloperAccount = paymentManager.isDeveloperAccount();
+      
+      if (!deviceToken && !isDeveloperAccount && !paymentEnabled) {
+        console.log('🔧 Auto-enabling developer mode for localhost');
+        paymentManager.setupDeveloperAccount();
+        this.hasPaymentSetup = true;
+        
+        // Hide payment popdown if showing
+        const paymentPopdown = document.getElementById('payment-popdown');
+        if (paymentPopdown && !paymentPopdown.classList.contains('hidden')) {
+          paymentManager.hidePaymentPopdown();
+        }
+        
+        console.log('🎉 Developer mode auto-enabled for localhost');
+      }
+    }
   }
 
   setupEventListeners() {
@@ -497,6 +522,7 @@ class MolecularApp {
 // Initialize app when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
   const app = new MolecularApp();
+  window.app = app; // Make app globally available for debugging
   await app.initialize();
 
   // Make app globally available for debugging

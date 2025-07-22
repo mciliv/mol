@@ -80,24 +80,26 @@ class PaymentManager {
   }
 
   hidePaymentPopdown() {
+    console.log('🔄 Hiding payment popdown...');
     const popdown = document.getElementById('payment-popdown');
     const mainInterface = document.getElementById('main-app-interface');
     
     if (popdown) {
       popdown.classList.remove('show');
+      setTimeout(() => {
+        popdown.style.display = 'none';
+        popdown.classList.add('hidden');
+      }, 300);
     }
     
     if (mainInterface) {
       mainInterface.classList.remove('payment-required');
     }
     
-    setTimeout(() => {
-      if (popdown) {
-        popdown.style.display = 'none';
-        popdown.classList.add('hidden');
-      }
-    }, 400);
+    console.log('✅ Payment popdown hidden');
   }
+
+
 
   updateAccountStatus(user) {
     const accountStatus = document.getElementById('account-status');
