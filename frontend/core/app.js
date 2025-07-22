@@ -34,13 +34,29 @@ class MolecularApp {
       console.log('🔧 Payment requirement disabled by default');
     }
     
+    // Always show account status with appropriate state
+    paymentManager.updateAccountStatus(null);
+    
     // Check payment setup based on toggle state
     const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
     if (paymentEnabled) {
       console.log('🔧 Payment requirement enabled - checking setup');
       await paymentManager.checkInitialPaymentSetup();
+      
+      // Update account status after checking payment setup
+      const deviceToken = localStorage.getItem('molDeviceToken');
+      const cardInfo = localStorage.getItem('molCardInfo');
+      if (deviceToken && cardInfo) {
+        const card = JSON.parse(cardInfo);
+        paymentManager.updateAccountStatus({ name: card.name });
+      }
     } else {
       console.log('✅ Payment requirement disabled - no payment needed');
+      // Show account status but indicate payment disabled
+      const accountName = document.getElementById('account-name');
+      if (accountName) {
+        accountName.textContent = 'Payment Off';
+      }
     }
     
     // Show developer account indicator if using developer account

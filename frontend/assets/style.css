@@ -78,9 +78,10 @@ body {
   transition: all 0.3s ease;
   z-index: 1001;
   white-space: nowrap;
-  display: flex;
+  display: flex !important; /* Always show account status */
   align-items: center;
   gap: 6px;
+  border: 1px solid transparent;
 }
 
 .account-link svg {
@@ -93,7 +94,21 @@ body {
 
 .account-link:hover {
   background: rgba(0, 212, 255, 0.1);
-  color: #0099cc;
+  border-color: rgba(0, 212, 255, 0.2);
+  transform: translateY(-50%) scale(1.02);
+}
+
+/* Card setup needed state */
+.account-link[style*="cursor: pointer"] {
+  color: #ffa500;
+  border-color: rgba(255, 165, 0, 0.3);
+  background: rgba(255, 165, 0, 0.05);
+}
+
+.account-link[style*="cursor: pointer"]:hover {
+  background: rgba(255, 165, 0, 0.1);
+  border-color: rgba(255, 165, 0, 0.5);
+  color: #ffb733;
 }
 
 .dev-toggle {

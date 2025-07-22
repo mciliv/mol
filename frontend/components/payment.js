@@ -103,13 +103,38 @@ class PaymentManager {
     const accountStatus = document.getElementById('account-status');
     const accountName = document.getElementById('account-name');
     
-    if (user && user.name) {
-      accountName.textContent = user.name;
-    } else {
-      accountName.textContent = 'Account';
+    if (accountStatus) {
+      // Always show the account status
+      accountStatus.classList.remove('hidden');
+      accountStatus.style.display = 'flex';
+      
+      if (user && user.name) {
+        accountName.textContent = user.name;
+        accountStatus.style.color = '#00d4ff'; // Blue when set up
+      } else {
+        accountName.textContent = 'Add Card';
+        accountStatus.style.color = '#ffa500'; // Orange when not set up
+      }
+      
+      // Add click handler to show payment popdown when no payment set up
+      const paymentEnabled = localStorage.getItem('molPaymentEnabled') === 'true';
+      if (paymentEnabled) {
+        const deviceToken = localStorage.getItem('molDeviceToken');
+        const cardInfo = localStorage.getItem('molCardInfo');
+        
+        if (!deviceToken || !cardInfo) {
+          // No payment set up - make it clickable to show popdown
+          accountStatus.style.cursor = 'pointer';
+          accountStatus.onclick = () => {
+            this.showPaymentPopdown();
+          };
+        } else {
+          // Payment set up - remove click handler
+          accountStatus.style.cursor = 'default';
+          accountStatus.onclick = null;
+        }
+      }
     }
-    
-    accountStatus.style.display = 'flex';
   }
 
   isPaymentRequired() {
