@@ -1,5 +1,9 @@
-# UI
+---
+description: UI
+alwaysApply: false
+---
 
+just use icons where self-explanatory
 
 ## "Stupid Simple" UI Guidelines
 - **No Extraneous Lines**: Avoid borders, outlines, shadows, or decorative elements
@@ -30,7 +34,3 @@
 - Font weights: 400 for body text, 500 for labels and buttons
 - Letter spacing: `0.01em` for improved readability
 - Line height: `1.4` for comfortable reading
-description:
-globs:
-alwaysApply: false
----
