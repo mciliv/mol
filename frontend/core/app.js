@@ -298,235 +298,105 @@ class MolecularApp {
     }
   }
 
-  // Process analysis results and display molecules (restored working version)
-  processAnalysisResult(output, icon, objectName, useQuotes = false, croppedImageData = null) {
-    logger.analysisEvent('result_processed', { 
-      type: this.currentAnalysisType, 
-      objectName,
-      hasCroppedData: !!croppedImageData 
-    });
-
-    logger.info('Raw analysis output:', output);
+  // Simple analysis result processing
+  async processAnalysisResult(output, icon, objectName, useQuotes = false, croppedImageData = null) {
     const chemicals = output.chemicals || [];
-    logger.info('Extracted chemicals array:', chemicals);
-
-    let displayName = objectName;
-    if (useQuotes && objectName) {
-      displayName = `"${objectName}"`;
-    }
-
-    // Handle description responses
-    if (chemicals.length === 1 && chemicals[0].smiles && chemicals[0].smiles.startsWith("DESCRIPTION: ")) {
-      const description = chemicals[0].smiles.replace("DESCRIPTION: ", "");
-      this.generateSDFs([], displayName, description, null, croppedImageData);
-      return;
-    }
-
-    // Handle molecular responses - filter out N/A and invalid SMILES
-    const smilesMap = chemicals.map((chem) => {
-      logger.info(`Processing chemical:`, chem, `SMILES: "${chem.smiles}"`);
-      return chem.smiles;
-    });
-    logger.info('Mapped SMILES:', smilesMap);
+    const displayName = useQuotes ? `"${objectName}"` : objectName;
     
-    const smiles = smilesMap.filter(s => {
-      const isValid = s && s !== "N/A" && s.trim() !== "";
-      logger.info(`SMILES "${s}" is valid: ${isValid}`);
-      return isValid;
-    });
+    // Extract valid SMILES
+    const smiles = chemicals
+      .map(c => c.smiles)
+      .filter(s => s && s !== "N/A" && s.trim() !== "");
     
-    logger.info(`Found ${chemicals.length} chemicals, ${smiles.length} valid SMILES:`, smiles);
-    
+    // Generate and display molecules
     if (smiles.length > 0) {
-      this.generateSDFs(smiles, displayName, null, chemicals, croppedImageData);
+      await this.generateAndDisplayMolecules(smiles, displayName, chemicals);
     } else {
-      // Create column with description instead of molecules
-      this.generateSDFs([], displayName, "No displayable molecular structures found", chemicals, croppedImageData);
+      await this.createObjectColumn(displayName, [], [], "No displayable molecular structures found");
     }
   }
 
-  // Generate SDF files and create 3D visualizations (restored working version)
-  async generateSDFs(smiles, objectName, description = null, chemicals = null, croppedImageData = null) {
-    if (smiles.length === 0 && !description) {
-      this.showError("No valid molecules found for visualization");
-      return;
-    }
-
+  // Generate SDF files and create molecular display
+  async generateAndDisplayMolecules(smiles, objectName, chemicals) {
     try {
-      let sdfPaths = [];
+      const response = await fetch("/generate-sdfs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ smiles, overwrite: true }),
+      });
+
+      if (!response.ok) throw new Error(`SDF generation failed: ${response.status}`);
       
-      if (smiles.length > 0) {
-        logger.info(`Generating SDFs for ${smiles.length} SMILES:`, smiles);
-        const response = await fetch("/generate-sdfs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ smiles, overwrite: true }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`SDF generation failed: ${response.status} ${errorText}`);
-        }
-        
-        const result = await response.json();
-        sdfPaths = result.sdfPaths || [];
-        logger.info(`Generated ${sdfPaths.length} SDF files:`, sdfPaths);
-      }
-
-      await this.createObjectColumn(
-        objectName,
-        sdfPaths,
-        smiles,
-        null,
-        null,
-        [],
-        description,
-        chemicals,
-        croppedImageData
-      );
-
+      const result = await response.json();
+      await this.createObjectColumn(objectName, result.sdfPaths || [], smiles, null, chemicals);
+      
     } catch (error) {
-      logger.error("SDF generation error:", error);
       this.showError(`Error generating 3D models: ${error.message}`);
     }
   }
 
-  async createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, 
-                          summary = null, skippedChemicals = [], description = null, 
-                          chemicals = null, croppedImageData = null) {
-
+  // Create molecular display column
+  async createObjectColumn(objectName, sdfFiles, smiles = [], description = null, chemicals = null) {
     const gldiv = document.getElementById("gldiv");
-    if (!gldiv) {
-      logger.error("No gldiv found for molecular display");
-      return;
-    }
+    if (!gldiv) return;
 
-    // Create object column
     const objectColumn = document.createElement("div");
     objectColumn.className = "object-column";
 
-    // Create title with close button
+    // Title with close button
     const titleContainer = document.createElement("div");
     titleContainer.className = "object-title";
-    
-    const titleText = document.createElement("span");
-    titleText.textContent = objectName;
-    titleContainer.appendChild(titleText);
-
-    const closeButton = document.createElement("button");
-    closeButton.innerHTML = "✕";
-    closeButton.className = "close-button";
-    closeButton.title = "Close";
-    closeButton.onclick = () => {
-      objectColumn.remove();
-      this.updateScrollHandles();
-    };
-    titleContainer.appendChild(closeButton);
-    
+    titleContainer.innerHTML = `
+      <span>${objectName}</span>
+      <button class="close-button" onclick="this.parentElement.parentElement.remove()">✕</button>
+    `;
     objectColumn.appendChild(titleContainer);
 
-    // Handle description vs molecules
     if (description) {
+      // Show description
       const descDiv = document.createElement("div");
       descDiv.className = "description-content";
       descDiv.textContent = description;
-      descDiv.style.cssText = `
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 13px;
-        line-height: 1.4;
-        padding: 12px;
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: 4px;
-        max-height: 200px;
-        overflow-y: auto;
-      `;
       objectColumn.appendChild(descDiv);
     } else {
-      // Render 3D molecules with SPHERE REPRESENTATION ONLY
-      logger.info(`Rendering ${sdfFiles.length} molecules`);
-      
+      // Render 3D molecules
       for (let i = 0; i < sdfFiles.length; i++) {
-        const sdfFile = sdfFiles[i];
-        const chemical = chemicals?.[i] || { smiles: smiles[i] };
-        
-        logger.info(`Rendering molecule ${i + 1}/${sdfFiles.length}: ${sdfFile}`);
-        
         const container = document.createElement("div");
         container.className = "molecule-viewer";
-        objectColumn.appendChild(container);
-
-        const moleculeContainer = document.createElement("div");
-        moleculeContainer.className = "molecule-container";
-
+        
         const moleculeName = document.createElement("div");
         moleculeName.className = "molecule-name";
+        const chemical = chemicals?.[i] || { smiles: smiles[i] };
+        moleculeName.textContent = uiManager.getMoleculeName(chemical);
+        
+        objectColumn.appendChild(moleculeName);
+        objectColumn.appendChild(container);
 
-        const displayName = uiManager.getMoleculeName(chemical);
-        moleculeName.textContent = displayName;
-
-        // Add Wikipedia link
-        const wikipediaLink = document.createElement("a");
-        wikipediaLink.textContent = displayName;
-        wikipediaLink.href = `https://en.wikipedia.org/wiki/${encodeURIComponent(displayName)}`;
-        wikipediaLink.target = "_blank";
-        wikipediaLink.rel = "noopener noreferrer";
-        wikipediaLink.className = "wikipedia-link";
-
-        moleculeName.appendChild(wikipediaLink);
-        moleculeContainer.appendChild(moleculeName);
-        objectColumn.appendChild(moleculeContainer);
-
-        const viewer = await this.render(sdfFile, container);
-        if (viewer) {
-          this.viewers.push(viewer);
-          logger.info(`Successfully rendered molecule: ${displayName}`);
-        } else {
-          logger.error(`Failed to render molecule: ${displayName}`);
-        }
+        const viewer = await this.render(sdfFiles[i], container);
+        if (viewer) this.viewers.push(viewer);
       }
-
-      this.viewers.forEach((viewer) => {
-        viewer.resize();
-        viewer.render();
-      });
     }
 
     gldiv.appendChild(objectColumn);
-    this.updateScrollHandles();
   }
 
+  // Render 3D molecule
   async render(sdfFile, container) {
     try {
-      logger.info(`Fetching SDF file: ${sdfFile}`);
       const response = await fetch(sdfFile);
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
       const sdfData = await response.text();
-      logger.info(`SDF data length: ${sdfData.length} characters`);
+      const viewer = $3Dmol.createViewer(container, { defaultcolors: $3Dmol.rasmolElementColors });
       
-      if (!window.$3Dmol) {
-        throw new Error('3DMol.js library not loaded');
-      }
-      
-      const viewer = $3Dmol.createViewer(container, {
-        defaultcolors: $3Dmol.rasmolElementColors,
-      });
-
       viewer.addModel(sdfData, "sdf");
-      // CRITICAL: Use ONLY sphere representation with van der Waals radii at 0.8 scale
-      viewer.setStyle({}, { sphere: { scale: 0.8 } });
+      viewer.setStyle({}, { sphere: { scale: 0.8 } }); // Sphere representation only
       viewer.zoomTo();
       viewer.render();
       
-      logger.info('3D molecule viewer created successfully');
       return viewer;
-      
     } catch (error) {
-      logger.error(`Failed to load molecule:`, error);
-      container.textContent = `Error loading molecule: ${error.message}`;
-      container.className += " error-text";
+      container.textContent = `Error: ${error.message}`;
       return null;
     }
   }
@@ -557,3 +427,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.molecularApp = app;
 });
+
