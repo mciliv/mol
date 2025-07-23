@@ -364,27 +364,41 @@ class MolecularApp {
     const sdfFiles = [];
     const smiles = [];
 
-    for (const chemical of chemicals) {
-      try {
-        if (chemical.smiles) {
-          const response = await fetch("/generate-sdf", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ smiles: chemical.smiles }),
-          });
+    // Extract SMILES from all chemicals
+    const smilesArray = chemicals.filter(c => c.smiles).map(c => c.smiles);
+    
+    if (smilesArray.length === 0) {
+      return { sdfFiles, smiles };
+    }
 
-          if (response.ok) {
-            const blob = await response.blob();
-            const sdfUrl = URL.createObjectURL(blob);
-            sdfFiles.push(sdfUrl);
-            smiles.push(chemical.smiles);
-          } else {
-            logger.warn(`Failed to generate SDF for ${chemical.name || chemical.smiles}`);
-          }
+    try {
+      // Call the correct endpoint with array of SMILES
+      const response = await fetch("/generate-sdfs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ smiles: smilesArray }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Process the returned SDF paths
+        for (let i = 0; i < result.sdfPaths.length; i++) {
+          const sdfPath = result.sdfPaths[i];
+          smiles.push(smilesArray[i]);
+          sdfFiles.push(sdfPath); // Use the path directly since it's already a URL
         }
-      } catch (error) {
-        logger.error(`Error generating SDF for chemical:`, error);
+        
+        if (result.errors && result.errors.length > 0) {
+          logger.warn('Some SDF generation failed:', result.errors);
+        }
+        
+      } else {
+        const errorText = await response.text();
+        logger.error(`Failed to generate SDFs: ${response.status} ${errorText}`);
       }
+    } catch (error) {
+      logger.error(`Error generating SDFs:`, error);
     }
 
     return { sdfFiles, smiles };
