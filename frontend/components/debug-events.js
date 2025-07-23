@@ -62,7 +62,7 @@ window.fetch = function(...args) {
   };
   
   // 🔴 BREAKPOINT: Set breakpoint here to inspect all API calls
-  console.log('🌐 API Call:', callInfo);
+  // console.log('🌐 API Call:', callInfo); // Disabled to prevent log loops
   window.debugState.apiCalls.push(callInfo);
   
   return originalFetch.apply(this, args)
@@ -73,7 +73,7 @@ window.fetch = function(...args) {
         headers: Object.fromEntries(response.headers.entries())
       };
       // 🔴 BREAKPOINT: Set breakpoint here to inspect API responses
-      console.log('✅ API Response:', callInfo);
+      // console.log('✅ API Response:', callInfo); // Disabled to prevent log loops
       return response;
     })
     .catch(error => {
