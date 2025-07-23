@@ -5,35 +5,32 @@ class SimplePaymentManager {
     this.cardElement = null;
   }
 
-  // Show payment section at top
+  // Enhanced payment section show with better integration
   showPaymentSection() {
     console.log('💳 Showing payment section');
     const paymentSection = document.getElementById('payment-section');
-    const separatorLine = document.getElementById('separator-line');
     
     if (paymentSection) {
       paymentSection.classList.remove('hidden');
-    }
-    
-    if (separatorLine) {
-      separatorLine.style.display = 'block';
+      paymentSection.style.display = 'block';
+      
+      // Ensure the payment section is properly visible and scrolled to
+      setTimeout(() => {
+        paymentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
     }
     
     this.initializeStripe();
   }
 
-  // Hide payment section
+  // Hide payment section when payment is complete
   hidePaymentSection() {
     console.log('💳 Hiding payment section');
     const paymentSection = document.getElementById('payment-section');
-    const separatorLine = document.getElementById('separator-line');
     
     if (paymentSection) {
       paymentSection.classList.add('hidden');
-    }
-    
-    if (separatorLine) {
-      separatorLine.style.display = 'none';
+      paymentSection.style.display = 'none';
     }
   }
 
@@ -50,6 +47,7 @@ class SimplePaymentManager {
     
     console.log('✅ Payment method found');
     this.updateAccountButton();
+    this.hidePaymentSection(); // Hide if payment is set up
     return true;
   }
 
@@ -236,27 +234,56 @@ class SimplePaymentManager {
     localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
   }
 
-  // Update account button
+  // Update account button to show payment status
   updateAccountButton() {
-    const accountBtn = document.getElementById('account-btn');
-    const accountText = document.getElementById('account-text');
+    const accountStatus = document.getElementById('account-status');
+    const accountName = document.getElementById('account-name');
     
-    if (!accountBtn || !accountText) return;
-    
-    const cardInfo = localStorage.getItem('molCardInfo');
-    
-    if (cardInfo) {
-      const card = JSON.parse(cardInfo);
-      accountText.textContent = card.name || 'Payment Set';
-      accountBtn.style.color = '#00ff88'; // Green when setup
-    } else {
-      accountText.textContent = 'Add Card';
-      accountBtn.style.color = '#ffa500'; // Orange when not setup
+    if (accountStatus && accountName) {
+      const cardInfo = localStorage.getItem('molCardInfo');
       
-      // Click to show payment
-      accountBtn.onclick = () => {
-        this.showPaymentSection();
+      if (cardInfo) {
+        try {
+          const parsed = JSON.parse(cardInfo);
+          accountName.textContent = parsed.name || 'Account Active';
+          accountStatus.style.color = '#00d4ff'; // Blue when active
+          
+          // Show usage if available
+          if (parsed.usage !== undefined) {
+            accountName.textContent = `${parsed.name || 'Active'} (${parsed.usage} analyses)`;
+          }
+        } catch (e) {
+          accountName.textContent = 'Account Active';
+          accountStatus.style.color = '#00d4ff';
+        }
+      } else {
+        accountName.textContent = 'Setup Required';
+        accountStatus.style.color = '#ffa500'; // Orange when not set up
+      }
+      
+      // Make clickable to show/manage payment
+      accountStatus.style.cursor = 'pointer';
+      accountStatus.onclick = () => {
+        const deviceToken = localStorage.getItem('molDeviceToken');
+        if (deviceToken) {
+          this.showCardManagement();
+        } else {
+          this.showPaymentSection();
+        }
       };
+    }
+  }
+
+  // Simple card management (show account info)
+  showCardManagement() {
+    const cardInfo = localStorage.getItem('molCardInfo');
+    if (cardInfo) {
+      try {
+        const parsed = JSON.parse(cardInfo);
+        alert(`Account: ${parsed.name || 'Active'}\nUsage: ${parsed.usage || 0} analyses\n\nPayment is active and working.`);
+      } catch (e) {
+        alert('Payment is active and working.');
+      }
     }
   }
 

@@ -266,7 +266,7 @@ class CameraManager {
     
     let paymentCheck = false;
     try {
-      paymentCheck = await paymentManager.checkPaymentMethod();
+      paymentCheck = await this.checkPaymentSetupForSidebar();
       console.log('💳 Payment check result:', paymentCheck);
     } catch (error) {
       console.log('⚠️ Payment check failed, proceeding anyway:', error);
@@ -275,14 +275,13 @@ class CameraManager {
     
     if (!paymentCheck) {
       console.log('🚫 Payment required - showing message');
-      // Show simple message instead of modal
-      const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
+      // Show simple message directing to sidebar
+      const messageColumn = uiManager.createColumn("Payment setup required", "payment-required");
       messageColumn.innerHTML = `
         <div class="molecule-container">
           <div class="molecule-info">
-            <h3>Payment Required</h3>
-            <p>See payment setup above</p>
-            <div class="analysis-note">Complete payment setup to analyze molecules via camera</div>
+            <h3>Payment Setup Required</h3>
+            <p>Complete payment setup in the sidebar to analyze molecules via camera</p>
           </div>
         </div>
       `;
@@ -374,7 +373,7 @@ class CameraManager {
       
       // Try to increment usage, but don't fail if it doesn't work
       try {
-        await paymentManager.incrementUsage();
+        await this.incrementUsageForSidebar();
       } catch (usageError) {
         console.log('⚠️ Usage increment failed:', usageError);
       }
@@ -628,6 +627,69 @@ class CameraManager {
       this.saveCameraPermission(false);
       this.updateCameraInstructions();
       return false;
+    }
+  }
+
+  // Check payment setup for sidebar-based system
+  async checkPaymentSetupForSidebar() {
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    const cardInfo = localStorage.getItem('molCardInfo');
+    
+    if (!deviceToken || !cardInfo) {
+      // Ensure payment section is visible
+      const paymentSection = document.getElementById('payment-section');
+      if (paymentSection) {
+        paymentSection.classList.remove('hidden');
+      }
+      return false;
+    }
+    
+    try {
+      const response = await fetch('/validate-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_token: deviceToken })
+      });
+      
+      if (!response.ok) {
+        localStorage.removeItem('molDeviceToken');
+        localStorage.removeItem('molCardInfo');
+        // Ensure payment section is visible
+        const paymentSection = document.getElementById('payment-section');
+        if (paymentSection) {
+          paymentSection.classList.remove('hidden');
+        }
+        return false;
+      }
+      
+      return true;
+      
+    } catch (error) {
+      console.error('Payment validation error:', error);
+      return true; // Fallback to allow analysis
+    }
+  }
+
+  // Increment usage for sidebar-based system
+  async incrementUsageForSidebar() {
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    if (!deviceToken) return;
+    
+    try {
+      const response = await fetch('/increment-usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_token: deviceToken })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const cardInfo = JSON.parse(localStorage.getItem('molCardInfo') || '{}');
+        cardInfo.usage = result.usage;
+        localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
+      }
+    } catch (error) {
+      console.log('Usage increment failed:', error);
     }
   }
 

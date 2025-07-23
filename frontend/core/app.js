@@ -25,9 +25,8 @@ class MolecularApp {
 
     this.setupEventListeners();
 
-    // Check payment setup
-    simplePaymentManager.checkPaymentRequired();
-    this.hasPaymentSetup = true; // Keep simple for now
+    // Initialize sidebar payment system
+    await simplePaymentManager.checkPaymentRequired();
     
     // Auto-enable dev mode for localhost
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
@@ -113,9 +112,11 @@ class MolecularApp {
     const inputValue = this.objectInput.value.trim();
     if (!inputValue) return;
 
-    if (!this.hasPaymentSetup) {
+    // Check payment setup for sidebar
+    const paymentSetup = await this.checkPaymentSetupForSidebar();
+    if (!paymentSetup) {
       console.log('💳 Payment not set up, showing message');
-      this.showError('Payment setup required. See payment section on the right.');
+      this.showError('Payment setup required. Complete setup in the sidebar on the right.');
       return;
     }
 
@@ -153,6 +154,46 @@ class MolecularApp {
     } finally {
       this.hideProcessing();
       this.isProcessing = false;
+    }
+  }
+
+  // Check payment setup for sidebar-based system
+  async checkPaymentSetupForSidebar() {
+    const deviceToken = localStorage.getItem('molDeviceToken');
+    const cardInfo = localStorage.getItem('molCardInfo');
+    
+    if (!deviceToken || !cardInfo) {
+      // Ensure payment section is visible
+      const paymentSection = document.getElementById('payment-section');
+      if (paymentSection) {
+        paymentSection.classList.remove('hidden');
+      }
+      return false;
+    }
+    
+    try {
+      const response = await fetch('/validate-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_token: deviceToken })
+      });
+      
+      if (!response.ok) {
+        localStorage.removeItem('molDeviceToken');
+        localStorage.removeItem('molCardInfo');
+        // Ensure payment section is visible
+        const paymentSection = document.getElementById('payment-section');
+        if (paymentSection) {
+          paymentSection.classList.remove('hidden');
+        }
+        return false;
+      }
+      
+      return true;
+      
+    } catch (error) {
+      console.error('Payment validation error:', error);
+      return true; // Fallback to allow analysis
     }
   }
 
