@@ -649,7 +649,8 @@ app.post("/object-molecules", async (req, res) => {
   }
 });
 
-// SDF generation route
+
+// SDF generation route (returns JSON with paths)
 app.post("/generate-sdfs", async (req, res) => {
   try {
     // Validate input schema

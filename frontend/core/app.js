@@ -298,112 +298,87 @@ class MolecularApp {
     }
   }
 
-  async processAnalysisResult(output, icon, objectName, useQuotes, croppedImageData) {
+  // Process analysis results and display molecules (restored working version)
+  processAnalysisResult(output, icon, objectName, useQuotes = false, croppedImageData = null) {
     logger.analysisEvent('result_processed', { 
       type: this.currentAnalysisType, 
       objectName,
       hasCroppedData: !!croppedImageData 
     });
 
+    const chemicals = output.chemicals || [];
+
+    let displayName = objectName;
+    if (useQuotes && objectName) {
+      displayName = `"${objectName}"`;
+    }
+
+    // Handle description responses
+    if (chemicals.length === 1 && chemicals[0].smiles && chemicals[0].smiles.startsWith("DESCRIPTION: ")) {
+      const description = chemicals[0].smiles.replace("DESCRIPTION: ", "");
+      this.generateSDFs([], displayName, description, null, croppedImageData);
+      return;
+    }
+
+    // Handle molecular responses - filter out N/A and invalid SMILES
+    const smiles = chemicals
+      .map((chem) => chem.smiles)
+      .filter(s => s && s !== "N/A" && s.trim() !== "");
+    
+    logger.info(`Found ${chemicals.length} chemicals, ${smiles.length} valid SMILES:`, smiles);
+    
+    if (smiles.length > 0) {
+      this.generateSDFs(smiles, displayName, null, chemicals, croppedImageData);
+    } else {
+      // Create column with description instead of molecules
+      this.generateSDFs([], displayName, "No displayable molecular structures found", chemicals, croppedImageData);
+    }
+  }
+
+  // Generate SDF files and create 3D visualizations (restored working version)
+  async generateSDFs(smiles, objectName, description = null, chemicals = null, croppedImageData = null) {
+    if (smiles.length === 0 && !description) {
+      this.showError("No valid molecules found for visualization");
+      return;
+    }
+
     try {
-      if (!output || typeof output !== 'object') {
-        throw new Error('Invalid analysis output');
-      }
-
-      let displayName = objectName;
-      if (useQuotes && objectName) {
-        displayName = `"${objectName}"`;
-      }
-
-      // Handle different output formats
-      let chemicals = [];
-      let description = null;
-      let errorMessage = null;
+      let sdfPaths = [];
       
-      if (output.chemicals && Array.isArray(output.chemicals)) {
-        chemicals = output.chemicals;
-      } else if (output.description) {
-        description = output.description;
-      } else if (output.error) {
-        errorMessage = output.error;
-        description = `Error: ${output.error}`;
-      } else if (output.summary) {
-        description = output.summary;
+      if (smiles.length > 0) {
+        logger.info(`Generating SDFs for ${smiles.length} SMILES:`, smiles);
+        const response = await fetch("/generate-sdfs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ smiles, overwrite: true }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`SDF generation failed: ${response.status} ${errorText}`);
+        }
+        
+        const result = await response.json();
+        sdfPaths = result.sdfPaths || [];
+        logger.info(`Generated ${sdfPaths.length} SDF files:`, sdfPaths);
       }
 
-      // Generate SDFs for chemicals if we have them
-      let sdfFiles = [];
-      let smiles = [];
-      
-      if (chemicals.length > 0) {
-        const sdfResult = await this.generateSDFs(chemicals);
-        sdfFiles = sdfResult.sdfFiles;
-        smiles = sdfResult.smiles;
-      }
-
-      // Create the display column
       await this.createObjectColumn(
-        displayName || "Analysis Result", 
-        sdfFiles, 
-        smiles, 
-        errorMessage, 
-        output.summary || null, 
-        output.skippedChemicals || [], 
+        objectName,
+        sdfPaths,
+        smiles,
+        null,
+        null,
+        [],
         description,
         chemicals,
         croppedImageData
       );
 
     } catch (error) {
-      logger.error('Failed to process analysis result', error);
-      this.showError(`Failed to display results: ${error.message}`);
+      logger.error("SDF generation error:", error);
+      this.showError(`Error generating 3D models: ${error.message}`);
     }
-  }
-
-  async generateSDFs(chemicals) {
-    const sdfFiles = [];
-    const smiles = [];
-
-    // Extract SMILES from all chemicals
-    const smilesArray = chemicals.filter(c => c.smiles).map(c => c.smiles);
-    
-    if (smilesArray.length === 0) {
-      return { sdfFiles, smiles };
-    }
-
-    try {
-      // Call the correct endpoint with array of SMILES
-      const response = await fetch("/generate-sdfs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ smiles: smilesArray }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        logger.info('SDF generation result:', result);
-        
-        // Process the returned SDF paths
-        for (let i = 0; i < result.sdfPaths.length; i++) {
-          const sdfPath = result.sdfPaths[i];
-          smiles.push(smilesArray[i]);
-          sdfFiles.push(sdfPath); // Use the path directly since it's already a URL
-          logger.info(`Generated SDF: ${smilesArray[i]} -> ${sdfPath}`);
-        }
-        
-        if (result.errors && result.errors.length > 0) {
-          logger.warn('Some SDF generation failed:', result.errors);
-        }
-        
-      } else {
-        const errorText = await response.text();
-        logger.error(`Failed to generate SDFs: ${response.status} ${errorText}`);
-      }
-    } catch (error) {
-      logger.error(`Error generating SDFs:`, error);
-    }
-
-    return { sdfFiles, smiles };
   }
 
   async createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, 
