@@ -226,6 +226,61 @@ app.post('/api/log-error', (req, res) => {
   res.status(200).json({ status: 'logged' });
 });
 
+// Logging endpoint for frontend logs
+app.post('/api/logs', (req, res) => {
+  try {
+    const { logs, timestamp, userAgent, url } = req.body;
+    
+    if (!logs || !Array.isArray(logs)) {
+      return res.status(400).json({ error: 'Invalid logs format' });
+    }
+
+    // Process each log entry
+    logs.forEach(logEntry => {
+      const { level, message, data, timestamp: logTimestamp, source } = logEntry;
+      
+      // Format the log message
+      const timestampStr = new Date(logTimestamp).toISOString();
+      const sourceStr = source ? `[${source.file}:${source.line}]` : '';
+      const levelStr = level.toUpperCase().padEnd(5);
+      
+      let logMessage = `[${timestampStr}] ${levelStr} ${sourceStr} ${message}`;
+      
+      // Add data if present
+      if (data) {
+        if (typeof data === 'object') {
+          logMessage += ` | ${JSON.stringify(data)}`;
+        } else {
+          logMessage += ` | ${data}`;
+        }
+      }
+      
+      // Output to appropriate stream based on level
+      switch (level) {
+        case 'error':
+          console.error(logMessage);
+          break;
+        case 'warn':
+          console.warn(logMessage);
+          break;
+        case 'debug':
+          console.debug(logMessage);
+          break;
+        default:
+          console.log(logMessage);
+      }
+    });
+
+    // Log request metadata
+    console.log(`[${new Date().toISOString()}] INFO [LOGGER] Received ${logs.length} logs from ${url} (${userAgent})`);
+
+    res.json({ success: true, processed: logs.length });
+  } catch (error) {
+    console.error('Error processing logs:', error);
+    res.status(500).json({ error: 'Failed to process logs' });
+  }
+});
+
 // User data now stored in PostgreSQL instead of in-memory
 // Database schema will be created by the database setup script
 

@@ -1,5 +1,6 @@
 import { paymentManager } from './payment.js';
 import { uiManager } from './ui-utils.js';
+import { logger } from './logger.js';
 
 class CameraManager {
   constructor() {
@@ -9,6 +10,10 @@ class CameraManager {
     
     this.permissionKey = 'mol_camera_permission';
     this.deviceId = this.getDeviceId();
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    this.cameraPermission = this.getCameraPermission();
   }
 
   getDeviceId() {
@@ -170,7 +175,7 @@ class CameraManager {
     
     // Validate video element
     if (!this.video) {
-      console.error('Video element not found');
+      logger.error('Video element not found');
       return;
     }
 
@@ -206,7 +211,7 @@ class CameraManager {
       // Save successful camera permission
       this.saveCameraPermission(true);
       
-      console.log('✅ Camera started successfully:', {
+      logger.info('Camera started successfully', {
         videoWidth: this.video.videoWidth,
         videoHeight: this.video.videoHeight,
         readyState: this.video.readyState,
@@ -262,19 +267,22 @@ class CameraManager {
 
   // Handle camera interaction (click/tap)
   async handleInteraction(evt) {
-    console.log('📷 Camera interaction detected:', evt);
+    logger.cameraEvent('interaction_detected', { 
+      isMobile: this.isMobile,
+      eventType: evt.type 
+    });
     
     let paymentCheck = false;
     try {
       paymentCheck = await this.checkPaymentSetupForSidebar();
-      console.log('💳 Payment check result:', paymentCheck);
+      logger.debug('Payment check result', { paymentCheck });
     } catch (error) {
-      console.log('⚠️ Payment check failed, proceeding anyway:', error);
+      logger.warn('Payment check failed, proceeding anyway', error);
       paymentCheck = true; // Fallback to allow analysis
     }
     
     if (!paymentCheck) {
-      console.log('🚫 Payment required - showing message');
+      logger.warn('Payment required - showing message');
       // Show simple message directing to sidebar
       const messageColumn = uiManager.createColumn("Payment setup required", "payment-required");
       messageColumn.innerHTML = `
@@ -288,20 +296,20 @@ class CameraManager {
       return;
     }
 
-    console.log('✅ Payment check passed, proceeding with analysis');
+    logger.info('Payment check passed, proceeding with analysis');
 
     // Mobile reticle validation
     if (this.isMobile && !this.isWithinReticle(evt)) {
-      console.log('📱 Mobile reticle validation failed');
+      logger.warn('Mobile reticle validation failed');
       this.showReticleFeedback();
       return;
     }
 
-    console.log('🎯 Proceeding with camera analysis');
+    logger.info('Proceeding with camera analysis');
     
     // Check if camera is ready
     if (!this.isCameraReady()) {
-      console.log('⚠️ Camera not ready, attempting to restart...');
+      logger.warn('Camera not ready, attempting to restart');
       try {
         await this.startCamera();
         // Wait a moment for camera to stabilize
@@ -324,15 +332,19 @@ class CameraManager {
       }
       
       // Capture and analyze the image
-      console.log('📸 Capturing image from camera');
+      logger.cameraEvent('capturing_image');
       const captureData = await this.captureAndAnalyze(evt);
-      console.log('✅ Image captured successfully');
+      logger.info('Image captured successfully');
       
       // Create loading column
       const loadingColumn = uiManager.createLoadingColumn("Analyzing...", captureData.croppedBase64);
       
       // Send to server for analysis
-      console.log('🌐 Sending camera analysis request to server');
+      logger.analysisEvent('camera_analysis_request', {
+        coordinates: captureData.coordinates,
+        hasImageData: !!captureData.imageBase64
+      });
+      
       const response = await fetch("/image-molecules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -347,14 +359,14 @@ class CameraManager {
         }),
       });
 
-      console.log('📡 Camera analysis response status:', response.status);
+      logger.debug('Camera analysis response status', { status: response.status });
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
       
       const { output } = await response.json();
-      console.log('✅ Camera analysis completed:', output);
+      logger.analysisEvent('camera_analysis_completed', { output });
 
       // Remove loading column
       loadingColumn.remove();
@@ -375,11 +387,11 @@ class CameraManager {
       try {
         await this.incrementUsageForSidebar();
       } catch (usageError) {
-        console.log('⚠️ Usage increment failed:', usageError);
+        logger.warn('Usage increment failed', usageError);
       }
       
     } catch (error) {
-      console.error('❌ Camera analysis error:', error);
+      logger.error('Camera analysis error', error);
       this.createClosableErrorMessage(`Analysis failed: ${error.message}`);
     }
   }
@@ -665,7 +677,7 @@ class CameraManager {
       return true;
       
     } catch (error) {
-      console.error('Payment validation error:', error);
+      logger.error('Payment validation error', error);
       return true; // Fallback to allow analysis
     }
   }
@@ -689,7 +701,7 @@ class CameraManager {
         localStorage.setItem('molCardInfo', JSON.stringify(cardInfo));
       }
     } catch (error) {
-      console.log('Usage increment failed:', error);
+      logger.warn('Usage increment failed', error);
     }
   }
 

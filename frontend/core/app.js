@@ -3,6 +3,7 @@ import { simplePaymentManager } from '../components/simple-payment.js';
 import { cameraManager } from '../components/camera.js';
 import { cameraHandler } from '../components/camera-handler.js';
 import { uiManager } from '../components/ui-utils.js';
+import { logger } from '../components/logger.js';
 
 class MolecularApp {
   constructor() {
@@ -30,11 +31,11 @@ class MolecularApp {
     
     // Auto-enable dev mode for localhost
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      console.log('🔧 Auto-enabling developer mode for localhost');
+      logger.info('Auto-enabling developer mode for localhost');
       this.hasPaymentSetup = true;
     }
 
-    console.log('✅ Molecular analysis app initialized');
+    logger.info('Molecular analysis app initialized');
   }
 
   setupEventListeners() {
@@ -71,7 +72,7 @@ class MolecularApp {
     if (cameraMode) {
       cameraMode.addEventListener('change', async (e) => {
         if (e.target.checked) {
-          console.log('📸 Camera mode activated - initializing camera');
+          logger.cameraEvent('camera_mode_activated');
           try {
             await cameraManager.initialize();
             const permissionGranted = await cameraManager.requestPermission();
@@ -79,7 +80,7 @@ class MolecularApp {
               e.target.checked = false;
             }
           } catch (error) {
-            console.error('Camera initialization failed:', error);
+            logger.error('Camera initialization failed', error);
             e.target.checked = false;
           }
         }
@@ -90,7 +91,7 @@ class MolecularApp {
     const cardBtn = document.getElementById('card-icon-btn');
     if (cardBtn) {
       cardBtn.addEventListener('click', () => {
-        console.log('💳 Toggling payment sidebar');
+        logger.userAction('payment_sidebar_toggle');
         const paymentSection = document.getElementById('payment-section');
         if (paymentSection) {
           paymentSection.classList.toggle('collapsed');
@@ -98,12 +99,17 @@ class MolecularApp {
       });
     }
   }
-   
+
   setupTextAnalysis() {
-    this.objectInput.addEventListener("keyup", async (e) => {
-      if (e.key !== "Enter") return;
-      await this.handleTextAnalysis();
-    });
+    const textInput = document.getElementById('object-input');
+    if (textInput) {
+      textInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          this.handleTextAnalysis();
+        }
+      });
+    }
   }
 
   async handleTextAnalysis() {
@@ -115,7 +121,7 @@ class MolecularApp {
     // Check payment setup for sidebar
     const paymentSetup = await this.checkPaymentSetupForSidebar();
     if (!paymentSetup) {
-      console.log('💳 Payment not set up, showing message');
+      logger.warn('Payment not set up, showing message');
       this.showError('Payment setup required. Complete setup in the sidebar on the right.');
       return;
     }
@@ -125,6 +131,8 @@ class MolecularApp {
     
     try {
       this.showProcessing();
+      
+      logger.analysisEvent('text_analysis_started', { input: inputValue });
       
       const response = await fetch("/analyze-text", {
         method: "POST",
@@ -138,7 +146,7 @@ class MolecularApp {
       }
 
       const result = await response.json();
-      console.log("Analysis result:", result);
+      logger.analysisEvent('text_analysis_completed', { input: inputValue, result });
 
       this.lastAnalysis = {
         type: 'text',
@@ -149,7 +157,7 @@ class MolecularApp {
       this.processAnalysisResult(result, null, inputValue, false, null);
       
     } catch (error) {
-      console.error("Analysis failed:", error);
+      logger.error('Text analysis failed', error);
       this.showError(`Analysis failed: ${error.message}`);
     } finally {
       this.hideProcessing();
@@ -192,30 +200,45 @@ class MolecularApp {
       return true;
       
     } catch (error) {
-      console.error('Payment validation error:', error);
+      logger.error('Payment validation error', error);
       return true; // Fallback to allow analysis
     }
   }
 
   showProcessing() {
-    if (this.objectInput) {
-      this.objectInput.placeholder = "Processing...";
-      this.objectInput.disabled = true;
-    }
+    // Create loading indicator
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading-indicator';
+    loadingDiv.innerHTML = `
+      <div class="spinner"></div>
+      <div>Analyzing...</div>
+    `;
+    loadingDiv.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 1000;
+    `;
+    
+    document.body.appendChild(loadingDiv);
+    this.loadingIndicator = loadingDiv;
   }
 
   hideProcessing() {
-    if (this.objectInput) {
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-      const shortcutKey = isMac ? '⌘K' : 'Ctrl+K';
-      this.objectInput.placeholder = `Type any molecule name (e.g., caffeine, aspirin, water)... (${shortcutKey} to focus)`;
-      this.objectInput.disabled = false;
-      this.objectInput.value = "";
+    if (this.loadingIndicator) {
+      this.loadingIndicator.remove();
+      this.loadingIndicator = null;
     }
   }
 
   showError(message) {
-    console.error("🚨", message);
+    logger.error('Application error', { message });
     // Create simple error display
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error-message';
@@ -245,6 +268,12 @@ class MolecularApp {
   }
 
   async processAnalysisResult(output, icon, objectName, useQuotes, croppedImageData) {
+    logger.analysisEvent('result_processed', { 
+      type: this.currentAnalysisType, 
+      objectName,
+      hasCroppedData: !!croppedImageData 
+    });
+
     try {
       if (!output || typeof output !== 'object') {
         throw new Error('Invalid analysis output');
@@ -295,7 +324,7 @@ class MolecularApp {
       );
 
     } catch (error) {
-      console.error("Failed to process analysis result:", error);
+      logger.error('Failed to process analysis result', error);
       this.showError(`Failed to display results: ${error.message}`);
     }
   }
@@ -319,11 +348,11 @@ class MolecularApp {
             sdfFiles.push(sdfUrl);
             smiles.push(chemical.smiles);
           } else {
-            console.warn(`Failed to generate SDF for ${chemical.name || chemical.smiles}`);
+            logger.warn(`Failed to generate SDF for ${chemical.name || chemical.smiles}`);
           }
         }
       } catch (error) {
-        console.error(`Error generating SDF for chemical:`, error);
+        logger.error(`Error generating SDF for chemical:`, error);
       }
     }
 
@@ -336,7 +365,7 @@ class MolecularApp {
 
     const gldiv = document.getElementById("gldiv");
     if (!gldiv) {
-      console.error("No gldiv found for molecular display");
+      logger.error("No gldiv found for molecular display");
       return;
     }
 
@@ -446,7 +475,7 @@ class MolecularApp {
       return viewer;
       
     } catch (error) {
-      console.error(`Failed to load molecule:`, error);
+      logger.error(`Failed to load molecule:`, error);
       container.textContent = `Error loading molecule: ${error.message}`;
       container.className += " error-text";
       return null;
