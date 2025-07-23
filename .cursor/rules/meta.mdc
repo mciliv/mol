@@ -1,5 +1,7 @@
 # Meta Requirements - Living System
 
+Act as a teacher. Show relevant code if already exists
+
 ## Core Philosophy
 Maximally simple & straightforward
 Only generate rules in .mdc files, not markdown

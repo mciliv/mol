@@ -174,6 +174,10 @@ class CameraHandler {
       const loadingColumn = uiManager.createLoadingColumn("Analyzing...", croppedBase64);
 
       try {
+        // Create AbortController for timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
+        
         const response = await fetch("/image-molecules", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -186,7 +190,10 @@ class CameraHandler {
             cropMiddleY: middleY,
             cropSize: cropSize,
           }),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -210,7 +217,21 @@ class CameraHandler {
       } catch (err) {
         loadingColumn.remove();
         this.updateScrollHandles();
-        this.createClosableErrorMessage(`Error: ${err.message}`);
+        
+        // Enhanced error handling
+        let errorMessage = 'Error: ';
+        
+        if (err.name === 'AbortError') {
+          errorMessage = 'Image analysis timed out. Please check your internet connection and try again.';
+        } else if (err.message.includes('Failed to fetch') || err.message.includes('fetch')) {
+          errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+        } else if (err.message.includes('Network connection failed')) {
+          errorMessage = 'Unable to connect to analysis service. Please check your internet connection.';
+        } else {
+          errorMessage += err.message;
+        }
+        
+        this.createClosableErrorMessage(errorMessage);
       }
     };
 
@@ -223,6 +244,12 @@ class CameraHandler {
 
   // Check payment setup for sidebar-based system
   async checkPaymentSetupForSidebar() {
+    // Check if dev mode is enabled (localhost auto-enable)
+    if (window.app && window.app.hasPaymentSetup === true) {
+      logger.info('Developer mode active - bypassing payment check');
+      return true;
+    }
+    
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     

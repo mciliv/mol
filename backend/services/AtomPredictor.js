@@ -6,7 +6,11 @@ const {
 
 class AtomPredictor {
   constructor(apiKey) {
-    this.client = new OpenAI({ apiKey });
+    this.client = new OpenAI({ 
+      apiKey,
+      timeout: 30000, // 30 seconds timeout
+      maxRetries: 2   // Retry failed requests twice
+    });
     this.chemicalInstructions = this.buildChemicalInstructions();
   }
 
@@ -86,7 +90,23 @@ Use standard SMILES notation.`;
       };
     } catch (error) {
       console.error("AI analysis error:", error);
-      throw new Error(`AI analysis failed: ${error.message}`);
+      
+      // Enhanced error handling with specific error types
+      let errorMessage = `AI analysis failed: ${error.message}`;
+      
+      if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+      } else if (error.name === 'APIConnectionError') {
+        errorMessage = 'Unable to connect to AI service. Please check your internet connection.';
+      } else if (error.status === 401) {
+        errorMessage = 'API authentication failed. Please check your API key configuration.';
+      } else if (error.status === 429) {
+        errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
+      } else if (error.status === 503) {
+        errorMessage = 'AI service temporarily unavailable. Please try again in a few moments.';
+      }
+      
+      throw new Error(errorMessage);
     }
   }
 
@@ -113,7 +133,23 @@ Use standard SMILES notation.`;
       };
     } catch (error) {
       console.error("AI text analysis error:", error);
-      throw new Error(`AI text analysis failed: ${error.message}`);
+      
+      // Enhanced error handling with specific error types
+      let errorMessage = `AI text analysis failed: ${error.message}`;
+      
+      if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+      } else if (error.name === 'APIConnectionError') {
+        errorMessage = 'Unable to connect to AI service. Please check your internet connection.';
+      } else if (error.status === 401) {
+        errorMessage = 'API authentication failed. Please check your API key configuration.';
+      } else if (error.status === 429) {
+        errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
+      } else if (error.status === 503) {
+        errorMessage = 'AI service temporarily unavailable. Please try again in a few moments.';
+      }
+      
+      throw new Error(errorMessage);
     }
   }
 

@@ -134,11 +134,18 @@ class MolecularApp {
       
       logger.analysisEvent('text_analysis_started', { input: inputValue });
       
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
+      
       const response = await fetch("/analyze-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: inputValue }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -158,7 +165,25 @@ class MolecularApp {
       
     } catch (error) {
       logger.error('Text analysis failed', error);
-      this.showError(`Analysis failed: ${error.message}`);
+      
+      // Enhanced error handling with user-friendly messages
+      let errorMessage = 'Analysis failed: ';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Analysis timed out. Please check your internet connection and try again.';
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('fetch')) {
+        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+      } else if (error.message.includes('Network connection failed')) {
+        errorMessage = 'Unable to connect to analysis service. Please check your internet connection.';
+      } else if (error.message.includes('Rate limit exceeded')) {
+        errorMessage = 'Too many requests. Please wait a moment and try again.';
+      } else if (error.message.includes('503') || error.message.includes('temporarily unavailable')) {
+        errorMessage = 'Analysis service temporarily unavailable. Please try again in a few moments.';
+      } else {
+        errorMessage += error.message;
+      }
+      
+      this.showError(errorMessage);
     } finally {
       this.hideProcessing();
       this.isProcessing = false;
@@ -167,6 +192,12 @@ class MolecularApp {
 
   // Check payment setup for sidebar-based system
   async checkPaymentSetupForSidebar() {
+    // Check if dev mode is enabled (localhost auto-enable)
+    if (this.hasPaymentSetup === true) {
+      logger.info('Developer mode active - bypassing payment check');
+      return true;
+    }
+    
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     

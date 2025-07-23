@@ -345,6 +345,10 @@ class CameraManager {
         hasImageData: !!captureData.imageBase64
       });
       
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
+      
       const response = await fetch("/image-molecules", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -357,7 +361,10 @@ class CameraManager {
           cropMiddleY: captureData.coordinates.cropMiddleY,
           cropSize: captureData.coordinates.cropSize,
         }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       logger.debug('Camera analysis response status', { status: response.status });
       if (!response.ok) {
@@ -392,7 +399,23 @@ class CameraManager {
       
     } catch (error) {
       logger.error('Camera analysis error', error);
-      this.createClosableErrorMessage(`Analysis failed: ${error.message}`);
+      
+      // Enhanced error handling
+      let errorMessage = 'Analysis failed: ';
+      
+      if (error.name === 'AbortError') {
+        errorMessage = 'Camera analysis timed out. Please check your internet connection and try again.';
+      } else if (error.message.includes('Failed to fetch') || error.message.includes('fetch')) {
+        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
+      } else if (error.message.includes('Network connection failed')) {
+        errorMessage = 'Unable to connect to analysis service. Please check your internet connection.';
+      } else if (error.message.includes('Camera not ready')) {
+        errorMessage = error.message; // Keep camera-specific messages as-is
+      } else {
+        errorMessage += error.message;
+      }
+      
+      this.createClosableErrorMessage(errorMessage);
     }
   }
 
@@ -644,6 +667,12 @@ class CameraManager {
 
   // Check payment setup for sidebar-based system
   async checkPaymentSetupForSidebar() {
+    // Check if dev mode is enabled (localhost auto-enable)
+    if (window.app && window.app.hasPaymentSetup === true) {
+      logger.info('Developer mode active - bypassing payment check');
+      return true;
+    }
+    
     const deviceToken = localStorage.getItem('molDeviceToken');
     const cardInfo = localStorage.getItem('molCardInfo');
     
