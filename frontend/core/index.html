@@ -13,7 +13,7 @@
     />
     <meta name="format-detection" content="telephone=no" />
     <title>Atomizer - Molecular Analysis</title>
-    <link rel="stylesheet" href="../assets/style.css" />
+    <link rel="stylesheet" href="/assets/style.css" />
   </head>
   <body>
     <div class="app-container">
@@ -332,7 +332,7 @@
           aria-label="Upload photo for molecular analysis"
         />
         <label for="photo-upload" class="upload-label">
-          <img src="../assets/photo-upload.svg" alt="Photo upload" width="24" height="24" />
+          <img src="/assets/photo-upload.svg" alt="Photo upload" width="24" height="24" />
           <svg class="upload-text" width="80" height="20" viewBox="0 0 80 20">
             <text
               x="40"
@@ -419,24 +419,18 @@
       </div>
     </template>
 
-    <script type="module" src="../components/logger.js"></script>
-    <script type="module" src="../components/payment.js"></script>
-    <script type="module" src="../components/camera.js"></script>
-    <script type="module" src="../components/camera-handler.js"></script>
-    <script type="module" src="../components/ui-utils.js"></script>
-    <script src="../components/debug-events.js"></script>
-    <script src="../components/error-handler.js"></script>
+    <script type="module" src="/components/logger.js"></script>
+    <script type="module" src="/components/payment.js"></script>
+    <script type="module" src="/components/camera.js"></script>
+    <script type="module" src="/components/camera-handler.js"></script>
+    <script type="module" src="/components/ui-utils.js"></script>
+    <script src="/components/debug-events.js"></script>
+    <script src="/components/error-handler.js"></script>
     <script type="module" src="app.js"></script>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <!-- Manual testing script for component connections -->
-    <script src="../../tests/manual-test.js"></script>
-    <!-- Camera testing script -->
-    <script src="../../tests/camera-test.js"></script>
-    <!-- Camera mode testing script -->
-    <script src="../../test-camera-mode.js"></script>
-    <!-- Camera click testing script -->
-    <script src="../../test-camera-click.js"></script>
+
     <!-- Development mode -->
   <!-- Error Reporting Panel -->
   <div id="error-panel" class="error-panel hidden">
