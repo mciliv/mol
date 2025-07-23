@@ -306,7 +306,9 @@ class MolecularApp {
       hasCroppedData: !!croppedImageData 
     });
 
+    logger.info('Raw analysis output:', output);
     const chemicals = output.chemicals || [];
+    logger.info('Extracted chemicals array:', chemicals);
 
     let displayName = objectName;
     if (useQuotes && objectName) {
@@ -321,9 +323,17 @@ class MolecularApp {
     }
 
     // Handle molecular responses - filter out N/A and invalid SMILES
-    const smiles = chemicals
-      .map((chem) => chem.smiles)
-      .filter(s => s && s !== "N/A" && s.trim() !== "");
+    const smilesMap = chemicals.map((chem) => {
+      logger.info(`Processing chemical:`, chem, `SMILES: "${chem.smiles}"`);
+      return chem.smiles;
+    });
+    logger.info('Mapped SMILES:', smilesMap);
+    
+    const smiles = smilesMap.filter(s => {
+      const isValid = s && s !== "N/A" && s.trim() !== "";
+      logger.info(`SMILES "${s}" is valid: ${isValid}`);
+      return isValid;
+    });
     
     logger.info(`Found ${chemicals.length} chemicals, ${smiles.length} valid SMILES:`, smiles);
     
