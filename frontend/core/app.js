@@ -1,4 +1,5 @@
-import { paymentManager } from '../components/payment.js';
+// Simple App Logic - Following ui.mdc Guidelines
+import { simplePaymentManager } from '../components/simple-payment.js';
 import { cameraManager } from '../components/camera.js';
 import { cameraHandler } from '../components/camera-handler.js';
 import { uiManager } from '../components/ui-utils.js';
@@ -24,29 +25,16 @@ class MolecularApp {
 
     this.setupEventListeners();
 
-    // Clear localStorage for testing payment setup (remove this in production)
-    // localStorage.clear();
+    // Check payment setup
+    simplePaymentManager.checkPaymentRequired();
+    this.hasPaymentSetup = true; // Keep simple for now
     
-    // Always show account status with appropriate state
-    paymentManager.updateAccountStatus(null);
-    
-    // Check payment setup for all users (new users need to see the modal)
-    console.log('🔧 Checking payment setup for user');
-    const setupResult = await paymentManager.checkInitialPaymentSetup();
-    this.hasPaymentSetup = setupResult;
-    
-    // Note: Removed clearDevelopmentStates to prevent modal interference
-    
-    // Update account status after checking payment setup
-    const deviceToken = localStorage.getItem('molDeviceToken');
-    const cardInfo = localStorage.getItem('molCardInfo');
-    if (deviceToken && cardInfo) {
-      const card = JSON.parse(cardInfo);
-      paymentManager.updateAccountStatus({ name: card.name });
+    // Auto-enable dev mode for localhost
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      console.log('🔧 Auto-enabling developer mode for localhost');
+      this.hasPaymentSetup = true;
     }
     
-
-      
     await cameraManager.initialize();
 
     if (cameraManager.isSafari && !cameraManager.hasStoredCameraPermission()) {
@@ -54,381 +42,281 @@ class MolecularApp {
         cameraManager.requestPermission();
       }, 1000);
     }
-  
+
     console.log('✅ Molecular analysis app initialized');
-    
-    // Auto-enable dev mode for localhost development (but only if no payment setup AND no existing dev account)
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-      console.log('🔧 Localhost detected - checking if dev mode should be auto-enabled');
-      
-      const deviceToken = localStorage.getItem('molDeviceToken');
-      const isDeveloperAccount = paymentManager.isDeveloperAccount();
-      
-      // Only auto-enable if no existing setup at all
-      if (!deviceToken && !isDeveloperAccount) {
-        console.log('🔧 Auto-enabling developer mode for localhost (no existing setup found)');
-        paymentManager.setupDeveloperAccount();
-        this.hasPaymentSetup = true;
-        
-        // Hide payment modal if showing
-        const paymentModal = document.getElementById('payment-modal');
-        if (paymentModal && !paymentModal.classList.contains('hidden')) {
-          paymentManager.hidePaymentModal();
-        }
-        
-        console.log('🎉 Developer mode auto-enabled for localhost');
-      } else {
-        console.log('✅ Existing setup found - not auto-enabling dev mode');
-      }
-    }
   }
 
   setupEventListeners() {
     this.setupTextAnalysis();
-
     cameraHandler.setupEventListeners();
     
-    // Add keyboard shortcut for focusing text input (Cmd+K / Ctrl+K)
+    // Keyboard shortcut (Cmd+K / Ctrl+K)
     document.addEventListener('keydown', (event) => {
-      // Check if Cmd+K (macOS) or Ctrl+K (Windows/Linux) is pressed
       if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault(); // Prevent default browser behavior
-        
-        // Focus the text input field
+        event.preventDefault();
         const textInput = document.getElementById('object-input');
         if (textInput) {
           textInput.focus();
-          // Select all text if there's existing content
           textInput.select();
         }
       }
     });
     
-    // Set dynamic placeholder text based on platform
+    // Platform-specific placeholder
     const textInput = document.getElementById('object-input');
     if (textInput) {
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const shortcutKey = isMac ? '⌘K' : 'Ctrl+K';
-      textInput.placeholder = `Type any object name (e.g., coffee, aspirin, water) and press Enter... (${shortcutKey} to focus)`;
+      textInput.placeholder = `Type any molecule name (e.g., caffeine, aspirin, water)... (${shortcutKey} to focus)`;
     }
-    
-
-    
-    // Payment close button event listener
-    const paymentCloseBtn = document.getElementById('payment-close-btn');
-    if (paymentCloseBtn) {
-      paymentCloseBtn.addEventListener('click', () => {
-        paymentManager.hidePaymentModal();
-      });
-    }
-
-    // Card management close button event listener
-    const cardManagementCloseBtn = document.getElementById('card-management-close-btn');
-    if (cardManagementCloseBtn) {
-      cardManagementCloseBtn.addEventListener('click', () => {
-        paymentManager.hideCardManagementModal();
-      });
-    }
-
-    // Add new card button event listener
-    const addNewCardBtn = document.getElementById('add-new-card-btn');
-    if (addNewCardBtn) {
-      addNewCardBtn.addEventListener('click', () => {
-        paymentManager.showAddCardForm();
-      });
-    }
-
-    // Cancel edit button event listener
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    if (cancelEditBtn) {
-      cancelEditBtn.addEventListener('click', () => {
-        paymentManager.cancelCardEdit();
-      });
-    }
-    
-
-    
-    // Continue to analysis button event listener
-    const startAnalyzingBtn = document.getElementById('start-analyzing-btn');
-    if (startAnalyzingBtn) {
-      startAnalyzingBtn.addEventListener('click', () => {
-        paymentManager.hidePaymentModal();
-      });
-    }
-
-    const cardEditForm = document.getElementById('card-edit-form');
-    if (cardEditForm) {
-      cardEditForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await paymentManager.saveCardChanges();
-      });
-    }
-
-    // Modal backdrop click to close
-    const modalBackdrop = document.getElementById('modal-backdrop');
-    if (modalBackdrop) {
-      modalBackdrop.addEventListener('click', () => {
-        // Close any open modal
-        if (!document.getElementById('payment-modal').classList.contains('hidden')) {
-          paymentManager.hidePaymentModal();
-        }
-        if (!document.getElementById('card-management-modal').classList.contains('hidden')) {
-          paymentManager.hideCardManagementModal();
-        }
-      });
-    }
-      
-    const video = document.getElementById("video-feed");
-    if (video) {
-      video.addEventListener("click", () => uiManager.switchToCameraMode());
-      video.addEventListener("touchstart", () => uiManager.switchToCameraMode());
-  }
-  
-    const photoUpload = document.getElementById("photo-upload");
-    const photoUrl = document.getElementById("photo-url");
-    const urlAnalyze = document.getElementById("url-analyze");
-    
-    if (photoUpload) {
-      photoUpload.addEventListener("change", () => uiManager.switchToPhotoMode());
-    }
-    if (photoUrl) {
-      photoUrl.addEventListener("focus", () => uiManager.switchToPhotoMode());
-    }
-    if (urlAnalyze) {
-      urlAnalyze.addEventListener("click", () => uiManager.switchToPhotoMode());
-    }
-  
-    this.objectInput.addEventListener("focus", () => uiManager.clearModeSelection());
 
     document.addEventListener('imageAnalysisComplete', (e) => {
       const { output, icon, objectName, useQuotes, croppedImageData } = e.detail;
       this.processAnalysisResult(output, icon, objectName, useQuotes, croppedImageData);
     });
   }
-  
-  // Handle Enter key press for text analysis
+   
   setupTextAnalysis() {
     this.objectInput.addEventListener("keyup", async (e) => {
       if (e.key !== "Enter") return;
-      
-      // 🔴 BREAKPOINT: Set breakpoint here to debug text analysis trigger
-      console.log('🚀 Text analysis triggered from Enter key');
-      const paymentPopdown = document.getElementById('payment-modal');
-      console.log('📊 App state before analysis:', {
-        isProcessing: this.isProcessing,
-        hasPaymentSetup: this.hasPaymentSetup,
-        inputValue: this.objectInput.value,
-        paymentVisible: paymentPopdown ? paymentPopdown.style.display !== 'none' : false
-      });
-      
       await this.handleTextAnalysis();
     });
   }
 
   async handleTextAnalysis() {
-    console.log('🔬 Starting handleTextAnalysis');
-    console.log('📊 Current state:', {
-      isProcessing: this.isProcessing,
-      hasPaymentSetup: this.hasPaymentSetup,
-      inputValue: this.objectInput.value
-    });
-    
-    if (this.isProcessing) {
-      console.log('⚠️ Already processing, skipping analysis');
-      return;
-    }
+    if (this.isProcessing) return;
 
     const inputValue = this.objectInput.value.trim();
-    console.log('📝 Input value:', inputValue);
-    
-    if (!inputValue) {
-      console.log('❌ No input value, skipping analysis');
-      return;
-    }
+    if (!inputValue) return;
 
     if (!this.hasPaymentSetup) {
-      console.log('💳 Payment not set up, showing simple message');
-      
-      const messageColumn = uiManager.createColumn("See payment setup above", "payment-required");
-      messageColumn.innerHTML = `
-        <div class="molecule-container">
-          <div class="molecule-info">
-            <h3>Payment Required</h3>
-            <p>See payment setup above</p>
-            <div class="analysis-note">Complete payment setup to analyze molecules</div>
-          </div>
-        </div>
-      `;
-      
-      this.objectInput.value = "";
+      console.log('💳 Payment not set up, showing message');
+      this.showError('Payment setup required. See payment section on the right.');
       return;
     }
 
     this.isProcessing = true;
     this.currentAnalysisType = 'text';
-    console.log('🏁 Starting processing with type:', this.currentAnalysisType);
     
     try {
-      paymentManager.hidePaymentModal();
       this.showProcessing();
       
-      console.log('🌐 Preparing API call for text analysis');
       const response = await fetch("/analyze-text", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: inputValue }),
       });
 
-      console.log('📡 API response received:', {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok
-      });
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ API error response:', errorText);
         throw new Error(`Failed to analyze text: ${response.status} ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('📋 API result:', result);
-      
-      this.lastAnalysis = result;
+      console.log("Analysis result:", result);
+
+      this.lastAnalysis = {
+        type: 'text',
+        input: inputValue,
+        result: result
+      };
+
       this.processAnalysisResult(result, null, inputValue, false, null);
       
-      this.objectInput.value = "";
-      
     } catch (error) {
-      console.error('💥 Error in handleTextAnalysis:', error);
-      this.handleError(error);
+      console.error("Analysis failed:", error);
+      this.showError(`Analysis failed: ${error.message}`);
     } finally {
-      console.log('🧹 Cleaning up processing state');
-      this.isProcessing = false;
       this.hideProcessing();
+      this.isProcessing = false;
     }
   }
 
-
-
-  // Process analysis results and display molecules
-  processAnalysisResult(output, icon, objectName, useQuotes = false, croppedImageData = null) {
-    const chemicals = output.chemicals || [];
-
-    // Handle description responses
-    if (chemicals.length === 1 && chemicals[0].smiles && chemicals[0].smiles.startsWith("DESCRIPTION: ")) {
-      const description = chemicals[0].smiles.replace("DESCRIPTION: ", "");
-      this.generateSDFs([], objectName, description, null, croppedImageData);
-      return;
-    }
-
-    // Handle molecular responses
-    const smiles = chemicals.map((chem) => chem.smiles).filter(Boolean);
-    if (smiles.length > 0) {
-      this.generateSDFs(smiles, objectName, null, chemicals, croppedImageData);
+  showProcessing() {
+    if (this.objectInput) {
+      this.objectInput.placeholder = "Processing...";
+      this.objectInput.disabled = true;
     }
   }
 
-  // Generate SDF files and create 3D visualizations
-  async generateSDFs(smiles, objectName, description = null, chemicals = null, croppedImageData = null) {
-    if (smiles.length === 0 && !description) {
-      this.createClosableErrorMessage("No valid molecules found for visualization");
-      return;
+  hideProcessing() {
+    if (this.objectInput) {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const shortcutKey = isMac ? '⌘K' : 'Ctrl+K';
+      this.objectInput.placeholder = `Type any molecule name (e.g., caffeine, aspirin, water)... (${shortcutKey} to focus)`;
+      this.objectInput.disabled = false;
+      this.objectInput.value = "";
     }
+  }
 
-    try {
-      let sdfPaths = [];
+  showError(message) {
+    console.error("🚨", message);
+    // Create simple error display
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message';
+    errorDiv.textContent = message;
+    errorDiv.style.cssText = `
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid #ff4444;
+      border-radius: 4px;
+      padding: 12px;
+      margin: 12px 16px;
+      color: #ff4444;
+      font-size: 12px;
+      text-align: center;
+    `;
+    
+    const resultsSection = document.querySelector('.results-section');
+    if (resultsSection) {
+      // Remove existing error messages
+      const existingErrors = resultsSection.querySelectorAll('.error-message');
+      existingErrors.forEach(err => err.remove());
       
-      if (smiles.length > 0) {
-        const response = await fetch("/generate-sdfs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ smiles, overwrite: true }),
-      });
+      resultsSection.insertBefore(errorDiv, resultsSection.firstChild);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => errorDiv.remove(), 5000);
+    }
+  }
 
-        if (!response.ok) throw new Error(`SDF generation failed: ${response.status}`);
-        const result = await response.json();
-        sdfPaths = result.sdfPaths || [];
+  async processAnalysisResult(output, icon, objectName, useQuotes, croppedImageData) {
+    try {
+      if (!output || typeof output !== 'object') {
+        throw new Error('Invalid analysis output');
       }
 
+      let displayName = objectName;
+      if (useQuotes && objectName) {
+        displayName = `"${objectName}"`;
+      }
+
+      // Handle different output formats
+      let chemicals = [];
+      let description = null;
+      let errorMessage = null;
+      
+      if (output.chemicals && Array.isArray(output.chemicals)) {
+        chemicals = output.chemicals;
+      } else if (output.description) {
+        description = output.description;
+      } else if (output.error) {
+        errorMessage = output.error;
+        description = `Error: ${output.error}`;
+      } else if (output.summary) {
+        description = output.summary;
+      }
+
+      // Generate SDFs for chemicals if we have them
+      let sdfFiles = [];
+      let smiles = [];
+      
+      if (chemicals.length > 0) {
+        const sdfResult = await this.generateSDFs(chemicals);
+        sdfFiles = sdfResult.sdfFiles;
+        smiles = sdfResult.smiles;
+      }
+
+      // Create the display column
       await this.createObjectColumn(
-    objectName,
-        sdfPaths,
-        smiles,
-        null,
-        null,
-        [],
+        displayName || "Analysis Result", 
+        sdfFiles, 
+        smiles, 
+        errorMessage, 
+        output.summary || null, 
+        output.skippedChemicals || [], 
         description,
         chemicals,
         croppedImageData
       );
 
     } catch (error) {
-      console.error("SDF generation error:", error);
-      this.createClosableErrorMessage(`Error generating 3D models: ${error.message}`);
+      console.error("Failed to process analysis result:", error);
+      this.showError(`Failed to display results: ${error.message}`);
     }
   }
 
-  // Create object column with 3D molecular visualizations
+  async generateSDFs(chemicals) {
+    const sdfFiles = [];
+    const smiles = [];
+
+    for (const chemical of chemicals) {
+      try {
+        if (chemical.smiles) {
+          const response = await fetch("/generate-sdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ smiles: chemical.smiles }),
+          });
+
+          if (response.ok) {
+            const blob = await response.blob();
+            const sdfUrl = URL.createObjectURL(blob);
+            sdfFiles.push(sdfUrl);
+            smiles.push(chemical.smiles);
+          } else {
+            console.warn(`Failed to generate SDF for ${chemical.name || chemical.smiles}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error generating SDF for chemical:`, error);
+      }
+    }
+
+    return { sdfFiles, smiles };
+  }
+
   async createObjectColumn(objectName, sdfFiles, smiles = [], errorMessage = null, 
                           summary = null, skippedChemicals = [], description = null, 
                           chemicals = null, croppedImageData = null) {
-    
+
     const gldiv = document.getElementById("gldiv");
+    if (!gldiv) {
+      console.error("No gldiv found for molecular display");
+      return;
+    }
+
+    // Create object column
     const objectColumn = document.createElement("div");
     objectColumn.className = "object-column";
 
-    // Create header
-    const header = document.createElement("div");
-    header.className = "object-header";
-
+    // Create title with close button
     const titleContainer = document.createElement("div");
-    titleContainer.className = "object-title-container";
-
-    const icon = document.createElement("div");
-    icon.className = "object-icon";
-    icon.textContent = description ? "📖" : "🔬";
+    titleContainer.className = "object-title";
     
-    const name = document.createElement("div");
-    name.className = "object-name";
-    name.textContent = objectName;
+    const titleText = document.createElement("span");
+    titleText.textContent = objectName;
+    titleContainer.appendChild(titleText);
 
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "object-close";
-    closeBtn.innerHTML = '<img src="close.svg" alt="Close" width="16" height="16" />';
-    closeBtn.onclick = () => {
+    const closeButton = document.createElement("button");
+    closeButton.innerHTML = "✕";
+    closeButton.className = "close-button";
+    closeButton.title = "Close";
+    closeButton.onclick = () => {
       objectColumn.remove();
       this.updateScrollHandles();
     };
-
-    titleContainer.appendChild(icon);
-    titleContainer.appendChild(name);
-    header.appendChild(titleContainer);
-    header.appendChild(closeBtn);
-    objectColumn.appendChild(header);
-
-    // Add cropped image if provided
-    if (croppedImageData) {
-      const imageContainer = document.createElement("div");
-      imageContainer.className = "cropped-image-container";
-
-      const img = document.createElement("img");
-      img.src = `data:image/jpeg;base64,${croppedImageData}`;
-      img.className = "image-highlighted";
-      img.alt = "Analysis region";
-
-      imageContainer.appendChild(img);
-      objectColumn.appendChild(imageContainer);
-    }
+    titleContainer.appendChild(closeButton);
+    
+    objectColumn.appendChild(titleContainer);
 
     // Handle description vs molecules
     if (description) {
       const descDiv = document.createElement("div");
       descDiv.className = "description-content";
       descDiv.textContent = description;
+      descDiv.style.cssText = `
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 13px;
+        line-height: 1.4;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+      `;
       objectColumn.appendChild(descDiv);
     } else {
-      // Render 3D molecules
+      // Render 3D molecules with SPHERE REPRESENTATION ONLY
       for (let i = 0; i < sdfFiles.length; i++) {
         const sdfFile = sdfFiles[i];
         const chemical = chemicals?.[i] || { smiles: smiles[i] };
@@ -472,7 +360,6 @@ class MolecularApp {
     this.updateScrollHandles();
   }
 
-  // Render 3D molecule visualization
   async render(sdfFile, container) {
     try {
       const response = await fetch(sdfFile);
@@ -486,6 +373,7 @@ class MolecularApp {
       });
 
       viewer.addModel(sdfData, "sdf");
+      // CRITICAL: Use ONLY sphere representation with van der Waals radii at 0.8 scale
       viewer.setStyle({}, { sphere: { scale: 0.8 } });
       viewer.zoomTo();
       viewer.render();
@@ -500,56 +388,23 @@ class MolecularApp {
     }
   }
 
-  // Show processing indicator
-  showProcessing() {
-    const processingIndicator = document.getElementById('processing-indicator');
-    if (processingIndicator) {
-      processingIndicator.style.display = 'block';
-    }
-  }
-
-  // Hide processing indicator
-  hideProcessing() {
-    const processingIndicator = document.getElementById('processing-indicator');
-    if (processingIndicator) {
-      processingIndicator.style.display = 'none';
-    }
-  }
-
-  // Handle errors
-  handleError(error) {
-    console.error('Error in molecular analysis:', error);
-    this.createClosableErrorMessage(`Analysis failed: ${error.message}`);
-  }
-
-  // Create error message
-  createClosableErrorMessage(message) {
-    const errorDiv = uiManager.createErrorMessage(message, this.snapshots);
-    this.updateScrollHandles();
-    return errorDiv;
-  }
-
-  // Update scroll handles (placeholder)
   updateScrollHandles() {
-    if (window.updateScrollHandles) {
-      window.updateScrollHandles();
+    // Simple implementation for horizontal scroll management
+    const gldiv = document.getElementById("gldiv");
+    if (gldiv) {
+      const hasOverflow = gldiv.scrollWidth > gldiv.clientWidth;
+      gldiv.style.overflowX = hasOverflow ? 'auto' : 'hidden';
     }
   }
 
-  // Cleanup resources
-  cleanup() {
-    cameraManager.cleanup();
-    uiManager.cleanup();
-    
-    // Clean up 3D viewers
-    this.viewers.forEach(viewer => {
-      if (viewer && viewer.clear) {
-        viewer.clear();
-      }
-    });
-    this.viewers = [];
+  clearResults() {
+    const gldiv = document.getElementById("gldiv");
+    if (gldiv) {
+      gldiv.innerHTML = "";
     }
+    this.viewers = [];
   }
+}
 
 // Initialize app when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
@@ -557,6 +412,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.app = app; // Make app globally available for debugging
   await app.initialize();
 
-  // Make app globally available for debugging
   window.molecularApp = app;
 });
