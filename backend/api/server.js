@@ -223,7 +223,20 @@ app.post('/api/logs', (req, res) => {
 
 app.use(express.static(path.join(__dirname, "..", "..", "frontend", "core")));
 app.use("/assets", express.static(path.join(__dirname, "..", "..", "frontend", "assets")));
-app.use("/components", express.static(path.join(__dirname, "..", "..", "frontend", "components")));
+
+// Disable caching for components in development to prevent issues with cached JavaScript
+if (process.env.NODE_ENV === "development") {
+  app.use("/components", express.static(path.join(__dirname, "..", "..", "frontend", "components"), {
+    setHeaders: (res) => {
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+    }
+  }));
+} else {
+  app.use("/components", express.static(path.join(__dirname, "..", "..", "frontend", "components")));
+}
+
 app.use("/sdf_files", express.static(path.join(__dirname, "..", "..", "data", "sdf_files")));
 
 // ==================== PAYMENT ROUTES ====================
