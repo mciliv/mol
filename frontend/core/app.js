@@ -295,7 +295,7 @@ class MolecularApp {
       console.log('📋 API result:', result);
       
       this.lastAnalysis = result;
-      this.displayResults(result);
+      this.processAnalysisResult(result, null, inputValue, false, null);
       
       this.objectInput.value = "";
       
