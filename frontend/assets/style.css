@@ -85,57 +85,100 @@ body {
   font-size: 0.9rem;
 }
 
-/* Form Elements */
-.form-row {
+/* Form Elements - Unified Styling */
+.form-row,
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.form-row label {
+.form-row label,
+.form-group label {
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.9rem;
   font-weight: 500;
 }
 
+/* All Input Fields - Unified */
 .card-input,
 input[type="text"],
-input[type="url"] {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  padding: 12px;
-  color: #ffffff;
-  font-size: 0.9rem;
+input[type="url"],
+input[type="email"],
+textarea,
+#card-element,
+.StripeElement {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px !important;
+  padding: 12px !important;
+  color: #ffffff !important;
+  font-size: 0.9rem !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  min-height: 44px;
+  transition: all 0.2s ease;
 }
 
-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+input::placeholder,
+.StripeElement::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* Buttons */
-button {
-  background: linear-gradient(45deg, #00d4ff, #0099cc);
-  color: #000000;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 24px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+input:focus,
+.StripeElement:focus,
+.StripeElement--focus {
+  border-color: rgba(0, 212, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+/* All Buttons - Unified */
+button,
+.btn,
+.submit-btn,
+.url-button,
+.payment-close-btn,
+input[type="submit"],
+input[type="button"] {
+  background: linear-gradient(45deg, #00d4ff, #0099cc) !important;
+  color: #000000 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 12px 24px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+button:hover,
+.btn:hover,
+.submit-btn:hover,
+.url-button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3) !important;
+}
+
+button:disabled,
+.btn:disabled,
+.submit-btn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* Close Button Override */
+.payment-close-btn {
+  background: none !important;
+  color: #00d4ff !important;
+  padding: 5px !important;
+  font-size: 20px !important;
+  min-height: auto !important;
 }
 
 /* URL Input Container */
@@ -147,18 +190,6 @@ button:disabled {
 
 .url-input-container input {
   flex: 1;
-}
-
-.url-button {
-  background: linear-gradient(45deg, #00d4ff, #0099cc);
-  color: #000000;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 /* Camera Interface */
@@ -180,6 +211,12 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Text Description */
+textarea {
+  min-height: 100px;
+  resize: vertical;
 }
 
 /* Icons and SVG */
@@ -216,6 +253,35 @@ svg {
   margin-top: 4px;
 }
 
+/* File Upload Styling */
+.file-input-container {
+  position: relative;
+  display: inline-block;
+}
+
+input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Radio Buttons and Checkboxes */
+input[type="radio"],
+input[type="checkbox"] {
+  accent-color: #00d4ff;
+  margin-right: 8px;
+}
+
+/* Labels for radio/checkbox */
+label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .main-content-layout {
@@ -237,11 +303,8 @@ svg {
 
 /* Touch-friendly sizes for mobile */
 @media (max-width: 768px) {
-  button {
-    min-height: 44px;
-    font-size: 1rem;
-  }
-  
+  button,
+  .btn,
   input {
     min-height: 44px;
     font-size: 1rem;
