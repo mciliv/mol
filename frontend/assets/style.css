@@ -1,57 +1,27 @@
-/*
-  DESIGN PRINCIPLE: Icon-First Mobile UI
-  
-  General Rule: On small screens (mobile/tablet), prioritize icons over text to maximize screen space
-  and improve usability. Text labels should be hidden or minimized while keeping icons visible and
-  functional. This creates a cleaner, more focused interface that follows the "stupid simple" UI
-  principle.
-  
-  Implementation:
-  - Hide text spans/labels on mobile breakpoints
-  - Keep icons prominent and properly sized for touch
-  - Maintain adequate touch targets (min 44px for mobile, 36px for ultra-small)
-  - Preserve functionality while reducing visual clutter
-*/
+/* "Stupid Simple" UI - Clean Dark Theme */
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Remove all default browser outlines and borders */
 *:focus {
-  outline: none !important;
-  border: none !important;
-}
-
-*:focus-visible {
-  outline: none !important;
-  border: none !important;
+  outline: none;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #000000;
   color: #ffffff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: 0.01em;
   overflow-x: hidden;
 }
 
-/* Remove all default browser outlines and borders */
-*:focus {
-  outline: none !important;
-  border: none !important;
-}
-
-*:focus-visible {
-  outline: none !important;
-  border: none !important;
-}
-
+/* Main App Container */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -59,22 +29,28 @@ body {
   width: 100vw;
 }
 
-/* Main content layout with side-by-side sections */
+/* Hidden Elements */
+.hidden {
+  display: none !important;
+}
+
+/* Main Layout */
 .main-content-layout {
   display: flex;
   min-height: 100vh;
   width: 100%;
 }
 
-/* Left side: Analysis section */
+/* Analysis Section (Left) */
 .analysis-section {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Allow flex item to shrink */
+  padding: 20px;
+  min-width: 0;
 }
 
-/* Right side: Payment section */
+/* Payment Section (Right) */
 .payment-section {
   width: 350px;
   min-width: 350px;
@@ -83,13 +59,9 @@ body {
   padding: 24px;
   overflow-y: auto;
   max-height: 100vh;
-  position: relative;
 }
 
-.payment-section.hidden {
-  display: none;
-}
-
+/* Payment Content */
 .payment-content {
   display: flex;
   flex-direction: column;
@@ -98,31 +70,27 @@ body {
 
 .payment-header {
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .payment-header h2 {
   color: #ffffff;
   font-size: 1.2rem;
-  margin: 0 0 8px 0;
+  margin-bottom: 8px;
   font-weight: 500;
 }
 
 .payment-header p {
   color: rgba(255, 255, 255, 0.7);
-  margin: 0;
   font-size: 0.9rem;
 }
 
-.payment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
+/* Form Elements */
 .form-row {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: 16px;
 }
 
 .form-row label {
@@ -131,8 +99,9 @@ body {
   font-weight: 500;
 }
 
-.card-input, 
-.form-row input[type="text"] {
+.card-input,
+input[type="text"],
+input[type="url"] {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
@@ -141,11 +110,12 @@ body {
   font-size: 0.9rem;
 }
 
-.form-row input[type="text"]::placeholder {
+input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
-.submit-btn {
+/* Buttons */
+button {
   background: linear-gradient(45deg, #00d4ff, #0099cc);
   color: #000000;
   border: none;
@@ -157,17 +127,73 @@ body {
   transition: all 0.3s ease;
 }
 
-.submit-btn:hover {
+button:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
 }
 
-.submit-btn:disabled {
+button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
+/* URL Input Container */
+.url-input-container {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.url-input-container input {
+  flex: 1;
+}
+
+.url-button {
+  background: linear-gradient(45deg, #00d4ff, #0099cc);
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Camera Interface */
+.camera-interface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 400px;
+}
+
+.camera-feed {
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icons and SVG */
+svg {
+  flex-shrink: 0;
+}
+
+/* Modal (Hidden by default) */
+.payment-modal,
+.modal-backdrop {
+  display: none !important;
+}
+
+/* Account Status */
 .account-status {
   display: flex;
   align-items: center;
@@ -183,41 +209,14 @@ body {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.account-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: inherit;
-}
-
-#account-name {
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.error-text {
+/* Error Messages */
+.error-message {
   color: #ff4444;
   font-size: 0.8rem;
   margin-top: 4px;
 }
 
-/* Hide payment required states on main interface when using sidebar */
-.main-app-interface.payment-required {
-  filter: none !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Responsive adjustments for payment sidebar */
-@media (max-width: 1200px) {
-  .payment-section {
-    width: 300px;
-    min-width: 300px;
-    padding: 20px;
-  }
-}
-
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .main-content-layout {
     flex-direction: column;
@@ -230,46 +229,22 @@ body {
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
-}
-
-/* Payment Modal - Hidden by default since we're using sidebar */
-.payment-modal {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-.modal-backdrop {
-  display: none !important;
-  visibility: hidden !important;
-}
-
-/* Hide payment required states on main interface when using sidebar */
-.main-app-interface.payment-required {
-  filter: none !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* Responsive adjustments for payment sidebar */
-@media (max-width: 1200px) {
-  .payment-section {
-    width: 300px;
-    min-width: 300px;
-    padding: 20px;
+  
+  .analysis-section {
+    padding: 16px;
   }
 }
 
+/* Touch-friendly sizes for mobile */
 @media (max-width: 768px) {
-  .main-content-layout {
-    flex-direction: column;
+  button {
+    min-height: 44px;
+    font-size: 1rem;
   }
   
-  .payment-section {
-    width: 100%;
-    min-width: unset;
-    max-height: 50vh;
-    border-left: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  input {
+    min-height: 44px;
+    font-size: 1rem;
   }
 }
 
