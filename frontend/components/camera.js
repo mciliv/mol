@@ -13,7 +13,7 @@ class CameraManager {
     this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     this.isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    this.cameraPermission = this.getCameraPermission();
+    this.cameraPermission = this.hasStoredCameraPermission();
   }
 
   getDeviceId() {

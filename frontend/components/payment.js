@@ -702,9 +702,17 @@ class PaymentManager {
         }
       });
       
-      // Create and mount Payment Element
-      this.cardElement = this.elements.create('payment', {
-        layout: 'tabs'
+      // Create and mount Card Element
+      this.cardElement = this.elements.create('card', {
+        style: {
+          base: {
+            color: '#ffffff',
+            fontSize: '16px',
+            '::placeholder': {
+              color: 'rgba(255, 255, 255, 0.7)'
+            }
+          }
+        }
       });
       
       const cardElementContainer = document.getElementById('card-element');
