@@ -108,72 +108,7 @@ const getLocalIPAddress = () => {
   return "127.0.0.1";
 };
 
-// Utility to attempt cleanup of processes using our ports
-const attemptPortCleanup = async (port) => {
-  try {
-    const { execSync } = require("child_process");
-    
-    // Try to find and kill processes using the port (Unix/macOS)
-    if (process.platform !== "win32") {
-      try {
-        const result = execSync(`lsof -ti:${port}`, { encoding: "utf8", stdio: "pipe" });
-        const pids = result.trim().split("\n").filter(Boolean);
-        
-        if (pids.length > 0) {
-          console.log(`🧹 Found ${pids.length} process(es) using port ${port}, attempting cleanup...`);
-          
-          for (const pid of pids) {
-            try {
-              execSync(`kill -9 ${pid}`, { stdio: "pipe" });
-              console.log(`   ✅ Killed process ${pid}`);
-            } catch (e) {
-              console.log(`   ⚠️ Could not kill process ${pid} (may not have permission)`);
-            }
-          }
-          
-          // Wait a moment for cleanup
-          await new Promise(resolve => setTimeout(resolve, 500));
-          return true;
-        }
-      } catch (e) {
-        // No processes found or lsof not available
-        return false;
-      }
-    }
-    return false;
-  } catch (error) {
-    console.log(`⚠️ Port cleanup failed: ${error.message}`);
-    return false;
-  }
-};
 
-const findAvailablePort = async (startPort) => {
-  const net = require("net");
-
-  const isPortAvailable = (port) => {
-    return new Promise((resolve) => {
-      const tester = net
-        .createServer()
-        .once("error", () => resolve(false))
-        .once("listening", () => {
-          tester.once("close", () => resolve(true)).close();
-        })
-        .listen(port);
-    });
-  };
-
-  let port = startPort;
-  while (port < startPort + 100) {
-    // Try up to 100 ports
-    if (await isPortAvailable(port)) {
-      return port;
-    }
-    port++;
-  }
-  throw new Error(
-    `No available ports found between ${startPort} and ${startPort + 100}`,
-  );
-};
 
 const PORT = process.env.PORT || DEFAULT_PORT;
 
@@ -284,83 +219,7 @@ app.post('/api/logs', (req, res) => {
 // User data now stored in PostgreSQL instead of in-memory
 // Database schema will be created by the database setup script
 
-// ==================== DEVELOPMENT MIDDLEWARE ====================
-// Live reload enabled for local development
-if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined) {
-  const livereload = require("livereload");
-  const connectLivereload = require("connect-livereload");
-  const net = require("net");
-
-  const isPortAvailable = (port) => {
-    return new Promise((resolve) => {
-      const tester = net
-        .createServer()
-        .once("error", () => resolve(false))
-        .once("listening", () => {
-          tester.once("close", () => resolve(true)).close();
-        })
-        .listen(port);
-    });
-  };
-
-  const startLiveReload = async (port) => {
-    try {
-      const available = await isPortAvailable(port);
-      if (!available) {
-        console.log(`LiveReload port ${port} is already in use`);
-        if (port === 35729) {
-          console.log("Trying alternative port 35730...");
-          return startLiveReload(35730);
-        } else {
-          console.log("Continuing without LiveReload...");
-          return;
-        }
-      }
-
-      const liveReloadServer = livereload.createServer({
-        exts: ["html", "css", "js"],
-        ignore: [
-          "node_modules/**", 
-          "sdf_files/**", 
-          "*.log",
-          "**/*.test.js",
-          "**/test/**",
-          "**/.git/**",
-          "**/uploads/**",
-          "**/temp/**"
-        ],
-        port: port,
-      });
-
-      // Add error handler for unexpected errors
-      liveReloadServer.server.on("error", (err) => {
-        console.error("LiveReload server error:", err.message);
-      });
-
-      // Only proceed if server starts successfully
-      liveReloadServer.server.once("listening", () => {
-        const frontendPath = path.join(__dirname, "..", "..", "frontend");
-        liveReloadServer.watch(frontendPath);
-        app.use(connectLivereload());
-
-        liveReloadServer.server.once("connection", () => {
-          setTimeout(() => {
-            liveReloadServer.refresh("/");
-          }, 100);
-        });
-
-        console.log(`🔄 LiveReload server started on port ${port}`);
-        console.log(`👀 Watching frontend files: ${frontendPath}`);
-      });
-    } catch (err) {
-      console.log("LiveReload server failed to start:", err.message);
-      console.log("Continuing without LiveReload...");
-    }
-  };
-
-  // Start LiveReload with fallback port
-  startLiveReload(35729);
-}
+// ==================== STATIC FILES ====================
 
 app.use(express.static(path.join(__dirname, "..", "..", "frontend", "core")));
 app.use("/assets", express.static(path.join(__dirname, "..", "..", "frontend", "assets")));
@@ -858,118 +717,42 @@ let httpServer;
 let httpsServerInstance;
 
 if (!isServerless && !isTestMode) {
-  // Local development mode
-  const startServer = async () => {
-    try {
-      let actualPort = PORT;
+  // Simple server startup
+  const localIP = getLocalIPAddress();
+  
+  httpServer = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`✅ HTTP server running on http://localhost:${PORT}`);
+    console.log(`📱 Mobile access: http://${localIP}:${PORT}`);
+  });
 
-      // If default port is in use, try cleanup and then find an available port
-      if (PORT === DEFAULT_PORT) {
-        try {
-          // First check if port is available
-          if (!(await (async () => {
-            const net = require("net");
-            return new Promise((resolve) => {
-              const server = net.createServer();
-              server.listen(PORT, "0.0.0.0", () => {
-                server.once("close", () => resolve(true));
-                server.close();
-              });
-              server.on("error", () => resolve(false));
-            });
-          })())) {
-            console.log(`⚠️ Port ${PORT} is in use, attempting cleanup...`);
-            const cleanupSuccessful = await attemptPortCleanup(PORT);
-            
-            if (cleanupSuccessful) {
-              console.log(`✅ Port ${PORT} cleanup completed, retrying...`);
-              // Give a moment for the port to be fully released
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-          }
-          
-          actualPort = await findAvailablePort(PORT);
-          if (actualPort !== PORT) {
-            console.log(
-              `⚠️  Port ${PORT} is in use, using port ${actualPort} instead`,
-            );
-          }
-        } catch (error) {
-          console.error(`❌ Could not find available port: ${error.message}`);
-          console.log(`💡 Try: pkill -f "node.*server.js" or use a different port`);
-          process.exit(1);
-        }
-      }
-
-      const localIP = getLocalIPAddress();
-      httpServer = app.listen(actualPort, "0.0.0.0", () => {
-        console.log(`✅ HTTP server running on http://localhost:${actualPort}`);
-        console.log(`📱 Mobile access: http://${localIP}:${actualPort}`);
-      });
-    } catch (error) {
-      console.error(`❌ Failed to start server: ${error.message}`);
+  // Handle port binding errors
+  httpServer.on("error", (error) => {
+    if (error.code === "EADDRINUSE") {
+      console.error(`❌ Port ${PORT} is already in use`);
+      console.log(`💡 Try: ./dev (kills existing processes)`);
+      process.exit(1);
+    } else {
+      console.error("❌ Server error:", error.message);
       process.exit(1);
     }
-  };
+  });
 
-  startServer()
-    .then(() => {
-      // Handle port binding errors
-      httpServer.on("error", (error) => {
-        if (error.code === "EADDRINUSE") {
-          console.error(`❌ Port ${PORT} is already in use`);
-          console.log(`💡 Solutions:`);
-          console.log(
-            `   1. Kill existing process: pkill -f "node.*server.js"`,
-          );
-          console.log(`   2. Use different port: PORT=8081 npm start`);
-          console.log(`   3. Check what's using the port: lsof -i :${PORT}`);
-          process.exit(1);
-        } else if (error.code === "EACCES") {
-          console.error(`❌ Permission denied: Cannot bind to port ${PORT}`);
-          console.log(`💡 Try using a port > 1024 or run with sudo`);
-          process.exit(1);
-        } else {
-          console.error("❌ Server error:", error.message);
-          console.log(`💡 Check your network configuration and try again`);
-          process.exit(1);
-        }
-      });
-
-      // Initialize database after server starts
-      initializeDatabase();
-    })
-    .catch((error) => {
-      console.error(`❌ Failed to start server: ${error.message}`);
-      process.exit(1);
-    });
+  // Initialize database after server starts
+  initializeDatabase();
 
   // Start HTTPS server for development
   if (process.env.NODE_ENV !== "production") {
-    const startHttpsServer = async () => {
+    setTimeout(async () => {
       try {
         const httpsServer = new HttpsServer(app, HTTPS_PORT);
         httpsServerInstance = await httpsServer.start();
-        
         if (httpsServerInstance) {
           console.log("✅ HTTPS server started successfully");
-          
-          // Handle HTTPS server errors after startup
-          httpsServerInstance.on("error", (error) => {
-            console.error("❌ HTTPS server error after startup:", error.message);
-            console.log("💡 HTTPS server will continue running if possible");
-          });
-        } else {
-          console.log("⚠️ HTTPS server not started - continuing with HTTP only");
         }
       } catch (error) {
-        console.error("❌ Failed to start HTTPS server:", error.message);
-        console.log("💡 Continuing with HTTP server only");
+        console.log("⚠️ HTTPS server not started - continuing with HTTP only");
       }
-    };
-
-    // Start HTTPS server after a short delay to avoid port conflicts
-    setTimeout(startHttpsServer, 1000);
+    }, 1000);
   }
 } else {
   // Serverless mode
