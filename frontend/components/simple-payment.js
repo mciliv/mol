@@ -79,8 +79,16 @@ class SimplePaymentManager {
       });
       
       // Create and mount card element
-      this.cardElement = this.elements.create('payment', {
-        layout: 'tabs'
+      this.cardElement = this.elements.create('card', {
+        style: {
+          base: {
+            color: '#ffffff',
+            fontSize: '16px',
+            '::placeholder': {
+              color: 'rgba(255, 255, 255, 0.7)'
+            }
+          }
+        }
       });
       
       this.cardElement.mount('#card-element');
