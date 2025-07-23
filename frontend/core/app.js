@@ -381,12 +381,14 @@ class MolecularApp {
 
       if (response.ok) {
         const result = await response.json();
+        logger.info('SDF generation result:', result);
         
         // Process the returned SDF paths
         for (let i = 0; i < result.sdfPaths.length; i++) {
           const sdfPath = result.sdfPaths[i];
           smiles.push(smilesArray[i]);
           sdfFiles.push(sdfPath); // Use the path directly since it's already a URL
+          logger.info(`Generated SDF: ${smilesArray[i]} -> ${sdfPath}`);
         }
         
         if (result.errors && result.errors.length > 0) {
@@ -456,9 +458,13 @@ class MolecularApp {
       objectColumn.appendChild(descDiv);
     } else {
       // Render 3D molecules with SPHERE REPRESENTATION ONLY
+      logger.info(`Rendering ${sdfFiles.length} molecules`);
+      
       for (let i = 0; i < sdfFiles.length; i++) {
         const sdfFile = sdfFiles[i];
         const chemical = chemicals?.[i] || { smiles: smiles[i] };
+        
+        logger.info(`Rendering molecule ${i + 1}/${sdfFiles.length}: ${sdfFile}`);
         
         const container = document.createElement("div");
         container.className = "molecule-viewer";
@@ -486,7 +492,12 @@ class MolecularApp {
         objectColumn.appendChild(moleculeContainer);
 
         const viewer = await this.render(sdfFile, container);
-        if (viewer) this.viewers.push(viewer);
+        if (viewer) {
+          this.viewers.push(viewer);
+          logger.info(`Successfully rendered molecule: ${displayName}`);
+        } else {
+          logger.error(`Failed to render molecule: ${displayName}`);
+        }
       }
 
       this.viewers.forEach((viewer) => {
@@ -501,12 +512,19 @@ class MolecularApp {
 
   async render(sdfFile, container) {
     try {
+      logger.info(`Fetching SDF file: ${sdfFile}`);
       const response = await fetch(sdfFile);
       if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
+        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
       }
 
       const sdfData = await response.text();
+      logger.info(`SDF data length: ${sdfData.length} characters`);
+      
+      if (!window.$3Dmol) {
+        throw new Error('3DMol.js library not loaded');
+      }
+      
       const viewer = $3Dmol.createViewer(container, {
         defaultcolors: $3Dmol.rasmolElementColors,
       });
@@ -516,7 +534,8 @@ class MolecularApp {
       viewer.setStyle({}, { sphere: { scale: 0.8 } });
       viewer.zoomTo();
       viewer.render();
-
+      
+      logger.info('3D molecule viewer created successfully');
       return viewer;
       
     } catch (error) {
