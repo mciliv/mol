@@ -264,7 +264,16 @@ if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === undefined
 
       const liveReloadServer = livereload.createServer({
         exts: ["html", "css", "js"],
-        ignore: ["node_modules/**", "sdf_files/**", "*.log"],
+        ignore: [
+          "node_modules/**", 
+          "sdf_files/**", 
+          "*.log",
+          "**/*.test.js",
+          "**/test/**",
+          "**/.git/**",
+          "**/uploads/**",
+          "**/temp/**"
+        ],
         port: port,
       });
 
