@@ -561,6 +561,9 @@ class CameraManager {
     } else if (this.currentStream) {
       instructionText.textContent = 'Camera initializing... please wait';
       instructionText.style.color = '#ffa500';
+    } else if (this.isRequestingPermission) {
+      instructionText.textContent = 'Requesting camera permission...';
+      instructionText.style.color = '#ffa500';
     } else {
       instructionText.textContent = 'Camera not available - check permissions';
       instructionText.style.color = '#ff6b6b';
@@ -610,13 +613,20 @@ class CameraManager {
 
   // Request camera permission with persistence
   async requestPermission() {
+    this.isRequestingPermission = true;
+    this.updateCameraInstructions();
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       this.saveCameraPermission(true);
       stream.getTracks().forEach(track => track.stop());
+      this.isRequestingPermission = false;
+      await this.startCamera();
       return true;
     } catch (error) {
+      this.isRequestingPermission = false;
       this.saveCameraPermission(false);
+      this.updateCameraInstructions();
       return false;
     }
   }

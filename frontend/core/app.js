@@ -75,10 +75,12 @@ class MolecularApp {
           console.log('📸 Camera mode activated - initializing camera');
           try {
             await cameraManager.initialize();
-            await cameraManager.requestPermission();
+            const permissionGranted = await cameraManager.requestPermission();
+            if (!permissionGranted) {
+              e.target.checked = false;
+            }
           } catch (error) {
             console.error('Camera initialization failed:', error);
-            // Uncheck the camera mode if initialization fails
             e.target.checked = false;
           }
         }
