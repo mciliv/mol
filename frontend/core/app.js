@@ -161,7 +161,7 @@ class MolecularApp {
         result: result
       };
 
-      this.processAnalysisResult(result, null, inputValue, false, null);
+      this.processAnalysisResult(result.output, null, inputValue, false, null);
       
     } catch (error) {
       logger.error('Text analysis failed', error);
@@ -380,7 +380,6 @@ class MolecularApp {
     gldiv.appendChild(objectColumn);
   }
 
-  // Render 3D molecule
   async render(sdfFile, container) {
     try {
       const response = await fetch(sdfFile);
@@ -390,7 +389,7 @@ class MolecularApp {
       const viewer = $3Dmol.createViewer(container, { defaultcolors: $3Dmol.rasmolElementColors });
       
       viewer.addModel(sdfData, "sdf");
-      viewer.setStyle({}, { sphere: { scale: 0.8 } }); // Sphere representation only
+      viewer.setStyle({}, { sphere: { scale: 0.8 } });
       viewer.zoomTo();
       viewer.render();
       
@@ -410,13 +409,6 @@ class MolecularApp {
     }
   }
 
-  clearResults() {
-    const gldiv = document.getElementById("gldiv");
-    if (gldiv) {
-      gldiv.innerHTML = "";
-    }
-    this.viewers = [];
-  }
 }
 
 // Initialize app when DOM is ready
