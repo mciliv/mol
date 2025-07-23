@@ -275,19 +275,17 @@
           <!-- Right side: Payment and account management -->
           <div class="payment-section" id="payment-section">
             <div class="payment-content">
-              <!-- Card button moved to top left -->
-              <div class="card-button-top">
-                <button class="card-icon-btn" id="card-icon-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                    <line x1="2" y1="10" x2="22" y2="10"/>
-                  </svg>
-                </button>
-              </div>
-
               <div class="payment-header">
-                <h2>Payment Required</h2>
-                <p>$0.25 per analysis</p>
+                <div class="header-row">
+                  <h2>Payment Required</h2>
+                  <button class="card-icon-btn" id="card-icon-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="4" width="20" height="16" rx="2"/>
+                      <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                  </button>
+                </div>
+                <p>$0.10 per analysis</p>
               </div>
               
               <form id="payment-form" class="payment-form">

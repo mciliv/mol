@@ -59,7 +59,7 @@ class MolecularApp {
     if (textInput) {
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const shortcutKey = isMac ? '⌘K' : 'Ctrl+K';
-      textInput.placeholder = `Type any molecule name (e.g., caffeine, aspirin, water)... (${shortcutKey} to focus)`;
+      textInput.placeholder = `Describe an object... (${shortcutKey} to focus)`;
     }
 
     document.addEventListener('imageAnalysisComplete', (e) => {
@@ -83,6 +83,20 @@ class MolecularApp {
             console.error('Camera initialization failed:', error);
             e.target.checked = false;
           }
+        }
+      });
+    }
+
+    // Card management button handler
+    const cardBtn = document.getElementById('card-icon-btn');
+    if (cardBtn) {
+      cardBtn.addEventListener('click', () => {
+        console.log('💳 Card management clicked');
+        // Toggle payment modal or card management interface
+        const paymentModal = document.getElementById('payment-modal');
+        if (paymentModal) {
+          paymentModal.classList.toggle('hidden');
+          document.getElementById('modal-backdrop').classList.toggle('hidden');
         }
       });
     }
