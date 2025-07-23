@@ -221,7 +221,20 @@ app.post('/api/logs', (req, res) => {
 
 // ==================== STATIC FILES ====================
 
-app.use(express.static(path.join(__dirname, "..", "..", "frontend", "core")));
+// Disable caching for HTML files in development
+if (process.env.NODE_ENV === "development") {
+  app.use(express.static(path.join(__dirname, "..", "..", "frontend", "core"), {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.html')) {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+      }
+    }
+  }));
+} else {
+  app.use(express.static(path.join(__dirname, "..", "..", "frontend", "core")));
+}
 app.use("/assets", express.static(path.join(__dirname, "..", "..", "frontend", "assets")));
 
 // Disable caching for components in development to prevent issues with cached JavaScript
