@@ -83,6 +83,25 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+}
+
+.payment-section.collapsed {
+  width: 60px;
+  padding: 20px 16px;
+}
+
+.payment-section.collapsed .payment-content > *:not(.payment-header) {
+  display: none;
+}
+
+.payment-section.collapsed .payment-header p {
+  display: none;
+}
+
+.payment-section.collapsed .header-row h2 {
+  display: none;
 }
 
 .payment-content {

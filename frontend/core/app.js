@@ -91,12 +91,10 @@ class MolecularApp {
     const cardBtn = document.getElementById('card-icon-btn');
     if (cardBtn) {
       cardBtn.addEventListener('click', () => {
-        console.log('💳 Card management clicked');
-        // Toggle payment modal or card management interface
-        const paymentModal = document.getElementById('payment-modal');
-        if (paymentModal) {
-          paymentModal.classList.toggle('hidden');
-          document.getElementById('modal-backdrop').classList.toggle('hidden');
+        console.log('💳 Toggling payment sidebar');
+        const paymentSection = document.getElementById('payment-section');
+        if (paymentSection) {
+          paymentSection.classList.toggle('collapsed');
         }
       });
     }
