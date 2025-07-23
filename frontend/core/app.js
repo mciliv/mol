@@ -34,14 +34,6 @@ class MolecularApp {
       console.log('🔧 Auto-enabling developer mode for localhost');
       this.hasPaymentSetup = true;
     }
-    
-    await cameraManager.initialize();
-
-    if (cameraManager.isSafari && !cameraManager.hasStoredCameraPermission()) {
-      setTimeout(() => {
-        cameraManager.requestPermission();
-      }, 1000);
-    }
 
     console.log('✅ Molecular analysis app initialized');
   }
@@ -74,6 +66,24 @@ class MolecularApp {
       const { output, icon, objectName, useQuotes, croppedImageData } = e.detail;
       this.processAnalysisResult(output, icon, objectName, useQuotes, croppedImageData);
     });
+
+    // Camera mode selection handler
+    const cameraMode = document.getElementById('camera-mode');
+    if (cameraMode) {
+      cameraMode.addEventListener('change', async (e) => {
+        if (e.target.checked) {
+          console.log('📸 Camera mode activated - initializing camera');
+          try {
+            await cameraManager.initialize();
+            await cameraManager.requestPermission();
+          } catch (error) {
+            console.error('Camera initialization failed:', error);
+            // Uncheck the camera mode if initialization fails
+            e.target.checked = false;
+          }
+        }
+      });
+    }
   }
    
   setupTextAnalysis() {
