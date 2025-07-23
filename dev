@@ -1,29 +1,60 @@
 #!/bin/bash
 
-# dev - Simple development server startup with real-time error output
+# Development script for molecular analysis app
+# Usage: ./dev [option]
 
-set -e
+echo "🔧 Molecular Analysis App - Development Options"
+echo "=============================================="
 
-echo "🧹 Cleaning up any existing development processes..."
-pkill -f "node.*backend/api/server.js" 2>/dev/null || true
-pkill -f "nodemon" 2>/dev/null || true
-sleep 1
-
-echo "🧪 Running quick tests..."
-# Run tests but don't block the server if they fail
-if npx jest --testPathPattern=unit.test.js --verbose --silent; then
-    echo "✅ Tests passed"
-else
-    echo "⚠️ Some tests failed, but starting server anyway for development"
-fi
-
-echo ""
-echo "🚀 Starting development server with live reload..."
-echo "📱 HTTP: http://localhost:8080"
-echo "🔒 HTTPS: https://localhost:3001"
-echo "🔄 Live reload: Active (watches frontend/ directory)"
-echo "💡 Press Ctrl+C to stop"
-echo "=" | tr '=' '=' | head -c 60 && echo ""
-
-# Start nodemon with verbose output so you can see all errors
-exec npx nodemon --verbose backend/api/server.js 
+case "${1:-default}" in
+  "default"|"")
+    echo "🚀 Starting development server with LiveReload..."
+    npm run dev
+    ;;
+  "simple")
+    echo "🚀 Starting simple development server (no LiveReload)..."
+    npm run dev:simple
+    ;;
+  "watch")
+    echo "👀 Starting with nodemon (backend file watching)..."
+    npm run dev:watch
+    ;;
+  "clean")
+    echo "🧹 Cleaning up processes and starting fresh..."
+    npm run clean
+    npm run dev
+    ;;
+  "no-lr")
+    echo "🚀 Starting without LiveReload..."
+    npm run dev:no-lr
+    ;;
+  "https")
+    echo "🔒 Starting with HTTPS..."
+    npm run dev:https
+    ;;
+  "setup")
+    echo "⚙️ Setting up development environment..."
+    npm run setup
+    ;;
+  "help"|"-h"|"--help")
+    echo "Available options:"
+    echo "  default  - Start with LiveReload (default)"
+    echo "  simple   - Start without LiveReload"
+    echo "  watch    - Start with nodemon (backend watching)"
+    echo "  clean    - Clean processes and start fresh"
+    echo "  no-lr    - Start without LiveReload"
+    echo "  https    - Start with HTTPS"
+    echo "  setup    - Setup development environment"
+    echo "  help     - Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  ./dev          # Start with LiveReload"
+    echo "  ./dev simple   # Start without LiveReload"
+    echo "  ./dev clean    # Clean and start fresh"
+    ;;
+  *)
+    echo "❌ Unknown option: $1"
+    echo "Run './dev help' for available options"
+    exit 1
+    ;;
+esac 
