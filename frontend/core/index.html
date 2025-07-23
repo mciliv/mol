@@ -183,24 +183,61 @@
 
       <!-- Main App Interface -->
       <div class="main-app-interface" id="main-app-interface">
-        <!-- Always visible text input bar -->
-        <div class="top-bar">
-          <div class="input-container">
-            <input
-              id="object-input"
-              type="text"
-              placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter... (⌘K to focus)"
-              class="text-input"
-            />
-          </div>
-          <div class="account-link" id="account-status">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2"/>
-              <line x1="2" y1="10" x2="22" y2="10"/>
-            </svg>
-            <span id="account-name">Account</span>
+        <!-- Main content area with input and payment side-by-side -->
+        <div class="main-content-layout">
+          <!-- Left side: Text input and analysis -->
+          <div class="analysis-section">
+            <!-- Always visible text input bar -->
+            <div class="top-bar">
+              <div class="input-container">
+                <input
+                  id="object-input"
+                  type="text"
+                  placeholder="Type any object name (e.g., coffee, aspirin, water) and press Enter... (⌘K to focus)"
+                  class="text-input"
+                />
+              </div>
+            </div>
           </div>
 
+          <!-- Right side: Payment and account management -->
+          <div class="payment-section" id="payment-section">
+            <div class="payment-content">
+              <div class="payment-header">
+                <h2>Payment Required</h2>
+                <p>$0.25 per analysis</p>
+              </div>
+              
+              <form id="payment-form" class="payment-form">
+                <div class="form-row">
+                  <label>Card</label>
+                  <div id="card-element" class="card-input"></div>
+                  <div id="card-errors" class="error-text"></div>
+                </div>
+                
+                <div class="form-row">
+                  <label>Name</label>
+                  <input type="text" id="user-name" placeholder="Optional" />
+                </div>
+                
+                <button type="submit" id="setup-btn" class="submit-btn">
+                  <span class="btn-text">Setup</span>
+                  <span class="btn-loading hidden">...</span>
+                </button>
+              </form>
+
+              <!-- Account status display -->
+              <div class="account-status" id="account-status">
+                <div class="account-link">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <line x1="2" y1="10" x2="22" y2="10"/>
+                  </svg>
+                  <span id="account-name">Account</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
 

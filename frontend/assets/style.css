@@ -44,11 +44,171 @@ body {
   width: 100vw;
 }
 
+/* Main content layout with side-by-side sections */
+.main-content-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Left side: Analysis section */
+.analysis-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allow flex item to shrink */
+}
+
+/* Right side: Payment section */
+.payment-section {
+  width: 320px;
+  background: rgba(0, 0, 0, 0.95);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.payment-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.payment-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.payment-header h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #ffffff;
+}
+
+.payment-header p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-row label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.card-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  height: 32px;
+}
+
+.card-input:focus {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-row input {
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  height: 32px;
+}
+
+.form-row input:focus {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.form-row input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.submit-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 4px;
+  padding: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  height: 32px;
+  transition: background 0.15s ease;
+}
+
+.submit-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  min-height: 14px;
+}
+
+/* Account status in payment section */
+.account-status {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.account-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.account-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.account-link svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
 /* Top bar with always visible text input */
 .top-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 20px;
   background: rgba(0, 0, 0, 0.95);
   z-index: 1000;
@@ -64,26 +224,7 @@ body {
   max-width: 800px;
 }
 
-.account-link {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #00d4ff;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 12px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  z-index: 1001;
-  white-space: nowrap;
-  display: flex !important; /* Always show account status */
-  align-items: center;
-  gap: 8px; /* Increased gap for better separation */
-  border: 1px solid transparent;
-  min-width: 100px; /* Ensure minimum width for better spacing */
-}
+/* Remove old account link positioning - now handled in payment section */
 
 .account-link svg {
   filter: none;
@@ -527,6 +668,23 @@ input[type="checkbox"]:checked + .mode-label {
 
 /* Mobile optimizations - Icons First, Text Secondary */
 @media (max-width: 768px) {
+  /* Mobile: Stack layout vertically */
+  .main-content-layout {
+    flex-direction: column;
+  }
+  
+  .payment-section {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px;
+  }
+  
+  .payment-content {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
   .top-bar {
     padding: 12px;
   }
@@ -698,6 +856,18 @@ input[type="checkbox"]:checked + .mode-label {
 
 /* Ultra-small screens - even more icon-focused */
 @media (max-width: 480px) {
+  .payment-section {
+    padding: 12px;
+  }
+  
+  .payment-header h2 {
+    font-size: 16px;
+  }
+  
+  .payment-header p {
+    font-size: 12px;
+  }
+  
   .top-bar {
     padding: 8px;
   }
