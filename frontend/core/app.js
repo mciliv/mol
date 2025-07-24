@@ -415,6 +415,18 @@ class MolecularApp {
     console.log('Layout debug mode:', document.body.classList.contains('debug-layout') ? 'ON' : 'OFF');
   }
 
+  // UI Context Automation integration
+  initUIContextAutomation() {
+    if (window.uiContextAutomation) {
+      // Auto-enable on localhost
+      if (window.location.hostname === 'localhost') {
+        setTimeout(() => {
+          window.uiContextAutomation.enable();
+        }, 1000);
+      }
+    }
+  }
+
 }
 
 // Initialize app when DOM is ready
