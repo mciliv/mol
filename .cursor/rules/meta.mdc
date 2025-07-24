@@ -4,7 +4,8 @@ alwaysApply: true
 
 # Meta Requirements - Living System
 
-Act as a teacher. Show relevant code if already exists
+only respond in code
+Act as a teacher. Show relevant code chunks if already exists
 
 ## Core Philosophy
 Maximally simple & straightforward

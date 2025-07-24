@@ -40,14 +40,15 @@ class SimplePaymentManager {
     const cardInfo = localStorage.getItem('molCardInfo');
     
     if (!deviceToken || !cardInfo) {
-      console.log('🔧 No payment method found - showing payment section');
-      this.showPaymentSection();
+      console.log('🔧 No payment method found - payment sidebar available');
+      this.updateAccountButton();
+      this.hidePaymentSection(); // Keep sidebar closed by default
       return false;
     }
     
     console.log('✅ Payment method found');
     this.updateAccountButton();
-    this.hidePaymentSection(); // Hide if payment is set up
+    this.hidePaymentSection(); // Keep sidebar closed by default
     return true;
   }
 
