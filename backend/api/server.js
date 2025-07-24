@@ -151,16 +151,16 @@ if (process.env.NODE_ENV === 'development') {
     // Create livereload server
     const liveReloadServer = livereload.createServer({
       exts: ['html', 'css', 'js'],
-      port: 35729
+      port: 35730
     });
     
     // Watch frontend directory
     liveReloadServer.watch(path.join(__dirname, '../../frontend'));
     
     // Add livereload middleware
-    app.use(connectLivereload({ port: 35729 }));
+    app.use(connectLivereload({ port: 35730 }));
     
-    console.log('🔄 LiveReload server started on port 35729');
+    console.log('🔄 LiveReload server started on port 35730');
   } catch (error) {
     console.log('⚠️ LiveReload not available:', error.message);
   }

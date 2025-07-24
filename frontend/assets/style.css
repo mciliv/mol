@@ -25,13 +25,19 @@
 }
 
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 *:focus {
-  outline: none;
+  outline: none !important;
+}
+
+/* Remove all borders and outlines */
+*, *::before, *::after {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 body {
@@ -95,9 +101,7 @@ body {
   gap: 8px;
   cursor: pointer;
   padding: 8px 12px;
-  border-radius: 6px;
   background: rgba(255, 255, 255, 0.05);
-  border: none !important;
   transition: all 0.2s ease;
   font-size: 0.9rem;
   user-select: none;
@@ -396,7 +400,7 @@ svg {
 }
 
 .account-link:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .card-icon {
