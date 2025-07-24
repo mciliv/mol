@@ -409,6 +409,12 @@ class MolecularApp {
     }
   }
 
+  // Debug layout toggle (development only)
+  enableLayoutDebug() {
+    document.body.classList.toggle('debug-layout');
+    console.log('Layout debug mode:', document.body.classList.contains('debug-layout') ? 'ON' : 'OFF');
+  }
+
 }
 
 // Initialize app when DOM is ready
