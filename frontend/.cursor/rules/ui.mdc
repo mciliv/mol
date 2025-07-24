@@ -5,17 +5,12 @@ alwaysApply: false
 
 just use icons, no text
 
-## "Stupid Simple" UI Guidelines
+## "Simplest" UI Guidelines
 - **No Extraneous Lines**: Avoid borders, outlines, shadows, or decorative elements
 - **Minimal Design**: Focus on functionality over visual embellishment
 - **Clean Layout**: Use flexbox for responsive, clean layouts
 - **Consistent Spacing**: Use consistent padding and margins throughout
 
-## Dark Theme Standards
-- **Background**: Always use #000000 (black) for main backgrounds
-- **Text**: White (#ffffff) for primary text, rgba(255, 255, 255, 0.7) for secondary
-- **Interactive Elements**: Use rgba(255, 255, 255, 0.08) for subtle hover states
-- **Overlays**: Use rgba(0, 0, 0, 0.85) for modal backgrounds
 
 ## Responsive Design
 - Use `min-height: 60vh` for main containers to ensure adequate space
