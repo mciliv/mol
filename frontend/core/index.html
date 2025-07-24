@@ -272,46 +272,49 @@
             </div>
           </div>
 
-          <!-- Right side: Payment and account management -->
-          <div class="payment-section hidden" id="payment-section">
-            <div class="payment-content">
-              <div class="payment-header">
-                <div class="header-row">
-                  <h2>Payment Required</h2>
-                  <button class="card-icon-btn" id="card-icon-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="4" width="20" height="16" rx="2"/>
-                      <line x1="2" y1="10" x2="22" y2="10"/>
-                    </svg>
-                  </button>
-                </div>
-                <p>$0.10 per analysis</p>
+          <!-- Right side: Account button and payment sidebar -->
+          <div class="sidebar-container">
+            <!-- Always visible account button -->
+            <div class="account-status" id="account-status">
+              <div class="account-link">
+                <img src="assets/account.svg" alt="Card" class="card-icon">
+                <span id="account-name">Account</span>
               </div>
-              
-              <form id="payment-form" class="payment-form">
-                <div class="form-row">
-                  <label>Card</label>
-                  <div id="card-element" class="card-input"></div>
-                  <div id="card-errors" class="error-text"></div>
-                </div>
-                
-                <div class="form-row">
-                  <label>Name</label>
-                  <input type="text" id="user-name" placeholder="Optional" />
-                </div>
-                
-                <button type="submit" id="setup-btn" class="submit-btn">
-                  <span class="btn-text">Setup</span>
-                  <span class="btn-loading hidden">...</span>
-                </button>
-              </form>
+            </div>
 
-              <!-- Account status display with card icon -->
-              <div class="account-status" id="account-status">
-                <div class="account-link">
-                  <img src="assets/account.svg" alt="Card" class="card-icon">
-                  <span id="account-name">Account</span>
+            <!-- Hidden payment section -->
+            <div class="payment-section hidden" id="payment-section">
+              <div class="payment-content">
+                <div class="payment-header">
+                  <div class="header-row">
+                    <h2>Payment Required</h2>
+                    <button class="card-icon-btn" id="card-icon-btn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                        <line x1="2" y1="10" x2="22" y2="10"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <p>$0.10 per analysis</p>
                 </div>
+                
+                <form id="payment-form" class="payment-form">
+                  <div class="form-row">
+                    <label>Card</label>
+                    <div id="card-element" class="card-input"></div>
+                    <div id="card-errors" class="error-text"></div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <label>Name</label>
+                    <input type="text" id="user-name" placeholder="Optional" />
+                  </div>
+                  
+                  <button type="submit" id="setup-btn" class="submit-btn">
+                    <span class="btn-text">Setup</span>
+                    <span class="btn-loading hidden">...</span>
+                  </button>
+                </form>
               </div>
             </div>
           </div>

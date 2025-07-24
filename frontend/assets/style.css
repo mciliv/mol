@@ -60,6 +60,7 @@ body {
   gap: 20px;
   margin-bottom: 20px;
   align-items: center;
+  justify-content: center;
 }
 
 .mode-label {
@@ -70,7 +71,7 @@ body {
   padding: 8px 12px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: none !important;
   transition: all 0.2s ease;
   font-size: 0.9rem;
   user-select: none;
@@ -78,7 +79,6 @@ body {
 
 .mode-label:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(0, 212, 255, 0.3);
 }
 
 /* Hide the actual checkbox */
@@ -89,7 +89,6 @@ body {
 /* Style the label when checkbox is checked */
 .mode-selector input[type="checkbox"]:checked + .mode-label {
   background: rgba(0, 212, 255, 0.2);
-  border-color: rgba(0, 212, 255, 0.5);
   color: #00d4ff;
 }
 
@@ -299,6 +298,17 @@ svg {
 .payment-modal,
 .modal-backdrop {
   display: none !important;
+}
+
+/* Sidebar Container */
+.sidebar-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* Account Status */
