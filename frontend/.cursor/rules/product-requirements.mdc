@@ -21,9 +21,9 @@
 **Rationale**: "Stupid simple" UI with no extraneous lines
 **Implementation**:
 ```css
-button, .btn { border: none !important; outline: none !important; }
+button, .btn, .mode-label { border: none !important; outline: none !important; }
 ```
-**Covers**: All interactive elements, form controls, custom buttons
+**Covers**: All interactive elements, form controls, custom buttons, camera/photo mode buttons
 
 ## UI Core Principles
 1. **No Borders/Outlines**: Clean, borderless design throughout
