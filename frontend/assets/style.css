@@ -404,12 +404,13 @@ svg {
 .card-icon {
   width: 24px;
   height: 24px;
-  color: inherit;
-  filter: brightness(1);
+  color: #ffffff;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
 }
 
 .account-link:hover .card-icon {
-  filter: brightness(1.2);
+  color: #ffffff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
 }
 
 /* Error Messages */

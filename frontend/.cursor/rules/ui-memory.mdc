@@ -32,7 +32,7 @@ body, html, .main-container, .app-container { background: #000000; }
 **Implementation**: 
 - Remove all text labels ("Account", "Payment Required", etc.)
 - Use SVG icons exclusively
-- Card icon: 24x24px in 40x40px touch-friendly container
+- Card icon: 24x24px white (#ffffff) with subtle glow for max readability on black
 - Hover states: `rgba(255, 255, 255, 0.12)` (not 0.08)
 - No borders, outlines, box-shadows, or border-radius anywhere
 
