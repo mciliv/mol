@@ -185,6 +185,16 @@ input::placeholder,
   color: rgba(255, 255, 255, 0.5) !important;
 }
 
+#object-input {
+  margin-right: 160px;
+}
+
+@media (max-width: 768px) {
+  #object-input {
+    margin-right: 80px;
+  }
+}
+
 input:focus,
 .StripeElement:focus,
 .StripeElement--focus {
