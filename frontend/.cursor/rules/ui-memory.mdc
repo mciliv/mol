@@ -15,6 +15,7 @@
 **Frontend**: Script auto-injected by connect-livereload middleware
 **Location**: `backend/api/server.js` lines 144-165
 **Status**: ✅ All dependencies installed, livereload active
+**VS Code**: Pipeline documented in `.vscode/launch.json` with full infrastructure specs
 
 ## Black Background Rule (ALWAYS APPLY)
 **Requirement**: Everything in this app must have black background
