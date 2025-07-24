@@ -18,6 +18,12 @@ module.exports = {
   testEnvironmentOptions: {
     url: 'http://localhost:8080'
   },
+  transform: {
+    '^.+\\.(js|jsx)$': ['babel-jest']
+  },
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.(js|mjs)$))'
+  ],
   globals: {
     TextEncoder: TextEncoder,
     TextDecoder: TextDecoder
