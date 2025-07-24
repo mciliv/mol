@@ -2,15 +2,17 @@
 
 ## Auto-Reload Development Setup (ALWAYS APPLY)
 **Requirement**: Site should auto-reload after code changes during development
-**Implementation**:
+**Infrastructure**:
 ```bash
 ./dev                    # Uses nodemon + livereload
-# Watches: backend/ and frontend/ directories
+# Dependencies: livereload, connect-livereload (in package.json devDependencies)
+# Watches: backend/ and frontend/ directories  
 # Auto-reloads: server restart + browser refresh
 # LiveReload port: 35730
 ```
 **Backend**: connect-livereload middleware in server.js (development only)
 **Frontend**: Script auto-injected by connect-livereload middleware
+**Location**: `backend/api/server.js` lines 144-165
 
 ## Black Background Rule (ALWAYS APPLY)
 **Requirement**: Everything in this app must have black background
