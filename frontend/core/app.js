@@ -436,5 +436,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   await app.initialize();
 
   window.molecularApp = app;
+  
+  // Initialize UI Context Automation after app is created
+  if (window.uiContextAutomation) {
+    window.app.enableUIContextAutomation = () => window.uiContextAutomation.enable();
+    window.app.captureUIState = (label) => window.uiContextAutomation.captureUIState(label);
+    window.app.exportContextForPrompt = () => window.uiContextAutomation.exportContextForPrompt();
+    window.app.checkRuleCompliance = () => window.uiContextAutomation.checkRuleCompliance();
+    
+    // Auto-enable on localhost
+    if (window.location.hostname === 'localhost') {
+      setTimeout(() => {
+        window.uiContextAutomation.enable();
+        console.log('🤖 UI Context Automation auto-enabled for localhost');
+      }, 1000);
+    }
+  }
 });
 
