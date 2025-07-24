@@ -9,7 +9,7 @@ alwaysApply: true
 2. Never revert documented solutions
 
 ## Guidelines  
-- No code comments
+- prefer code comments
 - Don't create extraneous files
 - Show code chunks, not descriptions
 

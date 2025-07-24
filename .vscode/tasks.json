@@ -86,11 +86,34 @@
       }
     },
     {
-      "label": "test-full-suite",
+      "label": "test-livereload-procedure",
       "type": "shell",
-      "command": "npm",
-      "args": ["test", "--", "--verbose"],
-      "group": "test",
+      "command": "./scripts/test-livereload",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "quick-dev-procedure", 
+      "type": "shell",
+      "command": "./scripts/quick-dev",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "debug-pipeline-procedure",
+      "type": "shell", 
+      "command": "./scripts/debug-pipeline",
+      "group": "build",
       "presentation": {
         "echo": true,
         "reveal": "always",
