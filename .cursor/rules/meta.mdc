@@ -5,10 +5,10 @@ alwaysApply: true
 # Meta Requirements - Living System
 
 only respond in code
+Only generate rules in .mdc files, not markdown
 
 ## Core Philosophy
 Maximally simple & straightforward
-Only generate rules in .mdc files, not markdown
 Show code chunks rather than descriptions
 
 ## Auto-Generation Protocol

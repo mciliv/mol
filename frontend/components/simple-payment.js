@@ -273,6 +273,7 @@ class SimplePaymentManager {
       // Make clickable to show/manage payment
       accountStatus.style.cursor = 'pointer';
       accountStatus.onclick = () => {
+        console.log('💳 Credit card icon clicked');
         const deviceToken = localStorage.getItem('molDeviceToken');
         if (deviceToken) {
           this.showCardManagement();

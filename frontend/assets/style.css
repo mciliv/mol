@@ -399,10 +399,16 @@ svg {
 }
 
 .card-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   color: #00d4ff;
   flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.account-link:hover .card-icon {
+  transform: scale(1.1);
+  color: #ffffff;
 }
 
 /* Error Messages */
