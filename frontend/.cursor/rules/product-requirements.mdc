@@ -30,16 +30,19 @@ button, .btn, .mode-label { border: none !important; outline: none !important; }
 2. **Black Background**: Everything #000000 background
 3. **Card Icon**: Credit card symbol, not user icon
 4. **Minimal Design**: Function over decoration
-5. **Consistent Spacing**: 8px gaps, proper margins
+5. **Anti-Overlap Layout**: Use layout-system.mdc rules (CSS variables, safe areas, z-index stack)
+6. **Consistent Spacing**: CSS custom properties only (--space-xs to --space-xxl)
 
 ## Required Elements Checklist
 - [ ] Account button with card icon
 - [ ] Payment sidebar (hidden by default)
-- [ ] Text input with proper margin
+- [ ] Text input with safe area margin (var(--safe-area-right))
 - [ ] All buttons borderless
 - [ ] Black backgrounds everywhere
+- [ ] No overlapping elements (use layout debug: window.app.enableLayoutDebug())
 
 ## Prevention Protocol
-**Before ANY UI change**: Review this file + ui-memory.mdc
+**Before ANY UI change**: Review this file + ui-memory.mdc + layout-system.mdc
 **After losing element**: Immediately restore + update docs
-**Weekly**: Verify all required elements present
+**Testing overlaps**: Use window.app.enableLayoutDebug() in console
+**Weekly**: Verify all required elements present and no overlaps on mobile
