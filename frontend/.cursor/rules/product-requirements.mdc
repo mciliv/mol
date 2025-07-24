@@ -1,0 +1,45 @@
+# Product Requirements - Core UI Elements
+
+## Account Button (NEVER REMOVE)
+**Visual**: Card icon + "Account" text
+**Implementation**:
+```html
+<div class="account-link">
+  <img src="assets/account.svg" alt="Card" class="card-icon">
+  <span id="account-name">Account</span>
+</div>
+```
+**Critical CSS**:
+```css
+.account-link { gap: 8px; min-width: 100px; }
+.text-input { margin-right: 160px; } /* mobile: 80px */
+```
+**Purpose**: Opens payment sidebar, visual payment indicator
+
+## Button Design System (NEVER ADD BORDERS)
+**Rule**: All buttons must have `border: none !important`
+**Rationale**: "Stupid simple" UI with no extraneous lines
+**Implementation**:
+```css
+button, .btn { border: none !important; outline: none !important; }
+```
+**Covers**: All interactive elements, form controls, custom buttons
+
+## UI Core Principles
+1. **No Borders/Outlines**: Clean, borderless design throughout
+2. **Black Background**: Everything #000000 background
+3. **Card Icon**: Credit card symbol, not user icon
+4. **Minimal Design**: Function over decoration
+5. **Consistent Spacing**: 8px gaps, proper margins
+
+## Required Elements Checklist
+- [ ] Account button with card icon
+- [ ] Payment sidebar (hidden by default)
+- [ ] Text input with proper margin
+- [ ] All buttons borderless
+- [ ] Black backgrounds everywhere
+
+## Prevention Protocol
+**Before ANY UI change**: Review this file + ui-memory.mdc
+**After losing element**: Immediately restore + update docs
+**Weekly**: Verify all required elements present
