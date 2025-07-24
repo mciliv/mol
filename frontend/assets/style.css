@@ -375,6 +375,7 @@ svg {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
+  color: #00d4ff; /* Default blue for payment active */
 }
 
 .account-status:hover {
@@ -401,7 +402,7 @@ svg {
 .card-icon {
   width: 22px;
   height: 22px;
-  color: #00d4ff;
+  color: inherit;
   flex-shrink: 0;
   transition: transform 0.2s ease, color 0.2s ease;
   opacity: 1;

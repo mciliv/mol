@@ -266,8 +266,8 @@ class SimplePaymentManager {
           accountStatus.style.color = '#00d4ff';
         }
       } else {
-        accountName.textContent = 'Setup Required';
-        accountStatus.style.color = '#ffa500'; // Orange when not set up
+        accountName.textContent = '';
+        accountStatus.style.color = '#ff0000'; // Red when not set up
       }
       
       // Make clickable to show/manage payment
