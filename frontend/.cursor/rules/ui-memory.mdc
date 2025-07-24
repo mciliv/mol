@@ -1,5 +1,15 @@
 # UI Memory - Critical Fixes
 
+## Black Background Rule (ALWAYS APPLY)
+**Requirement**: Everything in this app must have black background
+**Implementation**:
+```css
+body, html, .main-container, .app-container { background: #000000; }
+.results-section, .object-column, .molecule-viewer { background: #000000; }
+.payment-section, .camera-section { background: #000000; }
+/* NO white/light backgrounds anywhere */
+```
+
 ## Card Icon Spacing (NEVER REVERT)
 **Problem**: Card icon overlaps text input (3x recurring)
 **Fix**: 
