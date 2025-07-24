@@ -235,7 +235,8 @@ function runCameraTests() {
 }
 
 // Export for manual testing
-window.cameraTests = {
+if (typeof window !== 'undefined') {
+  window.cameraTests = {
   runCameraTests,
   testCameraElements,
   testCameraModeActivation,
@@ -245,5 +246,6 @@ window.cameraTests = {
   testAnalysisTrigger,
   testCompleteFlow
 };
+}
 
 console.log('✅ Camera testing functions loaded. Run cameraTests.runCameraTests() to test camera connections.'); 

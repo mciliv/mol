@@ -245,7 +245,8 @@ function runAllTests() {
 }
 
 // Export functions for manual testing
-window.componentTests = {
+if (typeof window !== 'undefined') {
+  window.componentTests = {
   runAllTests,
   testInitialization,
   testCameraClick,
@@ -258,5 +259,6 @@ window.componentTests = {
   testPaymentIntegration,
   test3DVisualization
 };
+}
 
 console.log('✅ Manual testing functions loaded. Run componentTests.runAllTests() to start testing.'); 

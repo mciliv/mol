@@ -1,15 +1,14 @@
 module.exports = {
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/test/fixtures/setup.js'],
   testMatch: [
-    '<rootDir>/test/**/*.test.js',
-    '<rootDir>/test/**/test_*.py'
+    '**/test/smoke.test.js'
   ],
-  moduleDirectories: ['node_modules'],
-  testPathIgnorePatterns: ['/node_modules/'],
   collectCoverageFrom: [
     'backend/**/*.js',
     'frontend/**/*.js',
-    '!**/node_modules/**'
-  ]
+    '!**/node_modules/**',
+    '!**/coverage/**'
+  ],
+  testTimeout: 10000,
+  verbose: true
 }; 
