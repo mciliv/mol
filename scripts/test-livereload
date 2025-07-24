@@ -44,4 +44,17 @@ log_info "HTTPS: https://localhost:3001"
 log_info "LiveReload: Active on port 35730"
 echo ""
 
-exec ./dev 
+# Start server in background for integration tests
+./dev &
+DEV_PID=$!
+
+# Wait for server to start
+sleep 3
+
+log_info "Development server running (PID: $DEV_PID)"
+log_info "Integration tests can now connect to http://localhost:8080"
+echo ""
+echo "Press Ctrl+C to stop the development server"
+
+# Keep the process running
+wait $DEV_PID 

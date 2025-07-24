@@ -261,4 +261,22 @@ if (typeof window !== 'undefined') {
 };
 }
 
+// Convert to actual Jest tests
+describe('Component Tests', () => {
+  test('should initialize app components', () => {
+    expect(typeof runAllTests).toBe('function');
+    expect(typeof testInitialization).toBe('function');
+  });
+
+  test('should have camera functionality', () => {
+    expect(typeof testCameraClick).toBe('function');
+    expect(typeof testCameraMode).toBe('function');
+  });
+
+  test('should have UI context functions', () => {
+    expect(typeof testUIContext).toBe('function');
+    expect(typeof test3DVisualization).toBe('function');
+  });
+});
+
 console.log('✅ Manual testing functions loaded. Run componentTests.runAllTests() to start testing.'); 

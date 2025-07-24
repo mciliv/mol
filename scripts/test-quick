@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Quick Test Procedure
+# Runs only smoke tests for fast feedback
+
+echo "⚡ Quick Test Run..."
+
+# Run only smoke tests
+npx jest test/smoke.test.js --verbose 

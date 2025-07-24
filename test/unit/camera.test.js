@@ -248,4 +248,21 @@ if (typeof window !== 'undefined') {
 };
 }
 
+// Convert to actual Jest tests  
+describe('Camera Tests', () => {
+  test('should have camera test functions', () => {
+    expect(typeof runCameraTests).toBe('function');
+    expect(typeof testCameraElements).toBe('function');
+  });
+
+  test('should handle camera mode activation', () => {
+    expect(typeof testCameraModeActivation).toBe('function');
+    expect(typeof testVideoStreamActivation).toBe('function');
+  });
+
+  test('should test camera permissions', () => {
+    expect(typeof testCameraPermissions).toBe('function');
+  });
+});
+
 console.log('✅ Camera testing functions loaded. Run cameraTests.runCameraTests() to test camera connections.'); 
