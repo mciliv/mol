@@ -2,30 +2,100 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "dev",
+      "label": "dev-pipeline-setup",
       "type": "shell",
-      "command": "npm",
-      "args": ["run", "dev"],
-      "isBackground": true,
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
+      "command": "echo",
+      "args": ["🚀 Molecular Analysis Pipeline Starting..."],
+      "group": "build",
       "presentation": {
         "echo": true,
         "reveal": "always",
         "focus": false,
         "panel": "shared"
       },
+      "dependsOn": [
+        "check-dependencies",
+        "cleanup-ports"
+      ]
+    },
+    {
+      "label": "check-dependencies", 
+      "type": "shell",
+      "command": "npm",
+      "args": ["list", "--depth=0"],
+      "group": "build",
+      "presentation": {
+        "echo": false,
+        "reveal": "silent"
+      }
+    },
+    {
+      "label": "cleanup-ports",
+      "type": "shell", 
+      "command": "pkill",
+      "args": ["-f", "node.*server.js"],
+      "group": "build",
+      "presentation": {
+        "echo": false,
+        "reveal": "silent"
+      },
+      "options": {
+        "shell": {
+          "executable": "/bin/bash",
+          "args": ["-c"]
+        }
+      }
+    },
+    {
+      "label": "dev-pipeline-cleanup",
+      "type": "shell",
+      "command": "echo", 
+      "args": ["🛑 Development pipeline stopped"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "start-livereload-dev",
+      "type": "shell",
+      "command": "./dev",
+      "group": "build", 
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
       "problemMatcher": {
         "pattern": {
-          "regexp": "."
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
         },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "\\[nodemon\\]",
-          "endsPattern": "Node server running on"
+          "beginsPattern": "🚀 Starting development server",
+          "endsPattern": "✅ HTTPS server started successfully"
         }
+      }
+    },
+    {
+      "label": "test-full-suite",
+      "type": "shell",
+      "command": "npm",
+      "args": ["test", "--", "--verbose"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
       }
     }
   ]
