@@ -307,6 +307,30 @@ svg {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.account-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.account-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.card-icon {
+  width: 16px;
+  height: 16px;
+  color: #00d4ff;
+  flex-shrink: 0;
+}
+
 /* Error Messages */
 .error-message {
   color: #ff4444;
