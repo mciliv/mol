@@ -7,10 +7,7 @@ class PaymentManager {
     this.setupInProgress = false;
   }
 
-  isLocalDevelopment() {
-    console.warn('isLocalDevelopment() is deprecated - use developer account instead');
-    return false;
-  }
+  // Removed deprecated isLocalDevelopment method
 
   isDeveloperAccount() {
     const deviceToken = localStorage.getItem('molDeviceToken');
@@ -667,10 +664,7 @@ class PaymentManager {
     }
   }
 
-  resetLocalDevUser() {
-    console.warn('resetLocalDevUser() is deprecated - use developer account instead');
-    this.setupDeveloperAccount();
-  }
+  // Removed deprecated resetLocalDevUser method
 
   async initializePaymentSetup() {
     console.log('🔄 Initializing Stripe payment setup...');
@@ -915,15 +909,7 @@ class PaymentManager {
     }
   }
 
-  setupLocalDevUser() {
-    console.warn('setupLocalDevUser() is deprecated - use developer account instead');
-    this.setupDeveloperAccount();
-  }
-
-  getLocalDevUser() {
-    console.warn('getLocalDevUser() is deprecated - use developer account instead');
-    return this.getDeveloperAccount();
-  }
+  // Removed deprecated setupLocalDevUser and getLocalDevUser methods
 
   setupDeveloperAccount() {
     const developerUser = {

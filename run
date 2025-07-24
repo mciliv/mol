@@ -1,0 +1,122 @@
+#!/bin/bash
+
+# Simplified Run Script for Mol
+# =============================
+# Consolidates all development, testing, and deployment commands
+
+case "$1" in
+  # Development Commands
+  "dev"|"start")
+    echo "🧹 Cleaning up existing processes..."
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
+    pkill -f "nodemon" 2>/dev/null || true
+    sleep 1
+    echo "🚀 Starting development server..."
+    npm test && nodemon backend/api/server.js
+    ;;
+  
+  "server")
+    echo "🧹 Cleaning up existing processes..."
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
+    sleep 1
+    echo "🚀 Starting production server..."
+    node backend/api/server.js
+    ;;
+    
+  "debug")
+    echo "🧹 Cleaning up existing processes..."
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
+    sleep 1
+    echo "🐛 Starting server with debugger..."
+    node --inspect backend/api/server.js
+    ;;
+
+  # Testing Commands
+  "test")
+    echo "🧪 Running all tests..."
+    npm test && python -m pytest test/ -v
+    ;;
+    
+  "test:unit")
+    npm test
+    ;;
+    
+  "test:python")
+    python -m pytest test/ -v
+    ;;
+
+  # Deployment Commands
+  "deploy")
+    echo "☁️  Deploying to Google Cloud Functions..."
+    if [ -z "$OPENAI_API_KEY" ]; then
+      echo "❌ OPENAI_API_KEY environment variable is required"
+      exit 1
+    fi
+    npm test && python -m pytest test/ -v && \
+    gcloud functions deploy molecular-analysis \
+      --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated \
+      --memory 1GB --timeout 540s --region us-central1 \
+      --entry-point molecularAnalysis --source . \
+      --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet
+    ;;
+    
+  "ship")
+    echo "🚢 Complete workflow: commit, test, deploy, push..."
+    if [ -z "$OPENAI_API_KEY" ]; then
+      echo "❌ OPENAI_API_KEY environment variable is required"
+      exit 1
+    fi
+    git add .
+    git commit -m "Auto-commit before deployment - $(date)"
+    npm test && python -m pytest test/ -v && \
+    gcloud functions deploy molecular-analysis \
+      --gen2 --runtime nodejs20 --trigger-http --allow-unauthenticated \
+      --memory 1GB --timeout 540s --region us-central1 \
+      --entry-point molecularAnalysis --source . \
+      --set-env-vars OPENAI_API_KEY=$OPENAI_API_KEY --quiet && \
+    git push
+    echo "✅ Complete workflow successful!"
+    ;;
+
+  # Utility Commands
+  "cleanup")
+    echo "🧹 Cleaning up all processes and ports..."
+    pkill -f "node.*backend/api/server.js" 2>/dev/null || true
+    pkill -f "nodemon" 2>/dev/null || true
+    if command -v lsof >/dev/null 2>&1; then
+      for port in 8080 3001 35729; do
+        pids=$(lsof -ti:$port 2>/dev/null || true)
+        if [ ! -z "$pids" ]; then
+          echo "🔄 Freeing port $port..."
+          echo "$pids" | xargs kill -9 2>/dev/null || true
+        fi
+      done
+    fi
+    echo "✅ Cleanup complete"
+    ;;
+
+  # Help
+  *)
+    echo "Mol - Molecular Analysis App"
+    echo ""
+    echo "Usage: ./run [command]"
+    echo ""
+    echo "Development:"
+    echo "  dev          Run tests + start development server"
+    echo "  server       Start production server"
+    echo "  debug        Start server with debugger"
+    echo "  cleanup      Clean up processes and ports"
+    echo ""
+    echo "Testing:"
+    echo "  test         Run all tests (JavaScript + Python)"
+    echo "  test:unit    Run JavaScript tests only"
+    echo "  test:python  Run Python tests only"
+    echo ""
+    echo "Deployment:"
+    echo "  deploy       Deploy to Google Cloud Functions"
+    echo "  ship         Complete workflow: commit, test, deploy, push"
+    echo ""
+    echo "Environment:"
+    echo "  OPENAI_API_KEY required for deployment"
+    ;;
+esac

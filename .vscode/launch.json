@@ -30,9 +30,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "⚡ Unsafe Dev (no tests)",
+      "name": "🏭 Production Server",
       "program": "${workspaceFolder}/run",
-      "args": ["unsafe"],
+      "args": ["server"],
       "console": "integratedTerminal",
       "restart": true,
       "presentation": {
@@ -44,9 +44,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "🏭 Production Server",
+      "name": "🐛 Debug Server",
       "program": "${workspaceFolder}/run",
-      "args": ["server"],
+      "args": ["debug"],
       "console": "integratedTerminal",
       "presentation": {
         "hidden": false,
@@ -57,9 +57,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "🐛 Debug Server",
+      "name": "🧹 Cleanup Processes",
       "program": "${workspaceFolder}/run",
-      "args": ["debug"],
+      "args": ["cleanup"],
       "console": "integratedTerminal",
       "presentation": {
         "hidden": false,
@@ -240,7 +240,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "☁️ Deploy (Legacy)",
+      "name": "☁️ Deploy",
       "program": "${workspaceFolder}/run",
       "args": ["deploy"],
       "console": "integratedTerminal",
@@ -249,7 +249,7 @@
         "group": "deployment",
         "order": 2
       }
-    },
+    }
     {
       "type": "node",
       "request": "launch",
