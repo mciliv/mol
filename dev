@@ -1,11 +1,24 @@
 #!/bin/bash
 
-# Simple development script
-echo "🚀 Starting development server..."
+# Simple development script with auto-reload
+echo "🚀 Starting development server with auto-reload..."
 
 # Kill any existing processes
 pkill -f "node.*server.js" 2>/dev/null || true
+pkill -f "nodemon" 2>/dev/null || true
 sleep 1
 
-# Start the server
-npm run dev 
+# Start the server with nodemon watching frontend files
+echo "📁 Watching: backend/ and frontend/ directories"
+echo "🔄 Auto-reload: Active"
+echo "🌐 Server: http://localhost:8080"
+echo ""
+
+exec npx nodemon \
+    --watch backend/ \
+    --watch frontend/ \
+    --ext js,html,css \
+    --ignore node_modules/ \
+    --ignore test/ \
+    --delay 1000ms \
+    backend/api/server.js 

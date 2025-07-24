@@ -142,6 +142,30 @@ const initializeDatabase = async () => {
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
+// LiveReload for development
+if (process.env.NODE_ENV === 'development') {
+  try {
+    const livereload = require('livereload');
+    const connectLivereload = require('connect-livereload');
+    
+    // Create livereload server
+    const liveReloadServer = livereload.createServer({
+      exts: ['html', 'css', 'js'],
+      port: 35729
+    });
+    
+    // Watch frontend directory
+    liveReloadServer.watch(path.join(__dirname, '../../frontend'));
+    
+    // Add livereload middleware
+    app.use(connectLivereload({ port: 35729 }));
+    
+    console.log('🔄 LiveReload server started on port 35729');
+  } catch (error) {
+    console.log('⚠️ LiveReload not available:', error.message);
+  }
+}
+
 // ==================== ERROR LOGGING ENDPOINT ====================
 app.post('/api/log-error', (req, res) => {
   const error = req.body;

@@ -1,5 +1,17 @@
 # UI Memory - Critical Fixes
 
+## Auto-Reload Development Setup (ALWAYS APPLY)
+**Requirement**: Site should auto-reload after code changes during development
+**Implementation**:
+```bash
+./dev                    # Uses nodemon + livereload
+# Watches: backend/ and frontend/ directories
+# Auto-reloads: server restart + browser refresh
+# LiveReload port: 35729
+```
+**Backend**: connect-livereload middleware in server.js (development only)
+**Frontend**: Script auto-injected by connect-livereload middleware
+
 ## Black Background Rule (ALWAYS APPLY)
 **Requirement**: Everything in this app must have black background
 **Implementation**:
