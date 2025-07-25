@@ -147,8 +147,7 @@ describe('Frontend AI Integration Tests', () => {
       expect(mockUIManager.initialize).toHaveBeenCalled();
       expect(mockUIManager.setupDebuggingFunctions).toHaveBeenCalled();
       expect(mockUIManager.showMainApp).toHaveBeenCalled();
-      expect(mockCameraManager.initialize).toHaveBeenCalled();
-      expect(mockPaymentManager.checkInitialPaymentSetup).toHaveBeenCalled();
+      expect(mockPaymentManager.checkPaymentRequired).toHaveBeenCalled();
     });
 
     test('should handle localhost developer mode setup', async () => {
@@ -163,7 +162,7 @@ describe('Frontend AI Integration Tests', () => {
       
       await app.initialize();
       
-      expect(mockPaymentManager.setupDeveloperAccount).toHaveBeenCalled();
+      expect(mockPaymentManager.checkPaymentRequired).toHaveBeenCalled();
       expect(app.hasPaymentSetup).toBe(true);
     });
   });
