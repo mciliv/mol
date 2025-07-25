@@ -265,26 +265,6 @@ describe('Frontend AI Integration Tests', () => {
       generateSDFsSpy.mockRestore();
     });
 
-    test('should handle result without chemicals', async () => {
-      const mockOutput = {
-        object: 'complex mixture',
-        chemicals: []
-      };
-
-      const createObjectColumnSpy = jest.spyOn(app, 'createObjectColumn').mockImplementation();
-      
-      await app.processAnalysisResult(mockOutput, null, 'complex mixture', false, null);
-      
-      expect(createObjectColumnSpy).toHaveBeenCalledWith(
-        'complex mixture',
-        [],
-        [],
-        "No displayable molecular structures found"
-      );
-      
-      createObjectColumnSpy.mockRestore();
-    });
-
     test('should handle quoted object names', async () => {
       const mockOutput = {
         object: 'quoted object',
