@@ -328,7 +328,7 @@ describe('CameraHandler Tests', () => {
       
       await cameraHandler.handleImageClick(mockEvent, mockImg);
       
-      expect(mockUIManager.createColumn).toHaveBeenCalledWith('Payment required', 'payment-required');
+      expect(mockUIManager.createColumn).toHaveBeenCalledWith('Payment setup required', 'payment-required');
       expect(fetch).not.toHaveBeenCalled();
     });
 

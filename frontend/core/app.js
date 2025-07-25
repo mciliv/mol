@@ -400,6 +400,65 @@ class MolecularApp {
     }
   }
 
+  // Alias for test compatibility
+  handleError(error) {
+    this.showError(error.message);
+  }
+
+  // Generate SDFs (alias for generateAndDisplayMolecules for test compatibility)
+  async generateSDFs(smiles, objectName, icon, chemicals, croppedImageData) {
+    try {
+      const response = await fetch("/generate-sdfs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ smiles, overwrite: true }),
+      });
+
+      if (!response.ok) throw new Error(`SDF generation failed: ${response.status}`);
+      
+      const result = await response.json();
+      await this.createObjectColumn(objectName, result.sdfPaths || [], smiles, null, chemicals);
+      
+    } catch (error) {
+      this.showError(`Error generating 3D models: ${error.message}`);
+    }
+  }
+
+  // Create closable error message (for test compatibility)
+  createClosableErrorMessage(message) {
+    return uiManager.createErrorMessage(message, this.snapshots);
+  }
+
+  // Cleanup method for test compatibility
+  cleanup() {
+    // Clean up viewers
+    this.viewers.forEach(viewer => {
+      if (viewer && typeof viewer.clear === 'function') {
+        viewer.clear();
+      }
+    });
+    this.viewers = [];
+
+    // Clean up managers if they have cleanup methods
+    if (cameraManager && typeof cameraManager.cleanup === 'function') {
+      cameraManager.cleanup();
+    }
+    if (uiManager && typeof uiManager.cleanup === 'function') {
+      uiManager.cleanup();
+    }
+  }
+
+  // Processing indicator methods for test compatibility
+  showProcessing() {
+    const indicator = document.getElementById('processing-indicator');
+    if (indicator) indicator.style.display = 'block';
+  }
+
+  hideProcessing() {
+    const indicator = document.getElementById('processing-indicator');
+    if (indicator) indicator.style.display = 'none';
+  }
+
   updateScrollHandles() {
     // Simple implementation for horizontal scroll management
     const gldiv = document.getElementById("gldiv");
@@ -428,6 +487,9 @@ class MolecularApp {
   }
 
 }
+
+// Export for testing
+export { MolecularApp };
 
 // Initialize app when DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {

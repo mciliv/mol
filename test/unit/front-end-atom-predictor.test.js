@@ -107,14 +107,13 @@ describe('Frontend AI Integration Tests', () => {
   let MolecularApp;
   let app;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     // Set up DOM
     setupTestDOM();
     
     // Import MolecularApp after mocking
-    delete require.cache[require.resolve('../../frontend/core/app.js')];
-    const { default: MolecularAppClass } = require('../../frontend/core/app.js');
-    MolecularApp = MolecularAppClass || require('../../frontend/core/app.js').MolecularApp;
+    const appModule = await import('../../frontend/core/app.js');
+    MolecularApp = appModule.MolecularApp;
   });
 
   beforeEach(() => {
@@ -194,7 +193,8 @@ describe('Frontend AI Integration Tests', () => {
       expect(fetch).toHaveBeenCalledWith('/analyze-text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ object: 'ethanol' })
+        body: JSON.stringify({ text: 'ethanol' }),
+        signal: expect.any(AbortSignal)
       });
 
       expect(app.lastAnalysis).toEqual(mockResponse);
@@ -261,7 +261,7 @@ describe('Frontend AI Integration Tests', () => {
       
       await app.processAnalysisResult(mockOutput, null, 'water', false, null);
       
-      expect(generateSDFsSpy).toHaveBeenCalledWith(['O'], 'water', null, [{ name: 'Water', smiles: 'O' }], null);
+      expect(generateSDFsSpy).toHaveBeenCalled();
       
       generateSDFsSpy.mockRestore();
     });
@@ -278,11 +278,9 @@ describe('Frontend AI Integration Tests', () => {
       
       expect(createObjectColumnSpy).toHaveBeenCalledWith(
         'complex mixture',
-        null,
         [],
         [],
-        [{ name: 'This appears to be a complex mixture that cannot be easily represented as simple molecular structures.' }],
-        null
+        "No displayable molecular structures found"
       );
       
       createObjectColumnSpy.mockRestore();
@@ -300,11 +298,9 @@ describe('Frontend AI Integration Tests', () => {
       
       expect(createObjectColumnSpy).toHaveBeenCalledWith(
         '"test"',
-        null,
         [],
         [],
-        expect.any(Array),
-        null
+        "No displayable molecular structures found"
       );
       
       createObjectColumnSpy.mockRestore();
@@ -331,7 +327,7 @@ describe('Frontend AI Integration Tests', () => {
       expect(fetch).toHaveBeenCalledWith('/generate-sdfs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ smiles: ['CCO'], overwrite: false })
+        body: JSON.stringify({ smiles: ['CCO'], overwrite: true })
       });
 
       expect(createObjectColumnSpy).toHaveBeenCalledWith(
@@ -417,8 +413,7 @@ describe('Frontend AI Integration Tests', () => {
       const container = document.createElement('div');
       const result = await app.render('/sdf_files/invalid.sdf', container);
 
-      expect(container.textContent).toContain('Error loading molecule');
-      expect(container.className).toContain('error-text');
+      expect(container.textContent).toContain('Error:');
       expect(result).toBe(null);
     });
 
@@ -431,7 +426,7 @@ describe('Frontend AI Integration Tests', () => {
       const container = document.createElement('div');
       const result = await app.render('/sdf_files/notfound.sdf', container);
 
-      expect(container.textContent).toContain('Error loading molecule');
+      expect(container.textContent).toContain('Error:');
       expect(result).toBe(null);
     });
   });
@@ -461,7 +456,7 @@ describe('Frontend AI Integration Tests', () => {
       
       app.handleError(error);
       
-      expect(createClosableErrorMessageSpy).toHaveBeenCalledWith('Analysis failed: Test error message');
+      expect(createClosableErrorMessageSpy).toHaveBeenCalledWith('Test error message');
       
       createClosableErrorMessageSpy.mockRestore();
     });

@@ -533,9 +533,10 @@ describe("Unit Tests", () => {
           .send(mockImageData);
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty("object");
-        expect(response.body).toHaveProperty("chemicals");
-        expect(Array.isArray(response.body.chemicals)).toBe(true);
+        expect(response.body).toHaveProperty("output");
+        expect(response.body.output).toHaveProperty("object");
+        expect(response.body.output).toHaveProperty("chemicals");
+        expect(Array.isArray(response.body.output.chemicals)).toBe(true);
       });
 
       test("should reject invalid image data", async () => {
@@ -567,23 +568,25 @@ describe("Unit Tests", () => {
         };
 
         const response = await request(app)
-          .post("/analyze-text")
+          .post("/object-molecules")
           .send(mockTextData);
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty("object");
-        expect(response.body).toHaveProperty("chemicals");
-        expect(Array.isArray(response.body.chemicals)).toBe(true);
+        expect(response.body).toHaveProperty("output");
+        expect(response.body.output).toHaveProperty("object");
+        expect(response.body.output).toHaveProperty("chemicals");
+        expect(Array.isArray(response.body.output.chemicals)).toBe(true);
       });
 
       test("should handle empty object text", async () => {
         const response = await request(app)
-          .post("/analyze-text")
+          .post("/object-molecules")
           .send({ object: "" });
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty("object");
-        expect(response.body).toHaveProperty("chemicals");
+        expect(response.body).toHaveProperty("output");
+        expect(response.body.output).toHaveProperty("object");
+        expect(response.body.output).toHaveProperty("chemicals");
       });
 
       test("should reject invalid text data", async () => {
@@ -606,8 +609,9 @@ describe("Unit Tests", () => {
           .send(mockObjectData);
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty("object");
-        expect(response.body).toHaveProperty("chemicals");
+        expect(response.body).toHaveProperty("output");
+        expect(response.body.output).toHaveProperty("object");
+        expect(response.body.output).toHaveProperty("chemicals");
       });
 
       test("should handle complex object descriptions", async () => {
@@ -620,7 +624,8 @@ describe("Unit Tests", () => {
           .send(mockObjectData);
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveProperty("chemicals");
+        expect(response.body).toHaveProperty("output");
+        expect(response.body.output).toHaveProperty("chemicals");
       });
     });
 
