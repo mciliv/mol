@@ -7,23 +7,42 @@
       "request": "launch",
       "runtimeExecutable": "${workspaceFolder}/dev",
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": ["<node_internals>/**"],
+      "serverReadyAction": {
+        "pattern": "Server: http://localhost:([0-9]+)",
+        "uriFormat": "http://localhost:%s",
+        "action": "openExternally"
+      }
     },
     {
-      "name": "Debug Server",
-      "type": "node", 
+      "name": "Debug with Nodemon",
+      "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/backend/api/server.js",
+      "program": "${workspaceFolder}/node_modules/.bin/nodemon",
+      "args": [
+        "--watch", "backend/",
+        "--watch", "frontend/",
+        "--ext", "js,html,css",
+        "--ignore", "node_modules/",
+        "--ignore", "test/",
+        "--delay", "1000ms",
+        "--exec", "node --inspect-brk",
+        "backend/api/server.js"
+      ],
       "console": "integratedTerminal",
-      "runtimeArgs": ["--inspect-brk"],
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": ["<node_internals>/**"],
+      "restart": true,
+      "env": {
+        "NODE_ENV": "development"
+      }
     },
     {
       "name": "Attach to Running Server",
       "type": "node",
       "request": "attach",
       "port": 9229,
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": ["<node_internals>/**"],
+      "restart": true
     }
   ]
 }
