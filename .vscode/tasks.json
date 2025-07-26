@@ -2,21 +2,18 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "dev-pipeline-setup",
+      "label": "start-dev-server",
       "type": "shell",
-      "command": "echo",
-      "args": ["🚀 Molecular Analysis Pipeline Starting..."],
+      "command": "./dev",
       "group": "build",
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
-        "panel": "shared"
+        "focus": true,
+        "panel": "dedicated"
       },
-      "dependsOn": [
-        "check-dependencies",
-        "cleanup-ports"
-      ]
+      "isBackground": true,
+      "problemMatcher": []
     },
     {
       "label": "check-dependencies", 

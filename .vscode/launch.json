@@ -2,20 +2,12 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Start Server (Nodemon)",
+      "name": "Start Dev Server",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/node_modules/.bin/nodemon",
-      "args": [
-        "--watch", "backend/",
-        "--watch", "frontend/", 
-        "--ext", "js,html,css",
-        "--ignore", "node_modules/",
-        "--ignore", "test/",
-        "--delay", "1000ms",
-        "backend/api/server.js"
-      ],
+      "program": "${workspaceFolder}/backend/api/server.js",
       "console": "integratedTerminal",
+      "preLaunchTask": "start-dev-server",
       "skipFiles": ["<node_internals>/**"]
     },
     {
