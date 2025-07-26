@@ -10,12 +10,19 @@ const HttpsServer = require("./https-server");
 const AtomPredictor = require("../services/AtomPredictor");
 const MolecularProcessor = require("../services/molecular-processor");
 const ErrorHandler = require("../services/error-handler");
-// UserService import - only if database is available
+// UserService import - with fallback to simple service
 let UserService = null;
+let SimpleUserService = null;
 try {
   UserService = require("../services/user-service");
 } catch (error) {
-  console.log('⚠️ UserService not available - running without user management');
+  console.log('⚠️ Full UserService not available - trying simple fallback');
+  try {
+    SimpleUserService = require("../services/simple-user-service");
+    console.log('✅ Simple UserService loaded');
+  } catch (fallbackError) {
+    console.log('⚠️ No user service available - running without user management');
+  }
 }
 const {
   ImageMoleculeSchema,
@@ -116,26 +123,43 @@ const PORT = process.env.PORT || DEFAULT_PORT;
 // Initialize modules
 const atomPredictor = new AtomPredictor(process.env.OPENAI_API_KEY);
 const molecularProcessor = new MolecularProcessor();
-const userService = (pool && UserService) ? new UserService(pool) : null;
+// Initialize user service with detailed logging
+let userService = null;
+if (pool && UserService) {
+  userService = new UserService(pool);
+  console.log('✅ PostgreSQL UserService initialized');
+} else if (SimpleUserService) {
+  userService = new SimpleUserService();
+  console.log('✅ Simple UserService initialized');
+} else {
+  console.log('⚠️ No user service available');
+}
 
 // Initialize database on startup
 const initializeDatabase = async () => {
   if (!userService) {
-    console.log('⚠️ User service not available - running without persistent user storage');
+    console.log('⚠️ User service not available - running without user storage');
     return;
   }
   
   try {
-    const dbConnected = await testDatabaseConnection();
-    if (dbConnected) {
-      await userService.initializeTables();
-      console.log('✅ Database initialized successfully');
+    // If using PostgreSQL service, test connection first
+    if (pool && UserService && userService instanceof UserService) {
+      const dbConnected = await testDatabaseConnection();
+      if (dbConnected) {
+        await userService.initializeTables();
+        console.log('✅ PostgreSQL database initialized successfully');
+      } else {
+        console.log('⚠️ Database not connected - running without persistent user storage');
+      }
     } else {
-      console.log('⚠️ Database not connected - running without persistent user storage');
+      // Using simple in-memory service
+      await userService.initializeTables();
+      console.log('✅ In-memory user service initialized successfully');
     }
   } catch (error) {
-    console.error('🔴 Database initialization failed:', error.message);
-    console.log('💡 Server will continue but user data will not persist');
+    console.error('🔴 User service initialization failed:', error.message);
+    console.log('💡 Server will continue but user data may not persist');
   }
 };
 
@@ -307,6 +331,7 @@ app.post("/setup-payment-method", async (req, res) => {
     };
     
     if (!userService) {
+      console.log('🔴 UserService is null during payment setup');
       return res.status(503).json({ error: "User service not available" });
     }
     

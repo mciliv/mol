@@ -39,3 +39,5 @@ git push origin main
 ./dev          # Standard with live reload
 ./dev-debug    # Maximum error visibility
 ```
+
+Run terminal commands in seperate window from chat
