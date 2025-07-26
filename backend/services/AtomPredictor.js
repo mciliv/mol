@@ -3,6 +3,7 @@ const {
   ObjectIdentificationSchema,
   CHEMICAL_REPRESENTATIONS,
 } = require("../schemas/schemas");
+const ErrorHandler = require("./error-handler");
 
 class AtomPredictor {
   constructor(apiKey) {
@@ -89,23 +90,7 @@ Use standard SMILES notation.`;
         chemicals: parsed.chemicals || [],
       };
     } catch (error) {
-      console.error("AI analysis error:", error);
-      
-      // Enhanced error handling with specific error types
-      let errorMessage = `AI analysis failed: ${error.message}`;
-      
-      if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
-      } else if (error.name === 'APIConnectionError') {
-        errorMessage = 'Unable to connect to AI service. Please check your internet connection.';
-      } else if (error.status === 401) {
-        errorMessage = 'API authentication failed. Please check your API key configuration.';
-      } else if (error.status === 429) {
-        errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
-      } else if (error.status === 503) {
-        errorMessage = 'AI service temporarily unavailable. Please try again in a few moments.';
-      }
-      
+      const { errorMessage } = ErrorHandler.handleAIError(error, 'image analysis');
       throw new Error(errorMessage);
     }
   }
@@ -132,23 +117,7 @@ Use standard SMILES notation.`;
         chemicals: parsed.chemicals || [],
       };
     } catch (error) {
-      console.error("AI text analysis error:", error);
-      
-      // Enhanced error handling with specific error types
-      let errorMessage = `AI text analysis failed: ${error.message}`;
-      
-      if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-        errorMessage = 'Network connection failed. Please check your internet connection and try again.';
-      } else if (error.name === 'APIConnectionError') {
-        errorMessage = 'Unable to connect to AI service. Please check your internet connection.';
-      } else if (error.status === 401) {
-        errorMessage = 'API authentication failed. Please check your API key configuration.';
-      } else if (error.status === 429) {
-        errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
-      } else if (error.status === 503) {
-        errorMessage = 'AI service temporarily unavailable. Please try again in a few moments.';
-      }
-      
+      const { errorMessage } = ErrorHandler.handleAIError(error, 'text analysis');
       throw new Error(errorMessage);
     }
   }

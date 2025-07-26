@@ -332,10 +332,4 @@ ${context.recent_changes.map(change => `- ${change.timestamp}: ${change.descript
 // Initialize and expose globally
 window.uiContextAutomation = new UIContextAutomation();
 
-// Add methods to main app
-if (window.app) {
-  window.app.enableUIContextAutomation = () => window.uiContextAutomation.enable();
-  window.app.captureUIState = (label) => window.uiContextAutomation.captureUIState(label);
-  window.app.exportContextForPrompt = () => window.uiContextAutomation.exportContextForPrompt();
-  window.app.checkRuleCompliance = () => window.uiContextAutomation.checkRuleCompliance();
-} 
+// Methods will be added to main app when it initializes 

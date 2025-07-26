@@ -28,12 +28,17 @@ module.exports = {
     TextEncoder: TextEncoder,
     TextDecoder: TextDecoder
   },
+  moduleNameMapping: {
+    '^mol$': '<rootDir>/package.json'
+  },
   projects: [
     {
       displayName: 'unit-frontend',
       testMatch: ['**/test/unit/camera*.test.js', '**/test/unit/manual.test.js', '**/test/unit/front-end*.test.js'],
       testEnvironment: 'jsdom',
-      setupFilesAfterEnv: ['<rootDir>/test/fixtures/setup.js']
+      setupFilesAfterEnv: ['<rootDir>/test/fixtures/setup.js'],
+      forceExit: true,
+      detectOpenHandles: true
     },
     {
       displayName: 'unit-backend', 
@@ -42,7 +47,9 @@ module.exports = {
       globals: {
         TextEncoder: TextEncoder,
         TextDecoder: TextDecoder
-      }
+      },
+      forceExit: true,
+      detectOpenHandles: true
     },
     {
       displayName: 'integration',
@@ -51,12 +58,16 @@ module.exports = {
       globals: {
         TextEncoder: TextEncoder,
         TextDecoder: TextDecoder
-      }
+      },
+      forceExit: true,
+      detectOpenHandles: true
     },
     {
       displayName: 'smoke',
       testMatch: ['**/test/smoke.test.js'],
-      testEnvironment: 'node'
+      testEnvironment: 'node',
+      forceExit: true,
+      detectOpenHandles: true
     }
   ]
 }; 

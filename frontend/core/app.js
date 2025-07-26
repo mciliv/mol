@@ -474,15 +474,10 @@ class MolecularApp {
     console.log('Layout debug mode:', document.body.classList.contains('debug-layout') ? 'ON' : 'OFF');
   }
 
-  // UI Context Automation integration
+  // UI Context Automation integration (manual activation only)
   initUIContextAutomation() {
     if (window.uiContextAutomation) {
-      // Auto-enable on localhost
-      if (window.location.hostname === 'localhost') {
-        setTimeout(() => {
-          window.uiContextAutomation.enable();
-        }, 1000);
-      }
+      console.log('🤖 UI Context Automation available. Use app.enableUIContextAutomation() to activate manually.');
     }
   }
 
@@ -499,20 +494,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.molecularApp = app;
   
-  // Initialize UI Context Automation after app is created
+  // Initialize UI Context Automation after app is created (manual activation only)
   if (window.uiContextAutomation) {
     window.app.enableUIContextAutomation = () => window.uiContextAutomation.enable();
     window.app.captureUIState = (label) => window.uiContextAutomation.captureUIState(label);
     window.app.exportContextForPrompt = () => window.uiContextAutomation.exportContextForPrompt();
     window.app.checkRuleCompliance = () => window.uiContextAutomation.checkRuleCompliance();
     
-    // Auto-enable on localhost
-    if (window.location.hostname === 'localhost') {
-      setTimeout(() => {
-        window.uiContextAutomation.enable();
-        console.log('🤖 UI Context Automation auto-enabled for localhost');
-      }, 1000);
-    }
+    // UI Context Automation available but not auto-enabled (prevents Chrome crashes)
+    console.log('🤖 UI Context Automation available. Use app.enableUIContextAutomation() to activate manually.');
   }
 });
 

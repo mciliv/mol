@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 # Simple development script with auto-reload
 echo "🚀 Starting development server with auto-reload..."

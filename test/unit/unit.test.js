@@ -4,14 +4,22 @@
 // Mock child_process at the top of the file
 jest.mock('child_process', () => ({
   spawn: jest.fn(() => ({
-    stdout: { on: jest.fn() },
+    stdout: { 
+      on: jest.fn((event, callback) => {
+        if (event === 'data') {
+          // Mock successful SDF generation output
+          callback('Generated SDF file: /mock/path/CCO.sdf\n');
+        }
+      })
+    },
     stderr: { on: jest.fn() },
     on: jest.fn((event, callback) => {
       if (event === 'close') {
         setTimeout(() => callback(0), 10);
       }
     })
-  }))
+  })),
+  execSync: jest.fn().mockReturnValue("test output"),
 }));
 
 const request = require("supertest");
@@ -58,10 +66,7 @@ jest.mock("fs", () => ({
   mkdirSync: jest.fn(),
 }));
 
-// Mock child_process
-jest.mock("child_process", () => ({
-  execSync: jest.fn().mockReturnValue("test output"),
-}));
+
 
 // Global app instance for all tests
 let app;
@@ -133,6 +138,8 @@ describe("Unit Tests", () => {
 
       test("should throw error when API fails", async () => {
         const mockOpenAI = require("openai");
+        const originalMock = mockOpenAI.OpenAI.getMockImplementation();
+        
         mockOpenAI.OpenAI.mockImplementationOnce(() => ({
           chat: {
             completions: {
@@ -143,6 +150,9 @@ describe("Unit Tests", () => {
 
         const analyzer = new AtomPredictor("invalid-key");
         await expect(analyzer.analyzeImage(mockImageBase64)).rejects.toThrow("AI analysis failed: API Error");
+        
+        // Restore original mock
+        mockOpenAI.OpenAI.mockImplementation(originalMock);
       });
 
       test("should handle empty image base64", async () => {
@@ -177,6 +187,8 @@ describe("Unit Tests", () => {
 
       test("should throw error when API fails", async () => {
         const mockOpenAI = require("openai");
+        const originalMock = mockOpenAI.OpenAI.getMockImplementation();
+        
         mockOpenAI.OpenAI.mockImplementationOnce(() => ({
           chat: {
             completions: {
@@ -186,7 +198,10 @@ describe("Unit Tests", () => {
         }));
 
         const analyzer = new AtomPredictor("invalid-key");
-        await expect(analyzer.analyzeText("test")).rejects.toThrow("AI text analysis failed: Network timeout");
+        await expect(analyzer.analyzeText("test")).rejects.toThrow("Request timeout: The AI service is taking too long to respond.");
+        
+        // Restore original mock
+        mockOpenAI.OpenAI.mockImplementation(originalMock);
       });
     });
 
@@ -316,6 +331,9 @@ describe("Unit Tests", () => {
 
     describe("generateSDF", () => {
       test("should generate SDF for valid SMILES", async () => {
+        const mockExistsSync = require("fs").existsSync;
+        mockExistsSync.mockReturnValueOnce(true); // Mock that the SDF file exists after generation
+        
         const result = await molecularProcessor.generateSDF("CCO");
         expect(typeof result === "string" || result === null).toBe(true);
       });
@@ -329,6 +347,9 @@ describe("Unit Tests", () => {
       });
 
       test("should handle overwrite parameter", async () => {
+        const mockExistsSync = require("fs").existsSync;
+        mockExistsSync.mockReturnValueOnce(true); // Mock that the SDF file exists after generation
+        
         const result = await molecularProcessor.generateSDF("CCO", true);
         expect(typeof result === "string" || result === null).toBe(true);
       });
@@ -340,21 +361,7 @@ describe("Unit Tests", () => {
 
     describe("generateSmilesSDF", () => {
       test("should spawn python process for SMILES generation", async () => {
-        const mockSpawn = jest.fn().mockReturnValue({
-          stdout: {
-            on: jest.fn((event, callback) => {
-              if (event === "data") callback("output");
-            }),
-          },
-          stderr: {
-            on: jest.fn(),
-          },
-          on: jest.fn((event, callback) => {
-            if (event === "close") callback(0);
-          }),
-        });
-
-        jest.doMock("child_process", () => ({ spawn: mockSpawn }));
+        const { spawn } = require("child_process");
         
         const mockExistsSync = require("fs").existsSync;
         mockExistsSync.mockReturnValueOnce(true);
@@ -365,7 +372,7 @@ describe("Unit Tests", () => {
           // Expected to fail in test environment
         }
         
-        expect(mockSpawn).toHaveBeenCalledWith(
+        expect(spawn).toHaveBeenCalledWith(
           "python",
           expect.arrayContaining([
             expect.stringContaining("sdf.py"),
@@ -378,7 +385,10 @@ describe("Unit Tests", () => {
       });
 
       test("should handle python process failure", async () => {
-        const mockSpawn = jest.fn().mockReturnValue({
+        const { spawn } = require("child_process");
+        
+        // Mock spawn to return error condition
+        spawn.mockReturnValueOnce({
           stdout: { on: jest.fn() },
           stderr: { on: jest.fn() },
           on: jest.fn((event, callback) => {
@@ -386,9 +396,7 @@ describe("Unit Tests", () => {
           }),
         });
 
-        jest.doMock("child_process", () => ({ spawn: mockSpawn }));
-
-        await expect(molecularProcessor.generateSmilesSDF("INVALID")).rejects.toThrow("SMILES generation failed");
+        await expect(molecularProcessor.generateSmilesSDF("INVALID")).rejects.toThrow("SMILES generation failed for INVALID (exit code: 1)");
       });
     });
 

@@ -9,6 +9,7 @@ const path = require("path");
 const HttpsServer = require("./https-server");
 const AtomPredictor = require("../services/AtomPredictor");
 const MolecularProcessor = require("../services/molecular-processor");
+const ErrorHandler = require("../services/error-handler");
 // UserService import - only if database is available
 let UserService = null;
 try {
@@ -610,9 +611,9 @@ app.post("/analyze-text", async (req, res) => {
     const result = await atomPredictor.analyzeText(text);
     res.json({ output: result });
   } catch (error) {
-    console.error("Text analysis error:", error);
-    res.status(500).json({
-      error: `Analysis failed: ${error.message}`,
+    const { errorMessage, statusCode } = ErrorHandler.handleAIError(error, 'text analysis endpoint');
+    res.status(statusCode).json({
+      error: errorMessage,
     });
   }
 });
@@ -638,34 +639,7 @@ app.post("/object-molecules", async (req, res) => {
     const result = await atomPredictor.analyzeText(object);
     res.json({ output: result });
   } catch (error) {
-    console.error("Text analysis error:", error);
-
-    // Provide more specific error messages
-    let errorMessage = error.message;
-    let statusCode = 500;
-
-    if (error.message.includes("network") || error.message.includes("fetch")) {
-      errorMessage =
-        "Network error: Unable to connect to AI service. Please check your internet connection.";
-      statusCode = 503;
-    } else if (
-      error.message.includes("API key") ||
-      error.message.includes("authentication")
-    ) {
-      errorMessage = "Authentication error: Invalid or missing API key.";
-      statusCode = 401;
-    } else if (
-      error.message.includes("rate limit") ||
-      error.message.includes("quota")
-    ) {
-      errorMessage = "Rate limit exceeded: Please try again later.";
-      statusCode = 429;
-    } else if (error.message.includes("timeout")) {
-      errorMessage =
-        "Request timeout: The AI service is taking too long to respond.";
-      statusCode = 408;
-    }
-
+    const { errorMessage, statusCode } = ErrorHandler.handleAIError(error, 'object-molecules endpoint');
     res.status(statusCode).json({
       error: errorMessage,
       details: process.env.NODE_ENV === "development" ? error.stack : undefined,

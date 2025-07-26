@@ -9,11 +9,11 @@
   --space-xl: 32px;
   --space-xxl: 48px;
   
-  /* Layout Zones */
-  --sidebar-width: 300px;
+  /* Layout Zones - COMPACT CARD BUTTON */
+  --card-button-width: 48px;
   --sidebar-gap: 20px;
   --top-bar-height: 60px;
-  --safe-area-right: calc(var(--sidebar-width) + var(--sidebar-gap));
+  --safe-area-right: calc(var(--card-button-width) + var(--sidebar-gap));
   --safe-area-top: calc(var(--top-bar-height) + var(--sidebar-gap));
   
   /* Z-Index Stack */

@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# Simple test runner - just runs all tests
-npx jest --testPathPattern=test/unit/unit.test.js --verbose --silent && npx jest --testPathPattern=test/integration/integration.test.js --verbose && npx jest --testPathPattern=test/integration/system.test.js --verbose --detectOpenHandles 
