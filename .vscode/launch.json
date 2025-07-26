@@ -2,36 +2,32 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "🚀 Molecular Analysis Dev Server (Full Pipeline)",
+      "name": "🚀 Molecular Analysis Dev Server",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/backend/api/server.js",
       "env": {
         "NODE_ENV": "development",
-        "DEBUG": "*"
+        "PORT": "8080"
       },
       "console": "integratedTerminal",
       "restart": true,
       "runtimeArgs": ["--inspect"],
-      "skipFiles": ["<node_internals>/**"],
-      "preLaunchTask": "dev-pipeline-setup",
-      "postDebugTask": "dev-pipeline-cleanup"
+      "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "🔧 Debug Mode (Maximum Visibility)",
+      "name": "🔧 Debug Mode",
       "type": "node", 
       "request": "launch",
       "program": "${workspaceFolder}/backend/api/server.js",
       "env": {
         "NODE_ENV": "development",
-        "DEBUG": "*",
-        "PY_DEBUG": "1"
+        "PORT": "8080"
       },
       "console": "integratedTerminal",
       "restart": true,
-      "runtimeArgs": ["--inspect", "--inspect-brk"],
-      "skipFiles": ["<node_internals>/**"],
-      "stopOnEntry": false
+      "runtimeArgs": ["--inspect-brk"],
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "name": "🧪 Test Runner (Full Suite)",
@@ -50,7 +46,7 @@
     {
       "name": "🌟 Complete Development Environment",
       "configurations": [
-        "🚀 Molecular Analysis Dev Server (Full Pipeline)"
+        "🚀 Molecular Analysis Dev Server"
       ],
       "presentation": {
         "hidden": false,
