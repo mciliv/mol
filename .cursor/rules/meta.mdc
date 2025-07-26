@@ -25,9 +25,9 @@ Don't create extraneous files
 Show code chunks, not descriptions
 
 # Workflow
-1. Memory check (ui-memory.mdc)
-2. Run/refresh app (`dev`)
-3. Test changes
+Test 
+Run/refresh app (`dev`)
+ 
 ## After Acceptance
 ```bash
 git add .

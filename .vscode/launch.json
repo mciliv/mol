@@ -5,9 +5,8 @@
       "name": "Start Dev Server",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/backend/api/server.js",
+      "runtimeExecutable": "${workspaceFolder}/dev",
       "console": "integratedTerminal",
-      "preLaunchTask": "start-dev-server",
       "skipFiles": ["<node_internals>/**"]
     },
     {
@@ -17,6 +16,13 @@
       "program": "${workspaceFolder}/backend/api/server.js",
       "console": "integratedTerminal",
       "runtimeArgs": ["--inspect-brk"],
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Attach to Running Server",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
       "skipFiles": ["<node_internals>/**"]
     }
   ]

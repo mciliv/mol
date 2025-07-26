@@ -21,4 +21,5 @@ exec npx nodemon \
     --ignore node_modules/ \
     --ignore test/ \
     --delay 1000ms \
+    --exec "node --inspect=0.0.0.0:9229" \
     backend/api/server.js 
