@@ -9,16 +9,25 @@ Original launch.json had complex configuration causing startup stalls:
 - Restart configurations
 - Compound configurations
 
-## Solution: Minimal Configuration
+## Solution: Nodemon Integration
 ```json
 {
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Start Server",
+      "name": "Start Server (Nodemon)",
       "type": "node",
       "request": "launch", 
-      "program": "${workspaceFolder}/backend/api/server.js",
+      "program": "${workspaceFolder}/node_modules/.bin/nodemon",
+      "args": [
+        "--watch", "backend/",
+        "--watch", "frontend/", 
+        "--ext", "js,html,css",
+        "--ignore", "node_modules/",
+        "--ignore", "test/",
+        "--delay", "1000ms",
+        "backend/api/server.js"
+      ],
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
     },
@@ -42,8 +51,8 @@ Original launch.json had complex configuration causing startup stalls:
 4. **Removed compound configurations** - direct launch only
 5. **Removed test runner config** - use `npm test` directly
 
-## Result: Direct localhost:8080 Launch
-- VS Code debugger now starts server immediately
-- No dependency on external task pipeline
-- Server runs on default port 8080
-- Clean debug experience without stalls
+## Result: Nodemon Integration with VS Code
+- VS Code debugger launches nodemon with auto-reload
+- Matches `./dev` script behavior exactly
+- Server runs on default port 8080 with live reload
+- Clean debug experience using existing infrastructure
